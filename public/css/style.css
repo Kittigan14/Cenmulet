@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit&family=LINE+Seed+JP&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* font-family: 'Kanit', sans-serif; */
+}
+
+.navbar {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    position: relative;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+
+    ul {
+        list-style: none;
+        display: flex;
+        gap: 20px;
+        font-family: "Kanit", sans-serif;
+
+        li {
+            cursor: pointer;
+            font-size: 16px;
+
+            a {
+                text-decoration: none;
+                color: #1a1a1a;
+            }
+        }
+    }
+
+    .logo {
+        width: 400px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        font-family: "Sriracha", cursive;
+        /* margin-top: 5px; */
+        color: #444547;
+        
+        .content-logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+
+            img {
+                height: 60px;
+            }
+        }
+
+        p {
+            margin-top: 5px;
+            font-size: 14px;
+            font-weight: 300;
+        }
+    }
+
+    .serverbar {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        .searchbar {
+            position: relative;
+            width: 220px;
+            height: 40px;
+
+            input {
+                width: 100%;
+                height: 100%;
+                padding: 10px 15px 10px 40px;
+                border-radius: 999px;
+                border: none;
+                outline: none;
+                font-family: "Kanit", sans-serif;
+                font-size: 14px;
+                background: #fff;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            }
+
+            i {
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #9ca3af;
+                font-size: 14px;
+            }
+        }
+
+        .btn-user {
+            padding: 15px;
+
+            a {
+                text-decoration: none;
+
+                i {
+                    margin: 10px;
+                    font-size: 20px;
+                    color: #1a1a1a;
+                }
+            }
+
+        }
+    }
+}
+
+.container {
+    width: 100%;
+    height: auto;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    h1 {
+        width: 100%;
+        font-family: "Kanit", sans-serif;
+        font-size: 24px;
+        margin: 30px 0 30px 0;
+        color: #1a1a1a;
+    }
+
+    .card-container {
+        width: 100%;
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        justify-content: center;
+        gap: 40px;
+        padding: 15px;
+
+        .card {
+            width: 300px;
+            height: 500px;
+            background: #f3f4f6;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+
+            .card-image {
+                width: 100%;
+                height: 70%;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                }
+            }
+
+            .card-content {
+                height: 30%;
+                padding: 15px;
+                font-family: "Kanit", sans-serif;
+                position: relative;
+
+                h2 {
+                    font-size: 18px;
+                    margin-bottom: 10px;
+                    color: #1a1a1a;
+                }
+
+                p {
+                    font-size: 14px;
+                    color: #6b7280;
+                }
+
+                .price {
+                    font-size: 14px;
+                    color: #4b5563;
+                    position: absolute;
+                    bottom: 25px;
+                    left: 15px;
+                }
+
+                .btn-cards {
+                    position: absolute;
+                    bottom: 15px;
+                    right: 15px;
+                    display: flex;
+                    gap: 10px;
+
+                    a {
+                        text-decoration: none;
+                        padding: 8px 12px;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: #fff;
+                        background: #3b82f6;
+                        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+                    }
+
+                    .btn-rent {
+                        background: #10b981;
+                        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+                    }
+                }
+            }
+        }
+    }
+}
