@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="../public/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title> Cenmulet </title>
 </head>
@@ -20,7 +20,7 @@
 
         <div class="logo">
             <div class="content-logo">
-                <img src="./images/image.png" alt="">
+                <img src="../public/images/image.png" alt="">
                 <h2>Cenmulet</h2>
             </div>
 
@@ -36,7 +36,7 @@
             </div>
 
             <div class="btn-user">
-                <a href="/view/auth/login.php"> <i class="fa-solid fa-user"></i> </a>
+                <a href="./auth/login.php"> <i class="fa-solid fa-user"></i> </a>
                 <a href=""> <i class="fa-solid fa-cart-shopping"></i> </a>
             </div>
 
@@ -50,7 +50,7 @@
 
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -66,7 +66,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -82,7 +82,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -98,7 +98,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -114,7 +114,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -130,7 +130,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -146,7 +146,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
@@ -162,7 +162,7 @@
             </div>
             <div class="card">
                 <div class="card-image">
-                    <img src="./images/IMG_2877.JPG" alt="" >
+                    <img src="../public/images/IMG_2877.JPG" alt="" >
                 </div>
 
                 <div class="card-content">
