@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . "/../../config/db.php";
 
-// ตรวจสอบว่า login และเป็น seller หรือไม่
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
     header("Location: /views/auth/login.php");
     exit;
@@ -10,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
 
 $seller_id = $_SESSION['user_id'];
 
-// ดึงข้อมูลผู้ขาย
 try {
     $stmt = $db->prepare("SELECT * FROM sellers WHERE id = :id");
     $stmt->execute([':id' => $seller_id]);
@@ -19,14 +17,13 @@ try {
     die("Error: " . $e->getMessage());
 }
 
-// ดึงสถิติต่างๆ
 try {
-    // จำนวนสินค้าทั้งหมด
+    // สินค้าทั้งหมด
     $stmt = $db->prepare("SELECT COUNT(*) as total FROM amulets WHERE sellerId = :seller_id");
     $stmt->execute([':seller_id' => $seller_id]);
     $total_products = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // จำนวนคำสั่งซื้อ
+    // คำสั่งซื้อทั้งหมด
     $stmt = $db->prepare("
         SELECT COUNT(DISTINCT o.id) as total 
         FROM orders o
@@ -37,7 +34,19 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $total_orders = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // ยอดขายรวม
+    // คำสั่งซื้อรอตรวจสอบ
+    $stmt = $db->prepare("
+        SELECT COUNT(DISTINCT o.id) as total 
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN amulets a ON oi.amulet_id = a.id
+        JOIN payments p ON o.id = p.order_id
+        WHERE a.sellerId = :seller_id AND p.status = 'waiting'
+    ");
+    $stmt->execute([':seller_id' => $seller_id]);
+    $pending_orders = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // ยอดขายรวม (เฉพาะที่สำเร็จ)
     $stmt = $db->prepare("
         SELECT COALESCE(SUM(oi.price * oi.quantity), 0) as total 
         FROM order_items oi
@@ -48,7 +57,16 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $total_sales = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // สินค้าของผู้ขาย (5 รายการล่าสุด)
+    // สินค้าใกล้หมด (น้อยกว่า 5 ชิ้น)
+    $stmt = $db->prepare("
+        SELECT COUNT(*) as total 
+        FROM amulets 
+        WHERE sellerId = :seller_id AND quantity < 5 AND quantity > 0
+    ");
+    $stmt->execute([':seller_id' => $seller_id]);
+    $low_stock = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // สินค้าล่าสุด
     $stmt = $db->prepare("
         SELECT a.*, c.category_name 
         FROM amulets a
@@ -60,6 +78,22 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $recent_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // คำสั่งซื้อล่าสุด
+    $stmt = $db->prepare("
+        SELECT DISTINCT o.*, u.fullname, p.status as payment_status
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN amulets a ON oi.amulet_id = a.id
+        JOIN users u ON o.user_id = u.id
+        LEFT JOIN payments p ON o.id = p.order_id
+        WHERE a.sellerId = :seller_id
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+        LIMIT 5
+    ");
+    $stmt->execute([':seller_id' => $seller_id]);
+    $recent_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
@@ -67,14 +101,14 @@ try {
 
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>แดชบอร์ดผู้ขาย - Cenmulet</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -91,7 +125,6 @@ try {
             min-height: 100vh;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 260px;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -114,11 +147,6 @@ try {
             margin-bottom: 5px;
         }
 
-        .sidebar-header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
         .user-info {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
@@ -129,11 +157,6 @@ try {
         .user-info h3 {
             font-size: 16px;
             margin-bottom: 5px;
-        }
-
-        .user-info p {
-            font-size: 13px;
-            opacity: 0.9;
         }
 
         .sidebar-menu {
@@ -160,12 +183,6 @@ try {
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .sidebar-menu i {
-            font-size: 18px;
-            width: 20px;
-        }
-
-        /* Main Content */
         .main-content {
             margin-left: 260px;
             flex: 1;
@@ -188,15 +205,12 @@ try {
             color: #1a1a1a;
         }
 
-        .top-bar-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
+        .btn-primary {
             padding: 10px 20px;
-            border-radius: 8px;
+            background: #10b981;
+            color: #fff;
             text-decoration: none;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
             transition: all 0.3s;
@@ -205,29 +219,14 @@ try {
             gap: 8px;
         }
 
-        .btn-primary {
-            background: #10b981;
-            color: #fff;
-        }
-
         .btn-primary:hover {
             background: #059669;
             transform: translateY(-2px);
         }
 
-        .btn-danger {
-            background: #ef4444;
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -237,31 +236,29 @@ try {
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .stat-info h3 {
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-
-        .stat-info p {
-            font-size: 32px;
-            font-weight: bold;
-            color: #1a1a1a;
+            margin-bottom: 15px;
         }
 
         .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
         }
 
         .stat-icon.green {
@@ -279,12 +276,34 @@ try {
             color: #f59e0b;
         }
 
-        /* Recent Products Table */
+        .stat-icon.yellow {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .stat-icon.red {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
         .content-section {
             background: #fff;
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
         }
 
         .section-header {
@@ -347,34 +366,19 @@ try {
             color: #f59e0b;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .btn-icon.edit {
-            background: #dbeafe;
-            color: #3b82f6;
-        }
-
-        .btn-icon.delete {
+        .badge-danger {
             background: #fee2e2;
             color: #ef4444;
         }
 
-        .btn-icon:hover {
-            transform: scale(1.1);
+        .badge-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-confirmed {
+            background: #dbeafe;
+            color: #2563eb;
         }
 
         .empty-state {
@@ -390,12 +394,11 @@ try {
         }
     </style>
 </head>
-
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
+                <img src="/public/images/image.png" alt="" width="64px">
                 <h2>Cenmulet</h2>
                 <p>แดชบอร์ดผู้ขาย</p>
             </div>
@@ -410,61 +413,133 @@ try {
                 <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
                 <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
                 <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
-                <li><a href="/views/seller/profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
-                <li><a href="/views/index.php"><i class="fa-solid fa-home"></i> กลับหน้าแรก</a></li>
-                <li><a href="/auth/logout.php" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
+                <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+                <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
             </ul>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
             <div class="top-bar">
                 <h1>แดชบอร์ด</h1>
-                <div class="top-bar-actions">
-                    <a href="/views/seller/add_product.php" class="btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
-                    </a>
-                </div>
+                <a href="/views/seller/add_product.php" class="btn-primary">
+                    <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
+                </a>
             </div>
 
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-info">
-                        <h3>สินค้าทั้งหมด</h3>
-                        <p><?php echo number_format($total_products); ?></p>
-                    </div>
-                    <div class="stat-icon green">
-                        <i class="fa-solid fa-box"></i>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3>คำสั่งซื้อ</h3>
-                        <p><?php echo number_format($total_orders); ?></p>
-                    </div>
-                    <div class="stat-icon blue">
-                        <i class="fa-solid fa-shopping-cart"></i>
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><?php echo number_format($total_products); ?></div>
+                            <div class="stat-label">สินค้าทั้งหมด</div>
+                        </div>
+                        <div class="stat-icon green">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
                     </div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-info">
-                        <h3>ยอดขายรวม</h3>
-                        <p>฿<?php echo number_format($total_sales, 2); ?></p>
-                    </div>
-                    <div class="stat-icon orange">
-                        <i class="fa-solid fa-dollar-sign"></i>
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><?php echo number_format($total_orders); ?></div>
+                            <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
+                        </div>
+                        <div class="stat-icon blue">
+                            <i class="fa-solid fa-shopping-cart"></i>
+                        </div>
                     </div>
                 </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><?php echo number_format($pending_orders); ?></div>
+                            <div class="stat-label">รอตรวจสอบ</div>
+                        </div>
+                        <div class="stat-icon yellow">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value">฿<?php echo number_format($total_sales, 2); ?></div>
+                            <div class="stat-label">ยอดขายรวม</div>
+                        </div>
+                        <div class="stat-icon orange">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if ($low_stock > 0): ?>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><?php echo number_format($low_stock); ?></div>
+                            <div class="stat-label">สินค้าใกล้หมด</div>
+                        </div>
+                        <div class="stat-icon red">
+                            <i class="fa-solid fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Recent Products -->
             <div class="content-section">
                 <div class="section-header">
-                    <h2>สินค้าล่าสุด</h2>
-                    <a href="/views/seller/products.php" class="btn btn-primary">ดูทั้งหมด</a>
+                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อล่าสุด</h2>
+                    <a href="/views/seller/orders.php" class="btn-primary">ดูทั้งหมด</a>
+                </div>
+
+                <?php if (count($recent_orders) > 0): ?>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>รหัส</th>
+                                <th>ผู้สั่งซื้อ</th>
+                                <th>ยอดรวม</th>
+                                <th>สถานะชำระเงิน</th>
+                                <th>วันที่</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($recent_orders as $order): ?>
+                                <tr>
+                                    <td><strong>#<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($order['fullname']); ?></td>
+                                    <td><strong style="color: #10b981;">฿<?php echo number_format($order['total_price'], 2); ?></strong></td>
+                                    <td>
+                                        <?php if ($order['payment_status'] === 'waiting'): ?>
+                                            <span class="badge badge-pending">รอตรวจสอบ</span>
+                                        <?php elseif ($order['payment_status'] === 'confirmed'): ?>
+                                            <span class="badge badge-confirmed">ยืนยันแล้ว</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-warning">ไม่ทราบสถานะ</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i class="fa-solid fa-shopping-cart"></i>
+                        <p>ยังไม่มีคำสั่งซื้อ</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- สินค้าล่าสุด -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-box"></i> สินค้าล่าสุด</h2>
+                    <a href="/views/seller/products.php" class="btn-primary">ดูทั้งหมด</a>
                 </div>
 
                 <?php if (count($recent_products) > 0): ?>
@@ -477,7 +552,6 @@ try {
                                 <th>ราคา</th>
                                 <th>คงเหลือ</th>
                                 <th>สถานะ</th>
-                                <th>จัดการ</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -495,25 +569,21 @@ try {
                                     <td><?php echo htmlspecialchars($product['amulet_name']); ?></td>
                                     <td><?php echo htmlspecialchars($product['category_name'] ?? '-'); ?></td>
                                     <td>฿<?php echo number_format($product['price'], 2); ?></td>
-                                    <td><?php echo number_format($product['quantity']); ?></td>
                                     <td>
-                                        <?php if ($product['quantity'] > 0): ?>
-                                            <span class="badge badge-success">มีสินค้า</span>
+                                        <?php if ($product['quantity'] < 5 && $product['quantity'] > 0): ?>
+                                            <span style="color: #f59e0b; font-weight: 600;"><?php echo number_format($product['quantity']); ?></span>
                                         <?php else: ?>
-                                            <span class="badge badge-warning">สินค้าหมด</span>
+                                            <?php echo number_format($product['quantity']); ?>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <div class="action-buttons">
-                                            <a href="/views/seller/edit_product.php?id=<?php echo $product['id']; ?>" class="btn-icon edit">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </a>
-                                            <a href="/views/seller/delete_product.php?id=<?php echo $product['id']; ?>" 
-                                               class="btn-icon delete" 
-                                               onclick="return confirm('คุณต้องการลบสินค้านี้หรือไม่?')">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </a>
-                                        </div>
+                                        <?php if ($product['quantity'] > 5): ?>
+                                            <span class="badge badge-success">มีสินค้า</span>
+                                        <?php elseif ($product['quantity'] > 0): ?>
+                                            <span class="badge badge-warning">ใกล้หมด</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-danger">สินค้าหมด</span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -524,7 +594,7 @@ try {
                         <i class="fa-solid fa-box-open"></i>
                         <h3>ยังไม่มีสินค้า</h3>
                         <p>เริ่มต้นเพิ่มสินค้าของคุณเลย</p>
-                        <a href="/views/seller/add_product.php" class="btn btn-primary" style="margin-top: 15px;">
+                        <a href="/views/seller/add_product.php" class="btn-primary" style="margin-top: 15px;">
                             <i class="fa-solid fa-plus"></i> เพิ่มสินค้าแรก
                         </a>
                     </div>
@@ -533,5 +603,4 @@ try {
         </main>
     </div>
 </body>
-
 </html>

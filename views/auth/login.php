@@ -13,31 +13,15 @@
 <body>
 
     <div class="navbar">
-        <ul>
-            <li><a href="/views/index.php">หน้าแรก</a></li>
-            <li><a href="">หมวดหมู่พระเครื่อง</a></li>
-            <li><a href="">รายการเช่าพระเครื่อง</a></li>
-        </ul>
 
         <div class="logo">
             <div class="content-logo">
-                <img src="/images/image.png" alt="">
+                <img src="/public/images/image.png" alt="">
                 <h2>Cenmulet</h2>
             </div>
             <p>Amulet market place ตลาดพระเครื่อง</p>
         </div>
-
-        <div class="serverbar">
-            <div class="searchbar">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="ค้นหาพระเครื่อง...">
-            </div>
-
-            <div class="btn-user">
-                <a href="/views/auth/login.php"> <i class="fa-solid fa-user"></i> </a>
-                <a href=""> <i class="fa-solid fa-cart-shopping"></i> </a>
-            </div>
-        </div>
+        
     </div>
 
     <div class="login-container">

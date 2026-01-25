@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . "/../../config/db.php";
 
-// ตรวจสอบว่า login และเป็น user หรือไม่
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     header("Location: /views/auth/login.php");
     exit;
@@ -10,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 
 $user_id = $_SESSION['user_id'];
 
-// ดึงข้อมูลผู้ใช้
 try {
     $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
     $stmt->execute([':id' => $user_id]);
@@ -19,22 +17,46 @@ try {
     die("Error: " . $e->getMessage());
 }
 
-// ดึงสินค้าทั้งหมด
 try {
-    $stmt = $db->query("
+    $stmt = $db->query("SELECT * FROM categories ORDER BY category_name");
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $categories = [];
+}
+
+$search = $_GET['search'] ?? '';
+$category_filter = $_GET['category'] ?? '';
+
+try {
+    $sql = "
         SELECT a.*, c.category_name, s.store_name 
         FROM amulets a
         LEFT JOIN categories c ON a.categoryId = c.id
         LEFT JOIN sellers s ON a.sellerId = s.id
         WHERE a.quantity > 0
-        ORDER BY a.id DESC
-    ");
+    ";
+    
+    $params = [];
+    
+    if (!empty($search)) {
+        $sql .= " AND (a.amulet_name LIKE :search OR a.source LIKE :search OR s.store_name LIKE :search)";
+        $params[':search'] = '%' . $search . '%';
+    }
+    
+    if (!empty($category_filter)) {
+        $sql .= " AND a.categoryId = :category";
+        $params[':category'] = $category_filter;
+    }
+    
+    $sql .= " ORDER BY a.id DESC";
+    
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
 
-// นับจำนวนสินค้าในตะกร้า
 try {
     $stmt = $db->prepare("SELECT COUNT(*) as count FROM cart WHERE user_id = :user_id");
     $stmt->execute([':user_id' => $user_id]);
@@ -42,321 +64,73 @@ try {
 } catch (PDOException $e) {
     $cart_count = 0;
 }
+
+$active_page = 'home';
 ?>
 
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/public/css/home.css">
     <title>หน้าแรก - Cenmulet</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit&family=Sriracha&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: "Kanit", sans-serif;
-            background: #f9fafb;
-        }
-
-        .navbar {
-            width: 100%;
-            height: 100px;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-left ul {
-            list-style: none;
-            display: flex;
-            gap: 25px;
-        }
-
-        .nav-left a {
-            text-decoration: none;
-            color: #1a1a1a;
-            font-size: 15px;
-            transition: color 0.3s;
-        }
-
-        .nav-left a:hover {
-            color: #10b981;
-        }
-
-        .logo {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-        }
-
-        .logo h2 {
-            font-family: "Sriracha", cursive;
-            font-size: 28px;
-            color: #444547;
-            margin-bottom: 5px;
-        }
-
-        .logo p {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-menu {
-            position: relative;
-        }
-
-        .user-button {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 15px;
-            background: #f3f4f6;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .user-button:hover {
-            background: #e5e7eb;
-        }
-
-        .user-button i {
-            font-size: 18px;
-            color: #1a1a1a;
-        }
-
-        .user-button span {
-            font-size: 14px;
-            color: #1a1a1a;
-        }
-
-        .cart-icon {
-            position: relative;
-            font-size: 22px;
-            color: #1a1a1a;
-            cursor: pointer;
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ef4444;
-            color: #fff;
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .page-header {
-            margin-bottom: 30px;
-        }
-
-        .page-header h1 {
-            font-size: 32px;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-        }
-
-        .page-header p {
-            font-size: 16px;
-            color: #6b7280;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .product-card {
-            background: #fff;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 250px;
-            background: #f3f4f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .product-image i {
-            font-size: 48px;
-            color: #d1d5db;
-        }
-
-        .product-info {
-            padding: 20px;
-        }
-
-        .product-category {
-            font-size: 12px;
-            color: #10b981;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .product-name {
-            font-size: 18px;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .product-source {
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 15px;
-        }
-
-        .product-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .product-price {
-            font-size: 24px;
-            color: #10b981;
-            font-weight: bold;
-        }
-
-        .btn-add-cart {
-            padding: 10px 20px;
-            background: #10b981;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-add-cart:hover {
-            background: #059669;
-            transform: scale(1.05);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            color: #d1d5db;
-            margin-bottom: 20px;
-        }
-
-        .empty-state h2 {
-            font-size: 24px;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-        }
-
-        .empty-state p {
-            font-size: 16px;
-            color: #6b7280;
-        }
-    </style>
 </head>
-
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <ul>
-                <li><a href="/views/user/home.php">หน้าแรก</a></li>
-                <li><a href="/views/user/orders.php">คำสั่งซื้อของฉัน</a></li>
-            </ul>
-        </div>
+    <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
-        <div class="logo">
-            <h2>Cenmulet</h2>
-            <p>ตลาดพระเครื่อง</p>
-        </div>
-
-        <div class="nav-right">
-            <a href="/views/user/cart.php">
-                <div class="cart-icon">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <?php if ($cart_count > 0): ?>
-                        <span class="cart-badge"><?php echo $cart_count; ?></span>
-                    <?php endif; ?>
-                </div>
-            </a>
-
-            <div class="user-menu">
-                <div class="user-button">
-                    <i class="fa-solid fa-user"></i>
-                    <span><?php echo htmlspecialchars($user['fullname']); ?></span>
-                </div>
-            </div>
-
-            <a href="/auth/logout.php" style="text-decoration: none;">
-                <div class="user-button">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </div>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
     <div class="container">
+        <div class="search-filter-section">
+            <form action="" method="GET" class="search-box">
+                <div class="search-input-group">
+                    <input type="text" 
+                           name="search" 
+                           class="search-input" 
+                           placeholder="ค้นหาพระเครื่อง, ร้านค้า..." 
+                           value="<?php echo htmlspecialchars($search); ?>">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                </div>
+                <input type="hidden" name="category" value="<?php echo htmlspecialchars($category_filter); ?>">
+                <button type="submit" class="btn-search">
+                    <i class="fa-solid fa-search"></i>
+                    ค้นหา
+                </button>
+            </form>
+
+            <div class="category-filters">
+                <a href="/views/user/home.php" class="category-chip <?php echo empty($category_filter) ? 'active' : ''; ?>">
+                    <i class="fa-solid fa-border-all"></i> ทั้งหมด
+                </a>
+                <?php foreach ($categories as $cat): ?>
+                    <a href="?category=<?php echo $cat['id']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
+                       class="category-chip <?php echo $category_filter == $cat['id'] ? 'active' : ''; ?>">
+                        <?php echo htmlspecialchars($cat['category_name']); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <div class="page-header">
-            <h1>พระเครื่องทั้งหมด</h1>
-            <p>เลือกเช่าพระเครื่องที่คุณต้องการ</p>
+            <h1>
+                <?php 
+                if (!empty($search)) {
+                    echo 'ผลการค้นหา: "' . htmlspecialchars($search) . '"';
+                } elseif (!empty($category_filter)) {
+                    $cat_name = '';
+                    foreach ($categories as $cat) {
+                        if ($cat['id'] == $category_filter) {
+                            $cat_name = $cat['category_name'];
+                            break;
+                        }
+                    }
+                    echo 'หมวดหมู่: ' . htmlspecialchars($cat_name);
+                } else {
+                    echo 'พระเครื่องทั้งหมด';
+                }
+                ?>
+            </h1>
+            <p class="result-info">พบ <?php echo count($products); ?> รายการ</p>
         </div>
 
         <?php if (count($products) > 0): ?>
@@ -382,13 +156,19 @@ try {
                                 <div class="product-price">
                                     ฿<?php echo number_format($product['price'], 2); ?>
                                 </div>
-                                <form action="/views/user/add_to_cart.php" method="POST">
-                                    <input type="hidden" name="amulet_id" value="<?php echo $product['id']; ?>">
-                                    <button type="submit" class="btn-add-cart">
-                                        <i class="fa-solid fa-cart-plus"></i>
-                                        เพิ่ม
-                                    </button>
-                                </form>
+                                <div class="product-actions">
+                                    <a href="/views/user/product_detail.php?id=<?php echo $product['id']; ?>" class="btn-detail">
+                                        <i class="fa-solid fa-eye"></i>
+                                        ดูเพิ่มเติม
+                                    </a>
+                                    <form action="/user/add_to_cart_process.php" method="POST" style="display: inline;">
+                                        <input type="hidden" name="amulet_id" value="<?php echo $product['id']; ?>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn-add-cart" title="เพิ่มลงตะกร้า">
+                                            <i class="fa-solid fa-cart-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -397,11 +177,18 @@ try {
         <?php else: ?>
             <div class="empty-state">
                 <i class="fa-solid fa-box-open"></i>
-                <h2>ยังไม่มีสินค้า</h2>
-                <p>กรุณารอผู้ขายเพิ่มสินค้า</p>
+                <h2>ไม่พบสินค้า</h2>
+                <p>
+                    <?php 
+                    if (!empty($search)) {
+                        echo 'ไม่พบสินค้าที่ตรงกับคำค้นหา "' . htmlspecialchars($search) . '"';
+                    } else {
+                        echo 'ไม่มีสินค้าในหมวดหมู่นี้';
+                    }
+                    ?>
+                </p>
             </div>
         <?php endif; ?>
     </div>
 </body>
-
 </html>
