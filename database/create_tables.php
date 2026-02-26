@@ -39,7 +39,10 @@ CREATE TABLE IF NOT EXISTS sellers (
     tel TEXT,
     pay_contax TEXT,
     id_per TEXT,
-    img_per TEXT
+    img_per TEXT,
+
+    status TEXT DEFAULT 'pending',
+    reject_reason TEXT
 );
 ");
 
