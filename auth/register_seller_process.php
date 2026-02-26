@@ -1,111 +1,112 @@
 <?php
+/**
+ * register_seller_process.php
+ * สร้าง seller account ด้วย status = 'pending' เพื่อรอ Admin อนุมัติ
+ *
+ * ต้องการ column เพิ่มใน table sellers:
+ *   status ENUM('pending','approved','rejected') DEFAULT 'pending'
+ *   reject_reason TEXT NULL
+ *   reviewed_at DATETIME NULL
+ */
+
 session_start();
 require_once __DIR__ . "/../config/db.php";
 
-$fullname = $_POST['fullname'] ?? '';
-$store_name = $_POST['store_name'] ?? '';
-$username = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-$address = $_POST['address'] ?? '';
-$tel = $_POST['tel'] ?? '';
-$pay_contax = $_POST['pay_contax'] ?? '';
-$id_per = $_POST['id_per'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: /views/auth/register_seller.php");
+    exit;
+}
 
-if (empty($fullname) || empty($store_name) || empty($username) || empty($password) || empty($address) || empty($tel) || empty($id_per)) {
+/* ── Collect & Validate ───────────────── */
+$store_name  = trim($_POST['store_name']  ?? '');
+$address     = trim($_POST['address']     ?? '');
+$fullname    = trim($_POST['fullname']    ?? '');
+$tel         = trim($_POST['tel']         ?? '');
+$id_per      = trim($_POST['id_per']      ?? '');
+$username    = trim($_POST['username']    ?? '');
+$password    = $_POST['password']         ?? '';
+$pay_contax  = trim($_POST['pay_contax']  ?? '');
+
+if (!$store_name || !$address || !$fullname || !$tel || !$id_per || !$username || !$password) {
     header("Location: /views/auth/register_seller.php?error=empty");
     exit;
 }
 
+/* ── Check duplicate username ─────────── */
 try {
     $stmt = $db->prepare("SELECT id FROM sellers WHERE username = :username");
     $stmt->execute([':username' => $username]);
-    
     if ($stmt->fetch()) {
         header("Location: /views/auth/register_seller.php?error=username_exists");
         exit;
     }
 } catch (PDOException $e) {
+    error_log("Seller Register Error: " . $e->getMessage());
     header("Location: /views/auth/register_seller.php?error=database");
     exit;
 }
 
-$img_store_name = null;
-if (isset($_FILES['img_store']) && $_FILES['img_store']['error'] == 0) {
-    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-    $file_type = $_FILES['img_store']['type'];
-    
-    if (in_array($file_type, $allowed_types)) {
-        $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/stores/';
-        
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        
-        $file_extension = pathinfo($_FILES['img_store']['name'], PATHINFO_EXTENSION);
-        $img_store_name = uniqid('store_') . '.' . $file_extension;
-        $upload_path = $upload_dir . $img_store_name;
-        
-        if (!move_uploaded_file($_FILES['img_store']['tmp_name'], $upload_path)) {
-            $img_store_name = null;
-        }
-    }
+/* ── Handle file uploads ──────────────── */
+$allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+$max_size      = 5 * 1024 * 1024; // 5 MB
+$upload_dir    = $_SERVER['DOCUMENT_ROOT'] . '/uploads/sellers/';
+
+if (!is_dir($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
 }
 
-$img_per_name = null;
-if (isset($_FILES['img_per']) && $_FILES['img_per']['error'] == 0) {
-    $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-    $file_type = $_FILES['img_per']['type'];
-    
-    if (in_array($file_type, $allowed_types)) {
-        $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/id_cards/';
-        
-        if (!file_exists($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
-        }
-        
-        $file_extension = pathinfo($_FILES['img_per']['name'], PATHINFO_EXTENSION);
-        $img_per_name = uniqid('id_') . '.' . $file_extension;
-        $upload_path = $upload_dir . $img_per_name;
-        
-        if (!move_uploaded_file($_FILES['img_per']['tmp_name'], $upload_path)) {
-            $img_per_name = null;
-        }
+function uploadFile(string $field, string $upload_dir, array $allowed_types, int $max_size): ?string
+{
+    if (!isset($_FILES[$field]) || $_FILES[$field]['error'] !== UPLOAD_ERR_OK) {
+        return null;
     }
+    $file = $_FILES[$field];
+    if (!in_array($file['type'], $allowed_types) || $file['size'] > $max_size) {
+        return null;
+    }
+    $ext  = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $name = uniqid($field . '_') . '_' . time() . '.' . $ext;
+    move_uploaded_file($file['tmp_name'], $upload_dir . $name);
+    return $name;
 }
 
+$img_store = uploadFile('img_store', $upload_dir, $allowed_types, $max_size);
+$img_per   = uploadFile('img_per',   $upload_dir, $allowed_types, $max_size);
+
+/* ── Insert seller (status = pending) ── */
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
 try {
     $stmt = $db->prepare("
-        INSERT INTO sellers (fullname, store_name, username, password, address, img_store, tel, pay_contax, id_per, img_per) 
-        VALUES (:fullname, :store_name, :username, :password, :address, :img_store, :tel, :pay_contax, :id_per, :img_per)
+        INSERT INTO sellers
+            (store_name, address, fullname, tel, id_per, username, password,
+             pay_contax, img_store, img_per, status)
+        VALUES
+            (:store_name, :address, :fullname, :tel, :id_per, :username, :password,
+             :pay_contax, :img_store, :img_per, 'pending')
     ");
-    
     $stmt->execute([
-        ':fullname' => $fullname,
         ':store_name' => $store_name,
-        ':username' => $username,
-        ':password' => $hashed_password,
-        ':address' => $address,
-        ':img_store' => $img_store_name,
-        ':tel' => $tel,
+        ':address'    => $address,
+        ':fullname'   => $fullname,
+        ':tel'        => $tel,
+        ':id_per'     => $id_per,
+        ':username'   => $username,
+        ':password'   => $hashed_password,
         ':pay_contax' => $pay_contax,
-        ':id_per' => $id_per,
-        ':img_per' => $img_per_name
+        ':img_store'  => $img_store,
+        ':img_per'    => $img_per,
     ]);
-    
-    header("Location: /views/auth/login.php?success=registered");
+
+    header("Location: /views/auth/register_seller.php?success=pending");
     exit;
-    
+
 } catch (PDOException $e) {
-    if ($img_store_name && file_exists($_SERVER['DOCUMENT_ROOT'] . '/uploads/stores/' . $img_store_name)) {
-        unlink($_SERVER['DOCUMENT_ROOT'] . '/uploads/stores/' . $img_store_name);
-    }
-    if ($img_per_name && file_exists($_SERVER['DOCUMENT_ROOT'] . '/uploads/id_cards/' . $img_per_name)) {
-        unlink($_SERVER['DOCUMENT_ROOT'] . '/uploads/id_cards/' . $img_per_name);
-    }
-    
+    // clean up uploaded files on DB error
+    if ($img_store && file_exists($upload_dir . $img_store)) unlink($upload_dir . $img_store);
+    if ($img_per   && file_exists($upload_dir . $img_per))   unlink($upload_dir . $img_per);
+
+    error_log("Seller Register DB Error: " . $e->getMessage());
     header("Location: /views/auth/register_seller.php?error=database");
     exit;
 }
-?>

@@ -24,7 +24,7 @@ try {
     $categories = [];
 }
 
-$search = $_GET['search'] ?? '';
+$search          = $_GET['search']   ?? '';
 $category_filter = $_GET['category'] ?? '';
 
 try {
@@ -32,24 +32,23 @@ try {
         SELECT a.*, c.category_name, s.store_name 
         FROM amulets a
         LEFT JOIN categories c ON a.categoryId = c.id
-        LEFT JOIN sellers s ON a.sellerId = s.id
+        LEFT JOIN sellers   s ON a.sellerId   = s.id
         WHERE a.quantity > 0
     ";
-    
     $params = [];
-    
+
     if (!empty($search)) {
         $sql .= " AND (a.amulet_name LIKE :search OR a.source LIKE :search OR s.store_name LIKE :search)";
         $params[':search'] = '%' . $search . '%';
     }
-    
+
     if (!empty($category_filter)) {
         $sql .= " AND a.categoryId = :category";
         $params[':category'] = $category_filter;
     }
-    
+
     $sql .= " ORDER BY a.id DESC";
-    
+
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -67,13 +66,13 @@ try {
 
 $active_page = 'home';
 ?>
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/home.css">
     <title>หน้าแรก - Cenmulet</title>
 </head>
@@ -81,13 +80,15 @@ $active_page = 'home';
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
     <div class="container">
-        <div class="search-filter-section">
-            <form action="" method="GET" class="search-box">
-                <div class="search-input-group">
-                    <input type="text" 
-                           name="search" 
-                           class="search-input" 
-                           placeholder="ค้นหาพระเครื่อง, ร้านค้า..." 
+
+        <!-- Search & Filter -->
+        <div class="search-filter-panel">
+            <form action="" method="GET" class="search-form">
+                <div class="search-input-wrap">
+                    <input type="text"
+                           name="search"
+                           class="search-input"
+                           placeholder="ค้นหาพระเครื่อง, แหล่งที่มา, ร้านค้า..."
                            value="<?php echo htmlspecialchars($search); ?>">
                     <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 </div>
@@ -98,12 +99,13 @@ $active_page = 'home';
                 </button>
             </form>
 
-            <div class="category-filters">
-                <a href="/views/user/home.php" class="category-chip <?php echo empty($category_filter) ? 'active' : ''; ?>">
+            <div class="category-chips">
+                <a href="/views/user/home.php"
+                   class="category-chip <?php echo empty($category_filter) ? 'active' : ''; ?>">
                     <i class="fa-solid fa-border-all"></i> ทั้งหมด
                 </a>
                 <?php foreach ($categories as $cat): ?>
-                    <a href="?category=<?php echo $cat['id']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" 
+                    <a href="?category=<?php echo $cat['id']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>"
                        class="category-chip <?php echo $category_filter == $cat['id'] ? 'active' : ''; ?>">
                         <?php echo htmlspecialchars($cat['category_name']); ?>
                     </a>
@@ -111,18 +113,16 @@ $active_page = 'home';
             </div>
         </div>
 
-        <div class="page-header">
+        <!-- Results Header -->
+        <div class="results-header">
             <h1>
-                <?php 
+                <?php
                 if (!empty($search)) {
                     echo 'ผลการค้นหา: "' . htmlspecialchars($search) . '"';
                 } elseif (!empty($category_filter)) {
                     $cat_name = '';
                     foreach ($categories as $cat) {
-                        if ($cat['id'] == $category_filter) {
-                            $cat_name = $cat['category_name'];
-                            break;
-                        }
+                        if ($cat['id'] == $category_filter) { $cat_name = $cat['category_name']; break; }
                     }
                     echo 'หมวดหมู่: ' . htmlspecialchars($cat_name);
                 } else {
@@ -130,40 +130,41 @@ $active_page = 'home';
                 }
                 ?>
             </h1>
-            <p class="result-info">พบ <?php echo count($products); ?> รายการ</p>
+            <span class="result-count">พบ <?php echo count($products); ?> รายการ</span>
         </div>
 
+        <!-- Products -->
         <?php if (count($products) > 0): ?>
             <div class="products-grid">
                 <?php foreach ($products as $product): ?>
                     <div class="product-card">
                         <div class="product-image">
                             <?php if ($product['image']): ?>
-                                <img src="/uploads/amulets/<?php echo htmlspecialchars($product['image']); ?>" alt="">
+                                <img src="/uploads/amulets/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['amulet_name']); ?>">
                             <?php else: ?>
-                                <i class="fa-solid fa-image"></i>
+                                <i class="fa-solid fa-image placeholder-icon"></i>
                             <?php endif; ?>
                         </div>
 
-                        <div class="product-info">
-                            <div class="product-category">
+                        <div class="product-body">
+                            <div class="product-cat">
                                 <?php echo htmlspecialchars($product['category_name'] ?? 'ไม่ระบุหมวดหมู่'); ?>
                             </div>
                             <h3 class="product-name"><?php echo htmlspecialchars($product['amulet_name']); ?></h3>
-                            <p class="product-source">จาก: <?php echo htmlspecialchars($product['store_name'] ?? 'ร้านค้า'); ?></p>
+                            <p class="product-source">
+                                <i class="fa-solid fa-store" style="color:var(--primary);font-size:11px;"></i>
+                                <?php echo htmlspecialchars($product['store_name'] ?? 'ร้านค้า'); ?>
+                            </p>
 
                             <div class="product-footer">
-                                <div class="product-price">
-                                    ฿<?php echo number_format($product['price'], 2); ?>
-                                </div>
+                                <div class="product-price">฿<?php echo number_format($product['price'], 2); ?></div>
                                 <div class="product-actions">
                                     <a href="/views/user/product_detail.php?id=<?php echo $product['id']; ?>" class="btn-detail">
-                                        <i class="fa-solid fa-eye"></i>
-                                        ดูเพิ่มเติม
+                                        <i class="fa-solid fa-eye"></i> ดูเพิ่มเติม
                                     </a>
-                                    <form action="/user/add_to_cart_process.php" method="POST" style="display: inline;">
+                                    <form action="/user/add_to_cart_process.php" method="POST" style="display:inline;">
                                         <input type="hidden" name="amulet_id" value="<?php echo $product['id']; ?>">
-                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="quantity"   value="1">
                                         <button type="submit" class="btn-add-cart" title="เพิ่มลงตะกร้า">
                                             <i class="fa-solid fa-cart-plus"></i>
                                         </button>
@@ -174,12 +175,13 @@ $active_page = 'home';
                     </div>
                 <?php endforeach; ?>
             </div>
+
         <?php else: ?>
-            <div class="empty-state">
+            <div class="no-products">
                 <i class="fa-solid fa-box-open"></i>
                 <h2>ไม่พบสินค้า</h2>
                 <p>
-                    <?php 
+                    <?php
                     if (!empty($search)) {
                         echo 'ไม่พบสินค้าที่ตรงกับคำค้นหา "' . htmlspecialchars($search) . '"';
                     } else {
@@ -189,6 +191,7 @@ $active_page = 'home';
                 </p>
             </div>
         <?php endif; ?>
+
     </div>
 </body>
 </html>

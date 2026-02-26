@@ -1,0 +1,24 @@
+{
+  "name": "cenmulet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "migrate.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kittigan14/Cenmulet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kittigan14/Cenmulet/issues"
+  },
+  "homepage": "https://github.com/Kittigan14/Cenmulet#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2"
+  }
+}

@@ -1,0 +1,133 @@
+.profile-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1.5px solid var(--border);
+}
+
+.profile-card-header .header-icon {
+    width: 52px;
+    height: 52px;
+    background: var(--primary-light);
+    border-radius: var(--radius-circle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.profile-card-header .header-icon i {
+    font-size: 24px;
+    color: var(--primary-dark);
+}
+
+.profile-card-header h1 {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.profile-card-header p {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Avatar Section ── */
+.avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+}
+
+.avatar-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-img {
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-circle);
+    object-fit: cover;
+    border: 4px solid var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light), var(--shadow-md);
+    display: block;
+}
+
+.avatar-default {
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-circle);
+    background: var(--bg-subtle);
+    border: 4px solid var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light), var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-default i { font-size: 56px; color: var(--text-muted); }
+
+.btn-upload-avatar {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 9px 20px;
+    background: var(--bg-subtle);
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-upload-avatar:hover {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-color: var(--primary);
+}
+
+/* ── Form Grid ── */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.form-grid-2 .full-span { grid-column: 1 / -1; }
+
+/* ── Button Row ── */
+.form-btn-row {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    padding-top: var(--space-md);
+    border-top: 1.5px solid var(--border);
+    margin-top: var(--space-md);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .form-btn-row { flex-direction: column-reverse; }
+    .profile-card { padding: var(--space-lg); }
+}
