@@ -1,5 +1,5 @@
 <?php
-require_once "config/db.php";
+require_once __DIR__ . "/../config/db.php";
 
 /* ---------------- USERS ---------------- */
 $db->exec("
@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS sellers (
     img_per TEXT,
 
     status TEXT DEFAULT 'pending',
-    reject_reason TEXT
+    reject_reason TEXT,
+    reviewed_at DATETIME
 );
 ");
 
@@ -109,12 +110,13 @@ CREATE TABLE IF NOT EXISTS cart (
 
 /* ---------------- PAYMENTS ---------------- */
 $db->exec("
-CREATE TABLE IF NOT EXISTS payments (
+CREATE TABLE payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id INTEGER,
     slip_image TEXT,
     status TEXT DEFAULT 'waiting',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    confirmed_at DATETIME,
     FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 ");

@@ -1,9 +1,4 @@
 <?php
-/**
- * views/admin/seller_action.php
- * Admin อนุมัติ / ปฏิเสธ / ยกเลิกสิทธิ์ seller
- * รองรับ redirect กลับไปยัง page ต้นทาง (dashboard หรือ approve_sellers)
- */
 session_start();
 require_once __DIR__ . "/../../config/db.php";
 

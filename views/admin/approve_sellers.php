@@ -1,8 +1,4 @@
 <?php
-/**
- * views/admin/approve_sellers.php
- * Admin ดู รายชื่อ seller ที่รอการอนุมัติ และอนุมัติ/ปฏิเสธ
- */
 session_start();
 require_once __DIR__ . "/../../config/db.php";
 
@@ -55,33 +51,7 @@ try {
 <body class="admin">
 <div class="dashboard-container">
 
-    <!-- Sidebar -->
-    <aside class="sidebar admin">
-        <div class="sidebar-header">
-            <img src="/public/images/image.png" alt="">
-            <h2>Cenmulet</h2>
-            <p>ผู้ดูแลระบบ</p>
-        </div>
-        <div class="sidebar-user">
-            <h3><?php echo htmlspecialchars($admin['fullname']); ?></h3>
-            <p><i class="fa-solid fa-shield-halved"></i> Admin</p>
-        </div>
-        <ul class="sidebar-menu">
-            <li class="menu-sep">เมนูหลัก</li>
-            <li><a href="/views/admin/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-            <li><a href="/views/admin/users.php"><i class="fa-solid fa-users"></i> จัดการผู้ใช้</a></li>
-            <li><a href="/views/admin/approve_sellers.php" class="active"><i class="fa-solid fa-store"></i> อนุมัติผู้ขาย
-                <?php if ($count_pending > 0): ?>
-                <span style="background:#ef4444;color:#fff;border-radius:99px;padding:1px 8px;font-size:11px;margin-left:auto"><?php echo $count_pending; ?></span>
-                <?php endif; ?>
-            </a></li>
-            <li><a href="/views/admin/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-            <li><a href="/views/admin/categories.php"><i class="fa-solid fa-tags"></i> หมวดหมู่</a></li>
-            <li><a href="/views/admin/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
-            <li class="menu-sep">ระบบ</li>
-            <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
-        </ul>
-    </aside>
+<?php include __DIR__ . '/_sidebar.php'; ?>
 
     <!-- Main -->
     <main class="main-content">

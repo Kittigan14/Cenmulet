@@ -38,7 +38,8 @@ try {
             o.id, o.total_price, o.status, o.created_at,
             u.fullname as buyer_name, u.tel as buyer_tel, u.address as buyer_address,
             p.slip_image, p.status as payment_status, p.confirmed_at,
-            COUNT(DISTINCT oi.id) as item_count
+            COUNT(DISTINCT oi.id) as item_count,
+            o.tracking_number, o.shipped_at
         FROM orders o
         JOIN order_items oi ON o.id = oi.order_id
         JOIN amulets a ON oi.amulet_id = a.id
@@ -139,6 +140,9 @@ try {
     <main class="main-content">
         <div class="top-bar">
             <h1><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</h1>
+            <a href="/views/seller/report.php" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-print"></i> รายงานการขาย
+            </a>
         </div>
 
         <?php if (isset($_GET['success'])): ?>
@@ -248,8 +252,34 @@ try {
                                     <span class="badge badge-warning"><i class="fa-solid fa-hourglass"></i> รอดำเนินการ</span>
                                 <?php endif; ?>
                             </td>
-                            <td style="font-size:13px;color:#6b7280">
-                                <?php echo date('d/m/Y\nH:i', strtotime($order['created_at'])); ?>
+                            <td>
+                                <?php if (!empty($order['tracking_number'])): ?>
+                                <div style="font-family:monospace;font-size:12px;background:#f0fdf4;color:#059669;padding:4px 9px;border-radius:6px;border:1px solid #a7f3d0;margin-bottom:5px;font-weight:700">
+                                    <i class="fa-solid fa-truck" style="font-size:10px"></i>
+                                    <?php echo htmlspecialchars($order['tracking_number']); ?>
+                                </div>
+                                <?php endif; ?>
+                                <?php if ($order['payment_status'] === 'confirmed'): ?>
+                                <form action="/seller/update_tracking.php" method="POST"
+                                      style="display:flex;gap:5px;align-items:center">
+                                    <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
+                                    <input type="text" name="tracking_number"
+                                           value="<?php echo htmlspecialchars($order['tracking_number'] ?? ''); ?>"
+                                           placeholder="กรอกเลขพัสดุ"
+                                           style="width:130px;padding:5px 8px;border:2px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit">
+                                    <button type="submit" class="btn btn-sm btn-primary"
+                                            style="padding:5px 10px;font-size:12px"
+                                            title="บันทึกเลขพัสดุ">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </form>
+                                <?php else: ?>
+                                <span style="font-size:11px;color:#d1d5db">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td style="font-size:13px;color:#6b7280;white-space:nowrap">
+                                <?php echo date('d/m/Y', strtotime($order['created_at'])); ?><br>
+                                <span style="color:#9ca3af"><?php echo date('H:i', strtotime($order['created_at'])); ?></span>
                             </td>
                             <td>
                                 <div class="action-buttons">
