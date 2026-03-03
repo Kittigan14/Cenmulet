@@ -16,7 +16,7 @@ try {
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
-
+ 
 try {
     $stmt = $db->prepare("
         SELECT c.*, a.amulet_name, a.price, a.image, a.quantity as stock,
