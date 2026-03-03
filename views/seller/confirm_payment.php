@@ -1,8 +1,4 @@
 <?php
-/**
- * seller/confirm_payment.php
- * Seller ยืนยัน หรือ ปฏิเสธ การชำระเงิน
- */
 session_start();
 require_once __DIR__ . "/../../config/db.php";
 
@@ -26,7 +22,6 @@ if (!$order_id || !in_array($action, ['confirm', 'reject'])) {
 }
 
 try {
-    // ตรวจสอบว่า order นี้มีสินค้าของ seller จริงๆ
     $stmt = $db->prepare("
         SELECT COUNT(*) 
         FROM order_items oi
@@ -39,7 +34,6 @@ try {
         exit;
     }
 
-    // ตรวจสอบว่า payment ยังเป็น 'waiting'
     $stmt = $db->prepare("SELECT * FROM payments WHERE order_id = :order_id");
     $stmt->execute([':order_id' => $order_id]);
     $payment = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -50,7 +44,14 @@ try {
     }
 
     if ($action === 'confirm') {
-        // อัปเดต payment status เป็น confirmed
+        $stmt_tr = $db->prepare("SELECT tracking_number FROM orders WHERE id = :order_id");
+        $stmt_tr->execute([':order_id' => $order_id]);
+        $tracking = $stmt_tr->fetchColumn();
+
+        if (empty(trim((string)$tracking))) {
+            header("Location: /views/seller/orders.php?error=no_tracking&order_id=" . $order_id);
+            exit;
+        }
         $stmt = $db->prepare("
             UPDATE payments 
             SET status = 'confirmed', confirmed_at = datetime('now')
@@ -60,7 +61,6 @@ try {
 
         header("Location: /views/seller/orders.php?success=confirmed");
     } else {
-        // ปฏิเสธ - คืนสินค้า stock
         $db->beginTransaction();
 
         $stmt = $db->prepare("
@@ -70,7 +70,6 @@ try {
         ");
         $stmt->execute([':order_id' => $order_id]);
 
-        // คืน stock
         $stmt = $db->prepare("SELECT amulet_id, quantity FROM order_items WHERE order_id = :order_id");
         $stmt->execute([':order_id' => $order_id]);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);

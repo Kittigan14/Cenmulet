@@ -58,6 +58,12 @@ $current = basename($_SERVER['PHP_SELF']);
                 <i class="fa-solid fa-cart-shopping"></i> จัดการคำสั่งซื้อ
             </a>
         </li>
+        <li>
+            <a href="/views/admin/report.php"
+               class="<?php echo $current === 'report.php' ? 'active' : ''; ?>">
+                <i class="fa-solid fa-print"></i> พิมพ์รายงาน
+            </a>
+        </li>
         <li class="menu-sep">ระบบ</li>
         <li>
             <a href="/auth/logout.php">

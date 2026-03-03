@@ -32,6 +32,69 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>จัดการหมวดหมู่ - Cenmulet Admin</title>
+    <style>
+        .cat-form-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 22px 26px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+            margin-bottom: 24px;
+        }
+        .cat-form-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cat-form-card h3 i { color: #6366f1; }
+        .cat-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .cat-input-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .cat-input-row input:focus { border-color: #6366f1; }
+
+        /* Edit inline */
+        .edit-input {
+            padding: 7px 12px;
+            border: 2px solid #6366f1;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            width: 220px;
+        }
+        .btn-purple {
+            background: #6366f1;
+            color: #fff;
+        }
+        .btn-purple:hover { background: #4f46e5; }
+        .btn-icon.edit-cat  { background: #ede9fe; color: #7c3aed; }
+        .btn-icon.delete-cat{ background: #fee2e2; color: #ef4444; }
+        .btn-icon.save-cat  { background: #d1fae5; color: #059669; }
+        .btn-icon.cancel-cat{ background: #f3f4f6; color: #6b7280; }
+        .btn-icon { border: none; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: opacity .2s; }
+        .btn-icon:hover { opacity: .8; }
+
+        .cat-count-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #e0e7ff; color: #4338ca;
+            padding: 3px 11px; border-radius: 99px; font-size: 12px; font-weight: 600;
+        }
+    </style>
 </head>
 <body class="admin">
 <div class="dashboard-container">
@@ -45,34 +108,125 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         </span>
     </div>
 
+    <?php if (isset($_GET['success'])): ?>
+    <div class="alert alert-success">
+        <i class="fa-solid fa-circle-check"></i>
+        <span><?php
+            $ok = [
+                'added'   => 'เพิ่มหมวดหมู่ใหม่เรียบร้อยแล้ว',
+                'edited'  => 'แก้ไขหมวดหมู่เรียบร้อยแล้ว',
+                'deleted' => 'ลบหมวดหมู่เรียบร้อยแล้ว',
+            ];
+            echo $ok[$_GET['success']] ?? 'ดำเนินการสำเร็จ';
+        ?></span>
+    </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span><?php
+            $errs = [
+                'empty'     => 'กรุณากรอกชื่อหมวดหมู่',
+                'has_items' => 'ไม่สามารถลบได้ — หมวดหมู่นี้ยังมีสินค้าอยู่',
+                'duplicate' => 'ชื่อหมวดหมู่นี้มีอยู่แล้ว',
+                'db'        => 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+            ];
+            echo $errs[$_GET['error']] ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+        ?></span>
+    </div>
+    <?php endif; ?>
+
+    <!-- Add Category Form -->
+    <div class="cat-form-card">
+        <h3><i class="fa-solid fa-plus-circle"></i> เพิ่มหมวดหมู่ใหม่</h3>
+        <form action="/admin/category_action.php" method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="cat-input-row">
+                <input type="text" name="category_name" id="newCategoryName"
+                       placeholder="ชื่อหมวดหมู่ใหม่ เช่น พระปิดตา" required maxlength="100"
+                       autocomplete="off">
+                <button type="submit" class="btn btn-primary btn-sm" style="white-space:nowrap">
+                    <i class="fa-solid fa-plus"></i> เพิ่ม
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Categories Table -->
     <div class="card">
         <div class="table-wrapper">
         <?php if (count($categories) > 0): ?>
-        <table>
+        <table id="catTable">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th style="width:60px">#</th>
                     <th>ชื่อหมวดหมู่</th>
                     <th>จำนวนสินค้า</th>
+                    <th style="width:140px">จัดการ</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($categories as $i => $c): ?>
-            <tr>
-                <td style="color:#9ca3af;width:60px"><?php echo $i + 1; ?></td>
+            <tr id="row-<?php echo $c['id']; ?>">
+                <td style="color:#9ca3af"><?php echo $i + 1; ?></td>
                 <td>
-                    <div style="display:flex;align-items:center;gap:10px">
-                        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff">
+                    <!-- View mode -->
+                    <div id="view-<?php echo $c['id']; ?>"
+                         style="display:flex;align-items:center;gap:10px">
+                        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">
                             <i class="fa-solid fa-tag"></i>
                         </div>
                         <strong style="font-size:15px"><?php echo htmlspecialchars($c['category_name']); ?></strong>
                     </div>
+                    <!-- Edit mode -->
+                    <div id="edit-<?php echo $c['id']; ?>" style="display:none">
+                        <input type="text" class="edit-input"
+                               id="editInput-<?php echo $c['id']; ?>"
+                               value="<?php echo htmlspecialchars($c['category_name']); ?>"
+                               maxlength="100">
+                    </div>
                 </td>
                 <td>
-                    <span class="badge badge-info">
+                    <span class="cat-count-chip">
                         <i class="fa-solid fa-box"></i>
                         <?php echo number_format($c['product_count']); ?> สินค้า
                     </span>
+                </td>
+                <td>
+                    <!-- View mode buttons -->
+                    <div id="viewBtns-<?php echo $c['id']; ?>" style="display:flex;gap:6px">
+                        <button class="btn-icon edit-cat" title="แก้ไข"
+                                onclick="startEdit(<?php echo $c['id']; ?>)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <form action="/admin/category_action.php" method="POST"
+                              onsubmit="return confirmDelete(<?php echo $c['product_count']; ?>, '<?php echo htmlspecialchars(addslashes($c['category_name'])); ?>')">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
+                            <button type="submit" class="btn-icon delete-cat" title="ลบ">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <!-- Edit mode buttons -->
+                    <div id="editBtns-<?php echo $c['id']; ?>" style="display:none;gap:6px">
+                        <form action="/admin/category_action.php" method="POST" id="editForm-<?php echo $c['id']; ?>">
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
+                            <input type="hidden" name="category_name" id="editHidden-<?php echo $c['id']; ?>">
+                            <div style="display:flex;gap:6px">
+                                <button type="submit" class="btn-icon save-cat" title="บันทึก"
+                                        onclick="prepareEdit(<?php echo $c['id']; ?>)">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" class="btn-icon cancel-cat" title="ยกเลิก"
+                                        onclick="cancelEdit(<?php echo $c['id']; ?>)">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -82,11 +236,40 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         <div class="empty-state">
             <i class="fa-solid fa-tags"></i>
             <h2>ยังไม่มีหมวดหมู่</h2>
+            <p>เพิ่มหมวดหมู่ใหม่ได้จากฟอร์มด้านบน</p>
         </div>
         <?php endif; ?>
         </div>
     </div>
 </main>
 </div>
+
+<script>
+function startEdit(id) {
+    document.getElementById('view-' + id).style.display = 'none';
+    document.getElementById('edit-' + id).style.display = 'block';
+    document.getElementById('viewBtns-' + id).style.display = 'none';
+    document.getElementById('editBtns-' + id).style.display = 'flex';
+    document.getElementById('editInput-' + id).focus();
+}
+function cancelEdit(id) {
+    document.getElementById('view-' + id).style.display = 'flex';
+    document.getElementById('edit-' + id).style.display = 'none';
+    document.getElementById('viewBtns-' + id).style.display = 'flex';
+    document.getElementById('editBtns-' + id).style.display = 'none';
+}
+function prepareEdit(id) {
+    const val = document.getElementById('editInput-' + id).value.trim();
+    if (!val) { alert('กรุณากรอกชื่อหมวดหมู่'); return false; }
+    document.getElementById('editHidden-' + id).value = val;
+}
+function confirmDelete(productCount, name) {
+    if (productCount > 0) {
+        alert('ไม่สามารถลบ "' + name + '" ได้ เพราะยังมีสินค้า ' + productCount + ' รายการในหมวดหมู่นี้');
+        return false;
+    }
+    return confirm('ยืนยันการลบหมวดหมู่ "' + name + '"?');
+}
+</script>
 </body>
 </html>

@@ -162,7 +162,18 @@ try {
         <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-error">
             <i class="fa-solid fa-circle-exclamation"></i>
-            <span>เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง</span>
+            <span>
+            <?php
+            $errs = [
+                'no_tracking'      => '<strong>ต้องกรอกเลขพัสดุก่อนกดยืนยันการชำระเงิน</strong> – กรุณากรอกเลขพัสดุในช่องวันที่ก่อน',
+                'already_processed'=> 'คำสั่งซื้อนี้ได้รับการดำเนินการไปแล้ว',
+                'invalid'          => 'คำขอไม่ถูกต้อง กรุณาลองใหม่',
+                'unauthorized'     => 'ไม่มีสิทธิ์ดำเนินการนี้',
+                'database'         => 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+            ];
+            echo $errs[$_GET['error']] ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+            ?>
+            </span>
         </div>
         <?php endif; ?>
 
@@ -259,20 +270,25 @@ try {
                                     <?php echo htmlspecialchars($order['tracking_number']); ?>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ($order['payment_status'] === 'confirmed'): ?>
+                                <?php if (in_array($order['payment_status'], ['waiting', 'confirmed']) && $order['status'] !== 'completed'): ?>
                                 <form action="/seller/update_tracking.php" method="POST"
                                       style="display:flex;gap:5px;align-items:center">
                                     <input type="hidden" name="order_id" value="<?php echo $order['id']; ?>">
                                     <input type="text" name="tracking_number"
                                            value="<?php echo htmlspecialchars($order['tracking_number'] ?? ''); ?>"
-                                           placeholder="กรอกเลขพัสดุ"
-                                           style="width:130px;padding:5px 8px;border:2px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit">
+                                           placeholder="<?php echo $order['payment_status']==='waiting' ? 'กรอกก่อนยืนยัน *' : 'กรอกเลขพัสดุ'; ?>"
+                                           style="width:130px;padding:5px 8px;border:2px solid <?php echo ($order['payment_status']==='waiting' && empty($order['tracking_number'])) ? '#f59e0b' : '#e5e7eb'; ?>;border-radius:6px;font-size:12px;font-family:inherit">
                                     <button type="submit" class="btn btn-sm btn-primary"
                                             style="padding:5px 10px;font-size:12px"
                                             title="บันทึกเลขพัสดุ">
                                         <i class="fa-solid fa-paper-plane"></i>
                                     </button>
                                 </form>
+                                <?php if ($order['payment_status']==='waiting' && empty($order['tracking_number'])): ?>
+                                <div style="font-size:11px;color:#f59e0b;margin-top:3px">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> บันทึกก่อนยืนยัน
+                                </div>
+                                <?php endif; ?>
                                 <?php else: ?>
                                 <span style="font-size:11px;color:#d1d5db">-</span>
                                 <?php endif; ?>

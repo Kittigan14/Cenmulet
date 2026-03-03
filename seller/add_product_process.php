@@ -10,82 +10,114 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
 $seller_id = $_SESSION['user_id'];
 
 $amulet_name = $_POST['amulet_name'] ?? '';
-$source = $_POST['source'] ?? '';
-$quantity = $_POST['quantity'] ?? 0;
-$price = $_POST['price'] ?? 0;
-$categoryId = $_POST['categoryId'] ?? null;
+$source      = $_POST['source']      ?? '';
+$quantity    = $_POST['quantity']    ?? 0;
+$price       = $_POST['price']       ?? 0;
+$categoryId  = $_POST['categoryId']  ?? null;
 
 if (empty($amulet_name) || empty($source) || $quantity < 0 || $price < 0 || empty($categoryId)) {
     header("Location: /views/seller/add_product.php?error=empty");
     exit;
 }
 
-$image_name = null;
-if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+// ตรวจสอบจำนวนรูปภาพ (ขั้นต่ำ 5 รูป)
+$uploaded_files = $_FILES['images'] ?? null;
+$valid_files    = [];
+
+if ($uploaded_files) {
     $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-    $file_type = $_FILES['image']['type'];
-    $file_size = $_FILES['image']['size'];
     $max_size = 5 * 1024 * 1024;
-    
-    if (!in_array($file_type, $allowed_types)) {
-        header("Location: /views/seller/add_product.php?error=invalid_type");
-        exit;
-    }
-    
-    if ($file_size > $max_size) {
-        header("Location: /views/seller/add_product.php?error=file_too_large");
-        exit;
-    }
-    
-    $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/amulets/';
-    if (!file_exists($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
-    }
-    
-    $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-    $image_name = uniqid('amulet_') . '_' . time() . '.' . $file_extension;
-    $upload_path = $upload_dir . $image_name;
-    
-    if (!move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
-        header("Location: /views/seller/add_product.php?error=upload");
-        exit;
+
+    foreach ($uploaded_files['error'] as $idx => $err) {
+        if ($err !== UPLOAD_ERR_OK) continue;
+
+        $file_type = $uploaded_files['type'][$idx];
+        $file_size = $uploaded_files['size'][$idx];
+
+        if (!in_array($file_type, $allowed_types)) continue;
+        if ($file_size > $max_size) continue;
+
+        $valid_files[] = [
+            'tmp_name'  => $uploaded_files['tmp_name'][$idx],
+            'name'      => $uploaded_files['name'][$idx],
+        ];
     }
 }
 
+if (count($valid_files) < 5) {
+    header("Location: /views/seller/add_product.php?error=min_images");
+    exit;
+}
+
+// อัปโหลดรูปภาพ
+$upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/amulets/';
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
+
+$saved_images = [];
+foreach ($valid_files as $file) {
+    $ext        = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $filename   = uniqid('amulet_') . '_' . time() . rand(100, 999) . '.' . $ext;
+    $dest       = $upload_dir . $filename;
+
+    if (move_uploaded_file($file['tmp_name'], $dest)) {
+        $saved_images[] = $filename;
+    }
+}
+
+if (count($saved_images) < 5) {
+    // ลบรูปที่อัปโหลดไปแล้ว
+    foreach ($saved_images as $f) {
+        @unlink($upload_dir . $f);
+    }
+    header("Location: /views/seller/add_product.php?error=upload");
+    exit;
+}
+
+// บันทึกลงฐานข้อมูล
 try {
+    $db->beginTransaction();
+
+    // บันทึก amulet (รูปแรกเป็น main image)
     $stmt = $db->prepare("
-        INSERT INTO amulets (amulet_name, source, quantity, price, image, sellerId, categoryId) 
+        INSERT INTO amulets (amulet_name, source, quantity, price, image, sellerId, categoryId)
         VALUES (:amulet_name, :source, :quantity, :price, :image, :sellerId, :categoryId)
     ");
-    
-    $result = $stmt->execute([
+    $stmt->execute([
         ':amulet_name' => $amulet_name,
-        ':source' => $source,
-        ':quantity' => (int)$quantity,
-        ':price' => (float)$price,
-        ':image' => $image_name,
-        ':sellerId' => $seller_id,
-        ':categoryId' => $categoryId
+        ':source'      => $source,
+        ':quantity'    => (int)$quantity,
+        ':price'       => (float)$price,
+        ':image'       => $saved_images[0],
+        ':sellerId'    => $seller_id,
+        ':categoryId'  => $categoryId,
     ]);
-    
-    if ($result) {
-        header("Location: /views/seller/add_product.php?success=1");
-        exit;
-    } else {
-        if ($image_name && file_exists($upload_dir . $image_name)) {
-            unlink($upload_dir . $image_name);
-        }
-        header("Location: /views/seller/add_product.php?error=database");
-        exit;
+    $amulet_id = $db->lastInsertId();
+
+    // บันทึกรูปภาพทุกรูปใน amulet_images
+    $stmt2 = $db->prepare("
+        INSERT INTO amulet_images (amulet_id, image, sort_order)
+        VALUES (:amulet_id, :image, :sort_order)
+    ");
+    foreach ($saved_images as $order => $img) {
+        $stmt2->execute([
+            ':amulet_id'  => $amulet_id,
+            ':image'      => $img,
+            ':sort_order' => $order,
+        ]);
     }
-    
+
+    $db->commit();
+    header("Location: /views/seller/add_product.php?success=1");
+    exit;
+
 } catch (PDOException $e) {
-    if ($image_name && file_exists($upload_dir . $image_name)) {
-        unlink($upload_dir . $image_name);
+    $db->rollBack();
+    foreach ($saved_images as $f) {
+        @unlink($upload_dir . $f);
     }
-    
     error_log("Add Product Error: " . $e->getMessage());
-    
     header("Location: /views/seller/add_product.php?error=database");
     exit;
 }

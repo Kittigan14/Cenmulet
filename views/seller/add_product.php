@@ -264,64 +264,50 @@ try {
             transition: all 0.3s;
             cursor: pointer;
         }
-
-        .image-upload-area:hover {
+        .image-upload-area:hover, .image-upload-area.has-images {
             border-color: #10b981;
             background: #f0fdf4;
         }
+        .upload-icon { font-size: 48px; color: #10b981; margin-bottom: 15px; }
+        .upload-text h3 { font-size: 16px; color: #1a1a1a; margin-bottom: 5px; }
+        .upload-text p  { font-size: 14px; color: #6b7280; }
+        #imageInput { display: none; }
 
-        .image-upload-area.has-image {
-            border-color: #10b981;
-            background: #fff;
-        }
-
-        .upload-icon {
-            font-size: 48px;
-            color: #10b981;
-            margin-bottom: 15px;
-        }
-
-        .upload-text h3 {
-            font-size: 16px;
-            color: #1a1a1a;
-            margin-bottom: 5px;
-        }
-
-        .upload-text p {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        #imageInput {
-            display: none;
-        }
-
-        .image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .image-preview.show {
-            display: block;
-        }
-
-        .remove-image {
-            display: inline-block;
+        /* Image count badge */
+        .img-count-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 700;
             margin-top: 10px;
-            padding: 8px 16px;
-            background: #fee2e2;
-            color: #ef4444;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
         }
+        .img-count-badge.ok  { background: #d1fae5; color: #059669; }
+        .img-count-badge.low { background: #fef3c7; color: #d97706; }
+        .img-count-badge.bad { background: #fee2e2; color: #dc2626; }
 
-        .remove-image:hover {
-            background: #fecaca;
+        /* Preview grid */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+        }
+        .preview-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        .preview-item .rm-btn {
+            position: absolute; top: -6px; right: -6px;
+            background: #ef4444; color: #fff;
+            border: none; border-radius: 50%;
+            width: 22px; height: 22px;
+            font-size: 11px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,.2);
         }
 
         .alert {
@@ -448,8 +434,10 @@ try {
                             <?php
                             if ($_GET['error'] == 'empty') {
                                 echo 'กรุณากรอกข้อมูลให้ครบถ้วน';
+                            } elseif ($_GET['error'] == 'min_images') {
+                                echo '<strong>ต้องอัปโหลดรูปภาพอย่างน้อย 5 รูป</strong> เพื่อให้ลูกค้าเห็นสินค้าได้ชัดเจน';
                             } elseif ($_GET['error'] == 'upload') {
-                                echo 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ';
+                                echo 'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ';
                             } else {
                                 echo 'เกิดข้อผิดพลาดในการเพิ่มสินค้า';
                             }
@@ -506,27 +494,26 @@ try {
 
                     <div class="form-section">
                         <h2 class="section-title">
-                            <i class="fa-solid fa-image"></i>
-                            รูปภาพสินค้า
+                            <i class="fa-solid fa-images"></i>
+                            รูปภาพสินค้า <span style="color:#ef4444;font-size:14px">(ต้องอัปโหลดอย่างน้อย 5 รูป)</span>
                         </h2>
 
                         <div class="form-group full-width">
-                            <label for="imageInput">รูปพระเครื่อง</label>
-                            <div class="image-upload-area" id="uploadArea">
-                                <div class="upload-icon">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                                </div>
+                            <label>รูปพระเครื่อง <span style="color:#ef4444">*</span></label>
+                            <div class="image-upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
+                                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                                 <div class="upload-text">
-                                    <h3>คลิกเพื่อเลือกรูปภาพ</h3>
-                                    <p>รองรับไฟล์ JPG, PNG, GIF (ขนาดไม่เกิน 5MB)</p>
+                                    <h3>คลิกเพื่อเลือกรูปภาพ (เลือกได้หลายรูปพร้อมกัน)</h3>
+                                    <p>รองรับไฟล์ JPG, PNG, GIF – ขนาดไม่เกิน 5MB ต่อรูป</p>
                                 </div>
-                                <input type="file" id="imageInput" name="image" accept="image/*">
-                                <img id="imagePreview" class="image-preview" alt="Preview">
-                                <div id="removeImageBtn" class="remove-image" style="display: none;">
-                                    <i class="fa-solid fa-trash"></i> ลบรูปภาพ
-                                </div>
+                                <input type="file" id="imageInput" name="images[]" accept="image/*" multiple>
                             </div>
-                            <p class="input-hint">แนะนำขนาดรูป 800x800 พิกเซล เพื่อความคมชัด</p>
+                            <div id="imgCountBadge" class="img-count-badge bad" style="display:none">
+                                <i class="fa-solid fa-images"></i>
+                                <span id="imgCountText">0 รูป</span>
+                            </div>
+                            <div class="preview-grid" id="previewGrid"></div>
+                            <p class="input-hint" style="margin-top:10px">แนะนำขนาดรูป 800x800 พิกเซล – รูปแรกจะเป็นรูปปกสินค้า</p>
                         </div>
                     </div>
 
@@ -544,79 +531,89 @@ try {
     </div>
 
     <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const removeImageBtn = document.getElementById('removeImageBtn');
+        const imageInput   = document.getElementById('imageInput');
+        const previewGrid  = document.getElementById('previewGrid');
+        const imgCountBadge= document.getElementById('imgCountBadge');
+        const imgCountText = document.getElementById('imgCountText');
+        const uploadArea   = document.getElementById('uploadArea');
 
-        uploadArea.addEventListener('click', (e) => {
-            if (e.target !== removeImageBtn && !removeImageBtn.contains(e.target)) {
-                imageInput.click();
-            }
-        });
+        let selectedFiles = []; // DataTransfer workaround
 
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('ไฟล์มีขนาดใหญ่เกินไป! กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB');
-                    imageInput.value = '';
+        function updateBadge() {
+            const n = selectedFiles.length;
+            imgCountBadge.style.display = n > 0 ? 'inline-flex' : 'none';
+            imgCountText.textContent = n + ' รูป' + (n < 5 ? ' (ต้องการอีก ' + (5-n) + ' รูป)' : '');
+            imgCountBadge.className = 'img-count-badge ' + (n >= 5 ? 'ok' : n > 0 ? 'low' : 'bad');
+            uploadArea.classList.toggle('has-images', n > 0);
+        }
+
+        function renderPreviews() {
+            previewGrid.innerHTML = '';
+            selectedFiles.forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const item = document.createElement('div');
+                    item.className = 'preview-item';
+                    item.innerHTML = `<img src="${e.target.result}" alt=""><button type="button" class="rm-btn" onclick="removeImage(${idx})"><i class="fa-solid fa-times"></i></button>`
+                                   + (idx===0 ? '<div style="position:absolute;bottom:4px;left:4px;background:rgba(16,185,129,.85);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px">ปก</div>' : '');
+                    previewGrid.appendChild(item);
+                };
+                reader.readAsDataURL(file);
+            });
+            syncFilesInput();
+        }
+
+        function removeImage(idx) {
+            selectedFiles.splice(idx, 1);
+            updateBadge();
+            renderPreviews();
+        }
+
+        function syncFilesInput() {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
+        }
+
+        imageInput.addEventListener('change', function() {
+            const maxSize = 5 * 1024 * 1024;
+            Array.from(this.files).forEach(file => {
+                if (file.size > maxSize) {
+                    alert('ไฟล์ "' + file.name + '" มีขนาดเกิน 5MB กรุณาเลือกใหม่');
                     return;
                 }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.classList.add('show');
-                    removeImageBtn.style.display = 'inline-block';
-                    uploadArea.classList.add('has-image');
-                }
-                reader.readAsDataURL(file);
-            }
+                selectedFiles.push(file);
+            });
+            updateBadge();
+            renderPreviews();
         });
 
-        removeImageBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            imageInput.value = '';
-            imagePreview.src = '';
-            imagePreview.classList.remove('show');
-            removeImageBtn.style.display = 'none';
-            uploadArea.classList.remove('has-image');
-        });
-
-        uploadArea.addEventListener('dragover', (e) => {
+        // Drag & drop
+        uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.style.borderColor='#10b981'; });
+        uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor=''; });
+        uploadArea.addEventListener('drop', e => {
             e.preventDefault();
-            uploadArea.style.borderColor = '#10b981';
-            uploadArea.style.background = '#f0fdf4';
+            uploadArea.style.borderColor='';
+            const maxSize = 5 * 1024 * 1024;
+            Array.from(e.dataTransfer.files).forEach(file => {
+                if (file.size > maxSize) { alert('ไฟล์ "' + file.name + '" มีขนาดเกิน 5MB'); return; }
+                selectedFiles.push(file);
+            });
+            updateBadge(); renderPreviews();
         });
 
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#d1d5db';
-            uploadArea.style.background = '#f9fafb';
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#d1d5db';
-            uploadArea.style.background = '#f9fafb';
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                imageInput.files = files;
-                const event = new Event('change');
-                imageInput.dispatchEvent(event);
-            }
-        });
-
-        // Validate form before submit
+        // Validate before submit
         document.querySelector('form').addEventListener('submit', function(e) {
-            const price = document.getElementById('price').value;
-            const quantity = document.getElementById('quantity').value;
-
+            const price    = parseFloat(document.getElementById('price').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
             if (price < 0 || quantity < 0) {
                 e.preventDefault();
                 alert('ราคาและจำนวนต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0');
+                return false;
+            }
+            if (selectedFiles.length < 5) {
+                e.preventDefault();
+                alert('กรุณาอัปโหลดรูปภาพอย่างน้อย 5 รูป (ปัจจุบัน: ' + selectedFiles.length + ' รูป)');
                 return false;
             }
         });
