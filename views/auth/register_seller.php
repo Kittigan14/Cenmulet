@@ -3,16 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/public/css/auth.css">
+    <link rel="stylesheet" href="../../public/css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>สมัครผู้ขาย - Cenmulet</title>
+    <style>
+        .address-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .address-section.full {
+            grid-template-columns: 1fr;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+        select:focus {
+            outline: none;
+            border-color: #a67c52;
+        }
+    </style>
 </head>
 <body>
 
 <div class="navbar">
     <div class="logo">
         <div class="content-logo">
-            <img src="/public/images/image.png" alt="Cenmulet">
+            <img src="../../public/images/image.png" alt="Cenmulet">
             <h2>Cenmulet</h2>
         </div>
         <p>Amulet market place ตลาดพระเครื่อง</p>
@@ -57,7 +78,7 @@
             </div>
             <?php endif; ?>
 
-            <form action="/auth/register_seller_process.php" method="POST" enctype="multipart/form-data">
+            <form action="../../auth/register_seller_process.php" method="POST" enctype="multipart/form-data">
 
                 <!-- ข้อมูลร้านค้า -->
                 <div class="form-section">
@@ -80,10 +101,50 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Address Section with Dropdowns -->
                     <div class="form-group">
-                        <label for="address">ที่อยู่ร้านค้า <span style="color:red">*</span></label>
-                        <textarea name="address" id="address" placeholder="กรอกที่อยู่ร้านค้า" required></textarea>
+                        <label>ที่อยู่ร้านค้า <span style="color:red">*</span></label>
                     </div>
+
+                    <div class="address-section">
+                        <div class="form-group">
+                            <label for="house_number">บ้านเลขที่ <span style="color:red">*</span></label>
+                            <input type="text" name="house_number" id="house_number" placeholder="กรอกบ้านเลขที่" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="province">จังหวัด <span style="color:red">*</span></label>
+                            <select name="province" id="province" required>
+                                <option value="">-- เลือกจังหวัด --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="address-section">
+                        <div class="form-group">
+                            <label for="district">อำเภอ <span style="color:red">*</span></label>
+                            <select name="district" id="district" required disabled>
+                                <option value="">-- เลือกอำเภอ --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subdistrict">ตำบล <span style="color:red">*</span></label>
+                            <select name="subdistrict" id="subdistrict" required disabled>
+                                <option value="">-- เลือกตำบล --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="address-section">
+                        <div class="form-group">
+                            <label for="postal_code">รหัสไปรษณีย์</label>
+                            <input type="text" name="postal_code" id="postal_code" placeholder="รหัสไปรษณีย์" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Hidden field to store full address -->
+                    <input type="hidden" name="address" id="address">
+
                     <div class="form-group">
                         <label for="pay_contax">ช่องทางการชำระเงิน</label>
                         <input type="text" name="pay_contax" id="pay_contax" placeholder="เช่น เลขบัญชีธนาคาร, พร้อมเพย์">
@@ -153,17 +214,179 @@
 </div>
 
 <script>
+// Geography data will be loaded dynamically
+let geographyData = [];
+
+// Load geography data
+async function loadGeographyData() {
+    try {
+        const response = await fetch('../../data/geography.json');
+        geographyData = await response.json();
+        initializeProvinces();
+    } catch (error) {
+        console.error('Error loading geography data:', error);
+    }
+}
+
+// Initialize provinces dropdown - ไม่มีซ้ำ
+function initializeProvinces() {
+    const provinceMap = new Map();
+    
+    // เก็บจังหวัดที่ไม่ซ้ำ
+    geographyData.forEach(item => {
+        if (!provinceMap.has(item.provinceCode)) {
+            provinceMap.set(item.provinceCode, item.provinceNameTh);
+        }
+    });
+    
+    // แปลงเป็น array และเรียงลำดับ
+    const provinces = Array.from(provinceMap, ([code, name]) => ({ code, name }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+    const provinceSelect = document.getElementById('province');
+    provinces.forEach(province => {
+        const option = document.createElement('option');
+        option.value = province.code;
+        option.textContent = province.name;
+        provinceSelect.appendChild(option);
+    });
+}
+
+// Update districts when province changes - ไม่มีซ้ำ
+document.getElementById('province').addEventListener('change', function() {
+    const provinceCode = this.value;
+    const districtSelect = document.getElementById('district');
+    const subdistrictSelect = document.getElementById('subdistrict');
+    
+    // Reset dropdowns
+    districtSelect.innerHTML = '<option value="">-- เลือกอำเภอ --</option>';
+    subdistrictSelect.innerHTML = '<option value="">-- เลือกตำบล --</option>';
+    document.getElementById('postal_code').value = '';
+    
+    if (!provinceCode) {
+        districtSelect.disabled = true;
+        subdistrictSelect.disabled = true;
+        return;
+    }
+
+    // Get unique districts for selected province
+    const districtMap = new Map();
+    geographyData
+        .filter(item => item.provinceCode == provinceCode)
+        .forEach(item => {
+            if (!districtMap.has(item.districtCode)) {
+                districtMap.set(item.districtCode, item.districtNameTh);
+            }
+        });
+    
+    const districts = Array.from(districtMap, ([code, name]) => ({ code, name }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+    districts.forEach(district => {
+        const option = document.createElement('option');
+        option.value = district.code;
+        option.textContent = district.name;
+        districtSelect.appendChild(option);
+    });
+
+    districtSelect.disabled = false;
+});
+
+// Update subdistricts when district changes - ไม่มีซ้ำ
+document.getElementById('district').addEventListener('change', function() {
+    const provinceCode = document.getElementById('province').value;
+    const districtCode = this.value;
+    const subdistrictSelect = document.getElementById('subdistrict');
+    
+    // Reset subdistrict dropdown
+    subdistrictSelect.innerHTML = '<option value="">-- เลือกตำบล --</option>';
+    document.getElementById('postal_code').value = '';
+    
+    if (!districtCode) {
+        subdistrictSelect.disabled = true;
+        return;
+    }
+
+    // Get subdistricts for selected district - ไม่มีซ้ำ
+    const subdistrictMap = new Map();
+    geographyData
+        .filter(item => item.provinceCode == provinceCode && item.districtCode == districtCode)
+        .forEach(item => {
+            if (!subdistrictMap.has(item.subdistrictCode)) {
+                subdistrictMap.set(item.subdistrictCode, {
+                    name: item.subdistrictNameTh,
+                    postal: item.postalCode
+                });
+            }
+        });
+    
+    const subdistricts = Array.from(subdistrictMap, ([code, data]) => ({ 
+        code, 
+        name: data.name, 
+        postal: data.postal 
+    })).sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+    subdistricts.forEach(subdistrict => {
+        const option = document.createElement('option');
+        option.value = subdistrict.code;
+        option.textContent = subdistrict.name;
+        option.dataset.postal = subdistrict.postal;
+        subdistrictSelect.appendChild(option);
+    });
+
+    subdistrictSelect.disabled = false;
+});
+
+// Update postal code when subdistrict changes
+document.getElementById('subdistrict').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    document.getElementById('postal_code').value = selectedOption.dataset.postal || '';
+    updateAddressField();
+});
+
+// Update address field
+function updateAddressField() {
+    const houseNumber = document.getElementById('house_number').value;
+    const provinceCode = document.getElementById('province').value;
+    const districtCode = document.getElementById('district').value;
+    const subdistrictCode = document.getElementById('subdistrict').value;
+
+    if (!houseNumber || !provinceCode || !districtCode || !subdistrictCode) {
+        document.getElementById('address').value = '';
+        return;
+    }
+
+    const province = geographyData.find(item => item.provinceCode == provinceCode);
+    const district = geographyData.find(item => item.districtCode == districtCode);
+    const subdistrict = geographyData.find(item => item.subdistrictCode == subdistrictCode);
+
+    if (province && district && subdistrict) {
+        const fullAddress = `บ้านเลขที่ ${houseNumber} ${subdistrict.subdistrictNameTh} ${district.districtNameTh} ${province.provinceNameTh} ${subdistrict.postalCode}`;
+        document.getElementById('address').value = fullAddress;
+    }
+}
+
+// Listen to house number changes
+document.getElementById('house_number').addEventListener('change', updateAddressField);
+document.getElementById('subdistrict').addEventListener('change', updateAddressField);
+
+// File input handlers
 document.getElementById('img_store').addEventListener('change', function(e) {
     const f = e.target.files[0];
     if (f) document.getElementById('store-file-name').textContent = f.name;
 });
+
 document.getElementById('img_per').addEventListener('change', function(e) {
     const f = e.target.files[0];
     if (f) document.getElementById('id-file-name').textContent = f.name;
 });
+
 document.getElementById('id_per').addEventListener('input', function() {
     this.value = this.value.replace(/\D/g,'');
 });
+
+// Load data on page load
+window.addEventListener('load', loadGeographyData);
 </script>
 </body>
 </html>
