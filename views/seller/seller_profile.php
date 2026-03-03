@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
         if (in_array($ext, $allowed)) {
-            $new_filename = 'store_' . uniqid() . '.' . $ext;
-            $upload_path = __DIR__ . "/../../uploads/stores/";
+            $new_filename = 'img_store_' . uniqid() . '.' . $ext;
+            $upload_path = __DIR__ . "/../../uploads/sellers/";
             
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, true);
@@ -55,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
         if (in_array($ext, $allowed)) {
-            $new_filename = 'id_' . uniqid() . '.' . $ext;
-            $upload_path = __DIR__ . "/../../uploads/ids/";
+            $new_filename = 'img_per_' . uniqid() . '.' . $ext;
+            $upload_path = __DIR__ . "/../../uploads/sellers/";
             
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0777, true);
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':id' => $seller_id
         ]);
         
-        header("Location: /views/seller/profile.php?success=1");
+        header("Location: /views/seller/seller_profile.php?success=1");
         exit;
         
     } catch (PDOException $e) {
@@ -403,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
                 <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
                 <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
-                <li><a href="/views/seller/profile.php" class="active"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+                <li><a href="/views/seller/seller_profile.php" class="active"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
                 <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
             </ul>
         </aside>
@@ -482,7 +482,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <input type="file" id="img_store" name="img_store" accept="image/*" style="display: none;" onchange="previewImage(this, 'store_preview')">
                             <?php if ($seller['img_store']): ?>
-                                <img id="store_preview" src="/uploads/stores/<?php echo htmlspecialchars($seller['img_store']); ?>" class="current-image" alt="รูปร้านค้า">
+                                <img id="store_preview" src="/uploads/sellers/<?php echo htmlspecialchars($seller['img_store']); ?>" class="current-image" alt="รูปร้านค้า">
                             <?php else: ?>
                                 <img id="store_preview" src="" class="current-image" alt="" style="display: none;">
                             <?php endif; ?>
@@ -497,7 +497,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <input type="file" id="img_per" name="img_per" accept="image/*" style="display: none;" onchange="previewImage(this, 'id_preview')">
                             <?php if ($seller['img_per']): ?>
-                                <img id="id_preview" src="/uploads/ids/<?php echo htmlspecialchars($seller['img_per']); ?>" class="current-image" alt="บัตรประชาชน">
+                                <img id="id_preview" src="/uploads/sellers/<?php echo htmlspecialchars($seller['img_per']); ?>" class="current-image" alt="บัตรประชาชน">
                             <?php else: ?>
                                 <img id="id_preview" src="" class="current-image" alt="" style="display: none;">
                             <?php endif; ?>
