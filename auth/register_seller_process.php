@@ -1,8 +1,10 @@
 <?php
 /**
- * register_seller_process.php
+ * auth/register_seller_process.php
  * สร้าง seller account ด้วย status = 'pending' เพื่อรอ Admin อนุมัติ
- *
+ * 
+ * Path: cenmulet/auth/register_seller_process.php
+ * 
  * ต้องการ column เพิ่มใน table sellers:
  *   status ENUM('pending','approved','rejected') DEFAULT 'pending'
  *   reject_reason TEXT NULL
@@ -13,7 +15,7 @@ session_start();
 require_once __DIR__ . "/../config/db.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: /views/auth/register_seller.php");
+    header("Location: ../views/auth/register_seller.php");
     exit;
 }
 
@@ -27,8 +29,21 @@ $username    = trim($_POST['username']    ?? '');
 $password    = $_POST['password']         ?? '';
 $pay_contax  = trim($_POST['pay_contax']  ?? '');
 
+// Validate address components
+$house_number  = trim($_POST['house_number']  ?? '');
+$province      = trim($_POST['province']      ?? '');
+$district      = trim($_POST['district']      ?? '');
+$subdistrict   = trim($_POST['subdistrict']   ?? '');
+$postal_code   = trim($_POST['postal_code']   ?? '');
+
 if (!$store_name || !$address || !$fullname || !$tel || !$id_per || !$username || !$password) {
-    header("Location: /views/auth/register_seller.php?error=empty");
+    header("Location: ../views/auth/register_seller.php?error=empty");
+    exit;
+}
+
+// Validate address components are selected
+if (!$house_number || !$province || !$district || !$subdistrict) {
+    header("Location: ../views/auth/register_seller.php?error=empty");
     exit;
 }
 
@@ -37,19 +52,19 @@ try {
     $stmt = $db->prepare("SELECT id FROM sellers WHERE username = :username");
     $stmt->execute([':username' => $username]);
     if ($stmt->fetch()) {
-        header("Location: /views/auth/register_seller.php?error=username_exists");
+        header("Location: ../views/auth/register_seller.php?error=username_exists");
         exit;
     }
 } catch (PDOException $e) {
     error_log("Seller Register Error: " . $e->getMessage());
-    header("Location: /views/auth/register_seller.php?error=database");
+    header("Location: ../views/auth/register_seller.php?error=database");
     exit;
 }
 
 /* ── Handle file uploads ──────────────── */
 $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 $max_size      = 5 * 1024 * 1024; // 5 MB
-$upload_dir    = $_SERVER['DOCUMENT_ROOT'] . '/uploads/sellers/';
+$upload_dir    = $_SERVER['DOCUMENT_ROOT'] . '/../uploads/sellers/';
 
 if (!is_dir($upload_dir)) {
     mkdir($upload_dir, 0777, true);
@@ -98,7 +113,7 @@ try {
         ':img_per'    => $img_per,
     ]);
 
-    header("Location: /views/auth/register_seller.php?success=pending");
+    header("Location: ../views/auth/register_seller.php?success=pending");
     exit;
 
 } catch (PDOException $e) {
@@ -107,6 +122,6 @@ try {
     if ($img_per   && file_exists($upload_dir . $img_per))   unlink($upload_dir . $img_per);
 
     error_log("Seller Register DB Error: " . $e->getMessage());
-    header("Location: /views/auth/register_seller.php?error=database");
+    header("Location: ../views/auth/register_seller.php?error=database");
     exit;
 }
