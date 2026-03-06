@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $store_name = $_POST['store_name'] ?? '';
     $address = $_POST['address'] ?? '';
     $tel = $_POST['tel'] ?? '';
+    $pay_bank   = trim($_POST['pay_bank']   ?? '');
     $pay_contax = $_POST['pay_contax'] ?? '';
     
     $img_store = $seller['img_store'];
@@ -79,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 store_name = :store_name,
                 address = :address,
                 tel = :tel,
+                pay_bank = :pay_bank,
                 pay_contax = :pay_contax,
                 img_store = :img_store,
                 img_per = :img_per
@@ -90,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':store_name' => $store_name,
             ':address' => $address,
             ':tel' => $tel,
+            ':pay_bank'   => $pay_bank,
             ':pay_contax' => $pay_contax,
             ':img_store' => $img_store,
             ':img_per' => $img_per,
@@ -465,10 +468,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="form-group full-width">
-                            <label class="form-label">ข้อมูลการชำระเงิน (เลขบัญชี, ธนาคาร) *</label>
-                            <textarea name="pay_contax" class="form-control" 
-                                      placeholder="ธนาคาร: กสิกรไทย&#10;เลขที่บัญชี: 123-4-56789-0&#10;ชื่อบัญชี: ร้านพระเครื่อง ABC" 
-                                      required><?php echo htmlspecialchars($seller['pay_contax']); ?></textarea>
+                            <label class="form-label">ธนาคาร / ช่องทางการชำระเงิน *</label>
+                            <select name="pay_bank" class="form-control" required>
+                                <option value="">-- เลือกธนาคาร --</option>
+                                <?php
+                                $banks = [
+                                    'พร้อมเพย์ (PromptPay)',
+                                    'ธนาคารกสิกรไทย (KBank)',
+                                    'ธนาคารกรุงไทย (KTB)',
+                                    'ธนาคารกรุงเทพ (BBL)',
+                                    'ธนาคารไทยพาณิชย์ (SCB)',
+                                    'ธนาคารกรุงศรีอยุธยา (BAY)',
+                                    'ธนาคารทหารไทยธนชาต (TTB)',
+                                    'ธนาคารออมสิน (GSB)',
+                                    'ธนาคารเพื่อการเกษตรและสหกรณ์ (BAAC)',
+                                    'ธนาคารอาคารสงเคราะห์ (GHB)',
+                                    'ธนาคารซีไอเอ็มบี ไทย (CIMB)',
+                                ];
+                                foreach ($banks as $b):
+                                    $sel = ($seller['pay_bank'] ?? '') === $b ? 'selected' : '';
+                                ?>
+                                <option value="<?php echo htmlspecialchars($b); ?>" <?php echo $sel; ?>><?php echo htmlspecialchars($b); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">เลขที่บัญชี / เบอร์พร้อมเพย์ *</label>
+                            <input type="text" name="pay_contax" class="form-control"
+                                   placeholder="เช่น 123-4-56789-0 หรือ 08X-XXX-XXXX"
+                                   value="<?php echo htmlspecialchars($seller['pay_contax'] ?? ''); ?>" required>
                         </div>
                     </div>
 

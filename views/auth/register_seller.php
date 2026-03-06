@@ -145,9 +145,27 @@
                     <!-- Hidden field to store full address -->
                     <input type="hidden" name="address" id="address">
 
+                    <!-- ช่องทางการชำระเงิน -->
                     <div class="form-group">
-                        <label for="pay_contax">ช่องทางการชำระเงิน</label>
-                        <input type="text" name="pay_contax" id="pay_contax" placeholder="เช่น เลขบัญชีธนาคาร, พร้อมเพย์">
+                        <label for="pay_bank">ธนาคาร / ช่องทางการชำระเงิน <span style="color:red">*</span></label>
+                        <select name="pay_bank" id="pay_bank" required>
+                            <option value="">-- เลือกธนาคาร --</option>
+                            <option value="พร้อมเพย์ (PromptPay)">พร้อมเพย์ (PromptPay)</option>
+                            <option value="ธนาคารกสิกรไทย (KBank)">ธนาคารกสิกรไทย (KBank)</option>
+                            <option value="ธนาคารกรุงไทย (KTB)">ธนาคารกรุงไทย (KTB)</option>
+                            <option value="ธนาคารกรุงเทพ (BBL)">ธนาคารกรุงเทพ (BBL)</option>
+                            <option value="ธนาคารไทยพาณิชย์ (SCB)">ธนาคารไทยพาณิชย์ (SCB)</option>
+                            <option value="ธนาคารกรุงศรีอยุธยา (BAY)">ธนาคารกรุงศรีอยุธยา (BAY)</option>
+                            <option value="ธนาคารทหารไทยธนชาต (TTB)">ธนาคารทหารไทยธนชาต (TTB)</option>
+                            <option value="ธนาคารออมสิน (GSB)">ธนาคารออมสิน (GSB)</option>
+                            <option value="ธนาคารเพื่อการเกษตรและสหกรณ์ (BAAC)">ธนาคารเพื่อการเกษตรและสหกรณ์ (BAAC)</option>
+                            <option value="ธนาคารอาคารสงเคราะห์ (GHB)">ธนาคารอาคารสงเคราะห์ (GHB)</option>
+                            <option value="ธนาคารซีไอเอ็มบี ไทย (CIMB)">ธนาคารซีไอเอ็มบี ไทย (CIMB)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pay_contax">เลขที่บัญชี / เบอร์พร้อมเพย์ <span style="color:red">*</span></label>
+                        <input type="text" name="pay_contax" id="pay_contax" placeholder="เช่น 123-4-56789-0 หรือ 08X-XXX-XXXX" required>
                     </div>
                 </div>
 

@@ -20,7 +20,7 @@ try {
 try {
     $stmt = $db->prepare("
         SELECT c.*, a.amulet_name, a.price, a.image, a.quantity as stock,
-               s.store_name, s.pay_contax, cat.category_name
+               s.store_name, s.pay_bank, s.pay_contax, cat.category_name
         FROM cart c
         JOIN amulets a ON c.amulet_id = a.id
         LEFT JOIN sellers s ON a.sellerId = s.id
@@ -398,6 +398,12 @@ foreach ($cart_items as $item) {
 
         <div class="page-header">
             <h1>ชำระเงิน</h1>
+            <a href="/views/user/cart.php"
+               style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#fff;border:2px solid #e5e7eb;border-radius:10px;color:#374151;text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;margin-top:10px"
+               onmouseover="this.style.borderColor='#10b981';this.style.color='#10b981'"
+               onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">
+                <i class="fa-solid fa-arrow-left"></i> ย้อนกลับไปตะกร้าสินค้า
+            </a>
         </div>
 
         <?php if ($stock_error): ?>
@@ -440,13 +446,39 @@ foreach ($cart_items as $item) {
                             แนบหลักฐานการโอนเงิน
                         </h2>
 
+                        <?php
+                        // รวบรวมข้อมูลการชำระเงินแยกตามผู้ขาย (ไม่ซ้ำ)
+                        $seller_payments = [];
+                        foreach ($cart_items as $item) {
+                            $key = $item['store_name'];
+                            if (!isset($seller_payments[$key])) {
+                                $seller_payments[$key] = [
+                                    'store_name' => $item['store_name'],
+                                    'pay_bank'   => $item['pay_bank'] ?? '',
+                                    'pay_contax' => $item['pay_contax'] ?? '',
+                                ];
+                            }
+                        }
+                        foreach ($seller_payments as $sp):
+                        ?>
                         <div class="payment-info">
-                            <h4><i class="fa-solid fa-building-columns"></i> ข้อมูลการชำระเงิน</h4>
-                            <p><strong>ธนาคาร:</strong> กสิกรไทย</p>
-                            <p><strong>เลขที่บัญชี:</strong> 123-4-56789-0</p>
-                            <p><strong>ชื่อบัญชี:</strong> Cenmulet Shop</p>
+                            <h4><i class="fa-solid fa-building-columns"></i> ข้อมูลการชำระเงิน — <?php echo htmlspecialchars($sp['store_name']); ?></h4>
+                            <?php if ($sp['pay_bank']): ?>
+                            <p><strong>ธนาคาร:</strong> <?php echo htmlspecialchars($sp['pay_bank']); ?></p>
+                            <?php endif; ?>
+                            <p style="display:flex;align-items:center;gap:10px">
+                                <span><strong>เลขที่บัญชี / พร้อมเพย์:</strong> <span class="account-number"><?php echo htmlspecialchars($sp['pay_contax'] ?: '-'); ?></span></span>
+                                <?php if ($sp['pay_contax']): ?>
+                                <button type="button"
+                                        onclick="copyAccount(this, '<?php echo htmlspecialchars($sp['pay_contax'], ENT_QUOTES); ?>')"
+                                        style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:#10b981;color:#fff;border:none;border-radius:6px;font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap">
+                                    <i class="fa-solid fa-copy"></i> คัดลอก
+                                </button>
+                                <?php endif; ?>
+                            </p>
                             <p><strong>ยอดที่ต้องชำระ:</strong> <span style="color: #10b981; font-weight: bold;">฿<?php echo number_format($total_price, 2); ?></span></p>
                         </div>
+                        <?php endforeach; ?>
 
                         <div class="upload-area" onclick="document.getElementById('slip').click()">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -513,6 +545,18 @@ foreach ($cart_items as $item) {
     </div>
 
     <script>
+        function copyAccount(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> คัดลอกแล้ว';
+                btn.style.background = '#059669';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.style.background = '#10b981';
+                }, 2000);
+            });
+        }
+
         function previewSlip(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();

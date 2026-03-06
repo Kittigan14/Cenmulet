@@ -47,6 +47,13 @@ CREATE TABLE IF NOT EXISTS sellers (
 );
 ");
 
+/* --- Add pay_bank column to sellers if not exists --- */
+try {
+    $db->exec("ALTER TABLE sellers ADD COLUMN pay_bank TEXT");
+} catch (PDOException $e) {
+    // Column already exists — ignore
+}
+
 /* ---------------- CATEGORIES ---------------- */
 $db->exec("
 CREATE TABLE IF NOT EXISTS categories (

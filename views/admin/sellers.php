@@ -143,7 +143,14 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
                 <td><?php echo htmlspecialchars($s['fullname']); ?></td>
                 <td><?php echo htmlspecialchars($s['tel']); ?></td>
                 <td style="font-size:13px;letter-spacing:.5px"><?php echo htmlspecialchars($s['id_per'] ?? '-'); ?></td>
-                <td style="font-size:13px"><?php echo htmlspecialchars($s['pay_contax'] ?? '-'); ?></td>
+                <td style="font-size:13px">
+                    <?php if (!empty($s['pay_bank'])): ?>
+                        <div style="font-weight:600;color:#374151"><?php echo htmlspecialchars($s['pay_bank']); ?></div>
+                        <div style="color:#6b7280"><?php echo htmlspecialchars($s['pay_contax'] ?? '-'); ?></div>
+                    <?php else: ?>
+                        <?php echo htmlspecialchars($s['pay_contax'] ?? '-'); ?>
+                    <?php endif; ?>
+                </td>
                 <td style="font-size:13px;max-width:160px;word-break:break-word"><?php echo htmlspecialchars($s['address'] ?? '-'); ?></td>
                 <td>
                     <?php if (!empty($s['img_per'])): ?>

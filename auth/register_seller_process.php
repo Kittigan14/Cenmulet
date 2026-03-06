@@ -25,9 +25,10 @@ $tel         = trim($_POST['tel']         ?? '');
 $id_per      = trim($_POST['id_per']      ?? '');
 $username    = trim($_POST['username']    ?? '');
 $password    = $_POST['password']         ?? '';
+$pay_bank    = trim($_POST['pay_bank']    ?? '');
 $pay_contax  = trim($_POST['pay_contax']  ?? '');
 
-if (!$store_name || !$address || !$fullname || !$tel || !$id_per || !$username || !$password) {
+if (!$store_name || !$address || !$fullname || !$tel || !$id_per || !$username || !$password || !$pay_bank || !$pay_contax) {
     header("Location: /views/auth/register_seller.php?error=empty");
     exit;
 }
@@ -80,10 +81,10 @@ try {
     $stmt = $db->prepare("
         INSERT INTO sellers
             (store_name, address, fullname, tel, id_per, username, password,
-             pay_contax, img_store, img_per, status)
+             pay_bank, pay_contax, img_store, img_per, status)
         VALUES
             (:store_name, :address, :fullname, :tel, :id_per, :username, :password,
-             :pay_contax, :img_store, :img_per, 'pending')
+             :pay_bank, :pay_contax, :img_store, :img_per, 'pending')
     ");
     $stmt->execute([
         ':store_name' => $store_name,
@@ -93,6 +94,7 @@ try {
         ':id_per'     => $id_per,
         ':username'   => $username,
         ':password'   => $hashed_password,
+        ':pay_bank'   => $pay_bank,
         ':pay_contax' => $pay_contax,
         ':img_store'  => $img_store,
         ':img_per'    => $img_per,
