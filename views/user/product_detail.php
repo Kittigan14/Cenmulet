@@ -49,6 +49,18 @@ try {
 } catch (PDOException $e) {
     $cart_count = 0;
 }
+
+/* ── ดึงรูปทั้งหมดจาก amulet_images ── */
+try {
+    $stmt = $db->prepare("SELECT image FROM amulet_images WHERE amulet_id = :id ORDER BY sort_order ASC");
+    $stmt->execute([':id' => $product_id]);
+    $product_images = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    if (empty($product_images) && $product['image']) {
+        $product_images = [$product['image']];
+    }
+} catch (PDOException $e) {
+    $product_images = $product['image'] ? [$product['image']] : [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -82,12 +94,46 @@ try {
         <div class="product-detail-card">
             <div class="product-layout">
 
-                <!-- Image -->
+                <!-- Image Slider -->
                 <div class="product-image-panel">
-                    <div class="main-image">
-                        <?php if ($product['image']): ?>
-                            <img src="/uploads/amulets/<?php echo htmlspecialchars($product['image']); ?>"
-                                 alt="<?php echo htmlspecialchars($product['amulet_name']); ?>">
+                    <div class="main-image" id="productSlider">
+                        <?php if (!empty($product_images)): ?>
+                            <!-- Slides -->
+                            <div class="pd-slider-track">
+                                <?php foreach ($product_images as $img): ?>
+                                <div class="pd-slide">
+                                    <img src="/uploads/amulets/<?php echo htmlspecialchars($img); ?>"
+                                         alt="<?php echo htmlspecialchars($product['amulet_name']); ?>">
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <?php if (count($product_images) > 1): ?>
+                            <!-- Prev / Next -->
+                            <button class="pd-slider-btn pd-prev" onclick="pdSlideMove(-1)" aria-label="ก่อนหน้า">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <button class="pd-slider-btn pd-next" onclick="pdSlideMove(1)" aria-label="ถัดไป">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+
+                            <!-- Counter badge -->
+                            <div class="pd-counter">
+                                <span id="pdCurrent">1</span> / <?php echo count($product_images); ?>
+                            </div>
+
+                            <!-- Thumbnail strip -->
+                            <div class="pd-thumbs">
+                                <?php foreach ($product_images as $ti => $img): ?>
+                                <div class="pd-thumb <?php echo $ti === 0 ? 'active' : ''; ?>"
+                                     onclick="pdSlideTo(<?php echo $ti; ?>)">
+                                    <img src="/uploads/amulets/<?php echo htmlspecialchars($img); ?>"
+                                         alt="thumb <?php echo $ti+1; ?>">
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
+
                         <?php else: ?>
                             <i class="fa-solid fa-image img-placeholder"></i>
                         <?php endif; ?>
@@ -168,21 +214,165 @@ try {
         </div>
     </div>
 
+    <style>
+        /* ── Product Detail Slider ── */
+        .main-image {
+            position: relative;
+            overflow: hidden;
+            border-radius: 14px;
+            background: #f3f4f6;
+            aspect-ratio: 1 / 1;
+        }
+
+        .pd-slider-track {
+            display: flex;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+        }
+
+        .pd-slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pd-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Prev / Next buttons */
+        .pd-slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.42);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 3;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .pd-slider-btn:hover {
+            background: rgba(0,0,0,0.68);
+            transform: translateY(-50%) scale(1.08);
+        }
+        .pd-prev { left: 12px; }
+        .pd-next { right: 12px; }
+
+        /* Counter badge */
+        .pd-counter {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 99px;
+            z-index: 3;
+            letter-spacing: 0.3px;
+        }
+
+        /* Thumbnail strip */
+        .pd-thumbs {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 7px;
+            z-index: 3;
+            max-width: calc(100% - 24px);
+            overflow-x: auto;
+            padding: 3px 2px;
+            scrollbar-width: none;
+        }
+        .pd-thumbs::-webkit-scrollbar { display: none; }
+
+        .pd-thumb {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2.5px solid rgba(255,255,255,0.5);
+            flex-shrink: 0;
+            transition: border-color 0.2s, transform 0.2s;
+            background: #fff;
+        }
+        .pd-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .pd-thumb.active {
+            border-color: var(--primary, #FF8C00);
+            transform: scale(1.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .pd-thumb:hover { border-color: rgba(255,255,255,0.9); }
+    </style>
+
     <script>
-        const maxQty = <?php echo $product['quantity']; ?>;
+        /* ── Quantity ── */
+        const maxQty   = <?php echo $product['quantity']; ?>;
         const qtyInput = document.getElementById('quantity');
 
         function increaseQty() {
             const v = parseInt(qtyInput.value);
             if (v < maxQty) qtyInput.value = v + 1;
         }
-
         function decreaseQty() {
             const v = parseInt(qtyInput.value);
             if (v > 1) qtyInput.value = v - 1;
         }
+        qtyInput.addEventListener('keydown', function(e) { e.preventDefault(); });
 
-        qtyInput.addEventListener('keydown', e => e.preventDefault());
+        /* ── Product Image Slider ── */
+        let pdIdx   = 0;
+        const pdTotal = <?php echo count($product_images); ?>;
+
+        function pdSlideTo(idx) {
+            pdIdx = ((idx % pdTotal) + pdTotal) % pdTotal;
+
+            const track = document.querySelector('.pd-slider-track');
+            if (track) track.style.transform = 'translateX(-' + (pdIdx * 100) + '%)';
+
+            document.querySelectorAll('.pd-thumb').forEach(function(t, i) {
+                t.classList.toggle('active', i === pdIdx);
+            });
+
+            const counter = document.getElementById('pdCurrent');
+            if (counter) counter.textContent = pdIdx + 1;
+        }
+
+        function pdSlideMove(dir) { pdSlideTo(pdIdx + dir); }
+
+        /* Swipe support */
+        (function() {
+            const el = document.getElementById('productSlider');
+            if (!el) return;
+            var sx = 0;
+            el.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, { passive: true });
+            el.addEventListener('touchend',   function(e) {
+                var diff = sx - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) pdSlideMove(diff > 0 ? 1 : -1);
+            });
+        })();
     </script>
 </body>
 </html>

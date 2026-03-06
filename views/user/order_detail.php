@@ -46,6 +46,38 @@ try {
     $order_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { die("Error: " . $e->getMessage()); }
 
+$amulet_images_map = [];
+if (!empty($order_items)) {
+    $amulet_ids = array_unique(array_column($order_items, 'amulet_id'));
+    try {
+        // ดึงรูปทั้งหมดจาก amulet_images ทีละ amulet_id
+        $img_stmt = $db->prepare("
+            SELECT amulet_id, image
+            FROM amulet_images
+            WHERE amulet_id = :amulet_id
+            ORDER BY sort_order ASC
+        ");
+        foreach ($amulet_ids as $aid) {
+            $img_stmt->execute([':amulet_id' => $aid]);
+            $rows = $img_stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($rows)) {
+                foreach ($rows as $row) {
+                    $amulet_images_map[$aid][] = $row['image'];
+                }
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("amulet_images query error: " . $e->getMessage());
+    }
+    // Fallback: ถ้า amulet_images ว่าง ใช้รูปจาก amulets.image แทน
+    foreach ($order_items as $item) {
+        $aid = $item['amulet_id'];
+        if (empty($amulet_images_map[$aid]) && !empty($item['image'])) {
+            $amulet_images_map[$aid] = [$item['image']];
+        }
+    }
+}
+
 try {
     $stmt = $db->prepare("SELECT COUNT(*) as count FROM cart WHERE user_id = :user_id");
     $stmt->execute([':user_id' => $user_id]);
@@ -145,13 +177,40 @@ if ($order['status'] === 'completed') {
                     <h2 class="section-title">
                         <i class="fa-solid fa-box"></i> รายการสินค้า
                     </h2>
-                    <?php foreach ($order_items as $item): ?>
+                    <?php foreach ($order_items as $idx => $item):
+                        $imgs = $amulet_images_map[$item['amulet_id']] ?? [];
+                        if (empty($imgs) && $item['image']) $imgs = [$item['image']];
+                        $sliderId = 'slider-' . $idx;
+                    ?>
                         <div class="order-item-row">
-                            <div class="order-item-img">
-                                <?php if ($item['image']): ?>
-                                    <img src="/uploads/amulets/<?php echo htmlspecialchars($item['image']); ?>" alt="">
-                                <?php else: ?>
-                                    <i class="fa-solid fa-image"></i>
+                            <!-- Image Slider -->
+                            <div class="order-item-slider" id="<?php echo $sliderId; ?>">
+                                <div class="slider-track">
+                                    <?php if (!empty($imgs)): ?>
+                                        <?php foreach ($imgs as $img): ?>
+                                            <div class="slider-slide">
+                                                <img src="/uploads/amulets/<?php echo htmlspecialchars($img); ?>" alt="">
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="slider-slide slider-placeholder">
+                                            <i class="fa-solid fa-image"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if (count($imgs) > 1): ?>
+                                    <button class="slider-btn slider-prev" onclick="slideMove('<?php echo $sliderId; ?>', -1)" aria-label="ก่อนหน้า">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </button>
+                                    <button class="slider-btn slider-next" onclick="slideMove('<?php echo $sliderId; ?>', 1)" aria-label="ถัดไป">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                    <div class="slider-dots">
+                                        <?php for ($d = 0; $d < count($imgs); $d++): ?>
+                                            <span class="slider-dot<?php echo $d === 0 ? ' active' : ''; ?>"
+                                                  onclick="slideTo('<?php echo $sliderId; ?>', <?php echo $d; ?>)"></span>
+                                        <?php endfor; ?>
+                                    </div>
                                 <?php endif; ?>
                             </div>
                             <div class="order-item-body">
@@ -303,5 +362,25 @@ if ($order['status'] === 'completed') {
 
         </div>
     </div>
+
+    <script>
+    function slideMove(id, dir) {
+        const el = document.getElementById(id);
+        const slides = el.querySelectorAll('.slider-slide');
+        const dots   = el.querySelectorAll('.slider-dot');
+        let current  = parseInt(el.dataset.current || 0);
+        current = (current + dir + slides.length) % slides.length;
+        slideTo(id, current);
+    }
+    function slideTo(id, index) {
+        const el = document.getElementById(id);
+        const slides = el.querySelectorAll('.slider-slide');
+        const dots   = el.querySelectorAll('.slider-dot');
+        const track  = el.querySelector('.slider-track');
+        el.dataset.current = index;
+        track.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+    }
+    </script>
 </body>
 </html>
