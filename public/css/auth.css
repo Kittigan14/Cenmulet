@@ -5,10 +5,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary:      #10b981;
-  --primary-dark: #059669;
-  --primary-light:#d1fae5;
-  --border:       #e5e7eb;
+  --primary:      #FF8C00;
+  --primary-dark: #FF5F00;
+  --primary-light:#FFC300;
+  --border:       #ff8c009b;
   --text:         #111827;
   --text-sub:     #6b7280;
   --radius:       12px;
