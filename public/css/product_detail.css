@@ -10,13 +10,15 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-2xl);
+    margin-bottom: 20px;
 }
 
 /* ── Image Panel ── */
 .product-image-panel {
     position: sticky;
-    top: 90px;
-    height: fit-content;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .main-image {

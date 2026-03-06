@@ -100,12 +100,20 @@ try {
                         <?php if (!empty($product_images)): ?>
                             <!-- Slides -->
                             <div class="pd-slider-track">
-                                <?php foreach ($product_images as $img): ?>
+                                <?php foreach ($product_images as $idx => $img): ?>
                                 <div class="pd-slide">
                                     <img src="/uploads/amulets/<?php echo htmlspecialchars($img); ?>"
-                                         alt="<?php echo htmlspecialchars($product['amulet_name']); ?>">
+                                         alt="<?php echo htmlspecialchars($product['amulet_name']); ?>"
+                                         onclick="openLightbox(<?php echo $idx; ?>)"
+                                         class="pd-zoomable">
                                 </div>
                                 <?php endforeach; ?>
+                            </div>
+
+                            <!-- Zoom hint -->
+                            <div class="pd-zoom-hint" id="pdZoomHint">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i> คลิกเพื่อดูขยาย
+                            </div>
                             </div>
 
                             <?php if (count($product_images) > 1): ?>
@@ -211,6 +219,49 @@ try {
                 </div>
 
             </div>
+        </div>
+    </div>
+
+    <!-- ── Lightbox Modal ── -->
+    <div id="pdLightbox" class="pd-lightbox" onclick="closeLightbox()">
+        <div class="pd-lightbox-inner" onclick="event.stopPropagation()">
+
+            <!-- Close -->
+            <button class="pd-lb-close" onclick="closeLightbox()" aria-label="ปิด">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Counter -->
+            <div class="pd-lb-counter">
+                <span id="lbCurrent">1</span> / <?php echo count($product_images); ?>
+            </div>
+
+            <!-- Image -->
+            <div class="pd-lb-img-wrap">
+                <img id="pdLbImg" src="" alt="<?php echo htmlspecialchars($product['amulet_name']); ?>">
+            </div>
+
+            <?php if (count($product_images) > 1): ?>
+            <!-- Prev / Next -->
+            <button class="pd-lb-nav pd-lb-prev" onclick="lbMove(-1)" aria-label="ก่อนหน้า">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="pd-lb-nav pd-lb-next" onclick="lbMove(1)" aria-label="ถัดไป">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <!-- Thumbnail strip -->
+            <div class="pd-lb-thumbs">
+                <?php foreach ($product_images as $ti => $img): ?>
+                <div class="pd-lb-thumb <?php echo $ti === 0 ? 'active' : ''; ?>"
+                     onclick="lbGoTo(<?php echo $ti; ?>)">
+                    <img src="/uploads/amulets/<?php echo htmlspecialchars($img); ?>"
+                         alt="thumb <?php echo $ti+1; ?>">
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
         </div>
     </div>
 
@@ -325,6 +376,174 @@ try {
             box-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
         .pd-thumb:hover { border-color: rgba(255,255,255,0.9); }
+
+        /* ── Zoom cursor & hint ── */
+        .pd-zoomable {
+            cursor: zoom-in;
+        }
+        .pd-zoom-hint {
+            position: absolute;
+            bottom: 72px; /* เหนือ thumbnail strip */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.48);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 99px;
+            z-index: 3;
+            pointer-events: none;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        .pd-zoom-hint.hidden { opacity: 0; }
+
+        /* ── Lightbox ── */
+        .pd-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: lbFadeIn 0.2s ease;
+        }
+        .pd-lightbox.open { display: flex; }
+
+        @keyframes lbFadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .pd-lightbox-inner {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 92vw;
+            max-height: 92vh;
+            width: 100%;
+        }
+
+        /* Close button */
+        .pd-lb-close {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .pd-lb-close:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+
+        /* Counter */
+        .pd-lb-counter {
+            position: fixed;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.75);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            z-index: 10;
+        }
+
+        /* Main image */
+        .pd-lb-img-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-height: calc(92vh - 100px);
+            width: 100%;
+        }
+        .pd-lb-img-wrap img {
+            max-width: 100%;
+            max-height: calc(92vh - 110px);
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            display: block;
+            transition: opacity 0.2s;
+        }
+
+        /* Prev / Next */
+        .pd-lb-nav {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 10;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .pd-lb-nav:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-50%) scale(1.08);
+        }
+        .pd-lb-prev { left: 20px; }
+        .pd-lb-next { right: 20px; }
+
+        /* Thumbnail strip */
+        .pd-lb-thumbs {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding: 4px 2px;
+            scrollbar-width: none;
+        }
+        .pd-lb-thumbs::-webkit-scrollbar { display: none; }
+
+        .pd-lb-thumb {
+            width: 58px;
+            height: 58px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            cursor: pointer;
+            border: 2.5px solid rgba(255,255,255,0.25);
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .pd-lb-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+        .pd-lb-thumb.active {
+            border-color: var(--primary, #FF8C00);
+            transform: scale(1.1);
+        }
+        .pd-lb-thumb:hover { border-color: rgba(255,255,255,0.7); }
+
+        @media (max-width: 640px) {
+            .pd-lb-prev { left: 8px; }
+            .pd-lb-next { right: 8px; }
+            .pd-lb-nav  { width: 40px; height: 40px; font-size: 14px; }
+        }
     </style>
 
     <script>
@@ -371,6 +590,72 @@ try {
             el.addEventListener('touchend',   function(e) {
                 var diff = sx - e.changedTouches[0].clientX;
                 if (Math.abs(diff) > 40) pdSlideMove(diff > 0 ? 1 : -1);
+            });
+        })();
+
+        /* ── Hide zoom hint after 3s ── */
+        (function() {
+            var hint = document.getElementById('pdZoomHint');
+            if (hint) {
+                setTimeout(function() { hint.classList.add('hidden'); }, 3000);
+            }
+        })();
+
+        /* ── Lightbox ── */
+        var lbImages = <?php echo json_encode(array_map(function($img){ return '/uploads/amulets/' . $img; }, $product_images)); ?>;
+        var lbIdx    = 0;
+        var lbTotal  = lbImages.length;
+
+        function openLightbox(idx) {
+            lbGoTo(idx);
+            document.getElementById('pdLightbox').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            document.getElementById('pdLightbox').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function lbGoTo(idx) {
+            lbIdx = ((idx % lbTotal) + lbTotal) % lbTotal;
+
+            var img = document.getElementById('pdLbImg');
+            img.style.opacity = '0';
+            img.src = lbImages[lbIdx];
+            img.onload = function() { img.style.opacity = '1'; };
+
+            var counter = document.getElementById('lbCurrent');
+            if (counter) counter.textContent = lbIdx + 1;
+
+            document.querySelectorAll('.pd-lb-thumb').forEach(function(t, i) {
+                t.classList.toggle('active', i === lbIdx);
+            });
+
+            /* scroll active thumb into view */
+            var activeThumb = document.querySelector('.pd-lb-thumb.active');
+            if (activeThumb) activeThumb.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' });
+        }
+
+        function lbMove(dir) { lbGoTo(lbIdx + dir); }
+
+        /* Keyboard navigation */
+        document.addEventListener('keydown', function(e) {
+            var lb = document.getElementById('pdLightbox');
+            if (!lb.classList.contains('open')) return;
+            if (e.key === 'ArrowRight') lbMove(1);
+            if (e.key === 'ArrowLeft')  lbMove(-1);
+            if (e.key === 'Escape')     closeLightbox();
+        });
+
+        /* Touch/swipe inside lightbox */
+        (function() {
+            var lb = document.getElementById('pdLightbox');
+            var sx = 0;
+            lb.addEventListener('touchstart', function(e) { sx = e.touches[0].clientX; }, { passive: true });
+            lb.addEventListener('touchend',   function(e) {
+                var diff = sx - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) lbMove(diff > 0 ? 1 : -1);
             });
         })();
     </script>
