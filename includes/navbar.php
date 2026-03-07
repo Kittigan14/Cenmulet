@@ -392,11 +392,7 @@ $active_page = $active_page ?? 'home';
                     </a>
                 </li>
                 <li>
-                    <a href="/views/user/orders.php"
-                       class="<?php echo $active_page === 'orders' ? 'active' : ''; ?>">
-                        <i class="fa-solid fa-receipt"></i>
-                        ประวัติการเช่า
-                    </a>
+
                 </li>
             </ul>
         </div>

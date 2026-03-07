@@ -199,7 +199,7 @@ try {
     </a>
     <div class="nav-links">
         <a href="/views/user/home.php" class="nav-link"><i class="fa-solid fa-home"></i> หน้าแรก</a>
-        <a href="/views/user/my_orders.php" class="nav-link active"><i class="fa-solid fa-box"></i> รายการเช่าของฉัน</a>
+        
     </div>
     <div class="nav-user">
         <i class="fa-solid fa-user-circle" style="color:#c8922a"></i>
