@@ -47,15 +47,15 @@ $cart_count = count($cart_items);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/cart.css">
-    <title>ตะกร้าสินค้า - Cenmulet</title>
+    <title>รายการเช่าพระเครื่อง - Cenmulet</title>
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
     <div class="container">
         <div class="page-header">
-            <h1><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i> ตะกร้าสินค้า</h1>
-            <p>ตรวจสอบสินค้าก่อนดำเนินการสั่งซื้อ</p>
+            <h1><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i>รายการเช่าพระเครื่อง</h1>
+            <p>ตรวจสอบพระเครื่องก่อนดำเนินการสั่งซื้อ</p>
         </div>
 
         <?php if (count($cart_items) > 0): ?>
@@ -113,11 +113,11 @@ $cart_count = count($cart_items);
                 <div class="cart-summary">
                     <h2 class="summary-heading">
                         <i class="fa-solid fa-file-invoice"></i>
-                        สรุปคำสั่งซื้อ
+                        สรุปรายการเช่า
                     </h2>
 
                     <div class="summary-line">
-                        <span class="label">จำนวนสินค้า</span>
+                        <span class="label">จำนวน</span>
                         <span class="value"><?php echo $cart_count; ?> รายการ</span>
                     </div>
                     <div class="summary-line">
@@ -143,7 +143,7 @@ $cart_count = count($cart_items);
 
                     <a href="/views/user/home.php" class="btn-continue-shop">
                         <i class="fa-solid fa-arrow-left"></i>
-                        เลือกสินค้าต่อ
+                        เลือกพระต่อ
                     </a>
                 </div>
             </div>
@@ -151,11 +151,11 @@ $cart_count = count($cart_items);
         <?php else: ?>
             <div class="empty-cart">
                 <div class="big-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-                <h2>ตะกร้าสินค้าว่างเปล่า</h2>
-                <p>คุณยังไม่มีสินค้าในตะกร้า</p>
+                <h2>รายการเช่าพระเครื่องว่างเปล่า</h2>
+                <p>คุณยังไม่มีพระเครื่องในรายการเช่า</p>
                 <a href="/views/user/home.php" class="btn btn-primary">
                     <i class="fa-solid fa-shopping-bag"></i>
-                    เริ่มเลือกซื้อสินค้า
+                    เริ่มเลือกเช่าพระ
                 </a>
             </div>
         <?php endif; ?>

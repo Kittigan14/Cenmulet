@@ -395,7 +395,7 @@ $active_page = $active_page ?? 'home';
                     <a href="/views/user/orders.php"
                        class="<?php echo $active_page === 'orders' ? 'active' : ''; ?>">
                         <i class="fa-solid fa-receipt"></i>
-                        คำสั่งซื้อของฉัน
+                        ประวัติการเช่า
                     </a>
                 </li>
             </ul>
@@ -443,7 +443,7 @@ $active_page = $active_page ?? 'home';
                         </a>
                         <a href="/views/user/orders.php">
                             <div class="d-icon"><i class="fa-solid fa-shopping-bag"></i></div>
-                            <span>คำสั่งซื้อของฉัน</span>
+                            <span>ประวัติการเช่าของฉัน</span>
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="/auth/logout.php" class="logout-link">

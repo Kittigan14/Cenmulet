@@ -41,7 +41,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
-    <title>คำสั่งซื้อของฉัน - Cenmulet</title>
+    <title>รายการเช่าของฉัน - Cenmulet</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Sarabun',sans-serif; background:#f8f8f8; color:#333; }
@@ -199,7 +199,7 @@ try {
     </a>
     <div class="nav-links">
         <a href="/views/user/home.php" class="nav-link"><i class="fa-solid fa-home"></i> หน้าแรก</a>
-        <a href="/views/user/my_orders.php" class="nav-link active"><i class="fa-solid fa-box"></i> คำสั่งซื้อของฉัน</a>
+        <a href="/views/user/my_orders.php" class="nav-link active"><i class="fa-solid fa-box"></i> รายการเช่าของฉัน</a>
     </div>
     <div class="nav-user">
         <i class="fa-solid fa-user-circle" style="color:#c8922a"></i>
@@ -208,8 +208,8 @@ try {
 </nav>
 
 <div class="container">
-    <h1 class="page-title"><i class="fa-solid fa-box" style="color:#c8922a"></i> คำสั่งซื้อของฉัน</h1>
-    <p class="page-sub">ตรวจสอบสถานะและรายละเอียดคำสั่งซื้อทั้งหมด</p>
+    <h1 class="page-title"><i class="fa-solid fa-box" style="color:#c8922a"></i> รายการเช่าของฉัน</h1>
+    <p class="page-sub">ตรวจสอบสถานะและรายละเอียดรายการเช่าทั้งหมด</p>
 
     <?php if (isset($_GET['delivery_confirmed'])): ?>
     <div style="background:#d1fae5;border:1.5px solid #a7f3d0;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:#059669">
@@ -228,7 +228,7 @@ try {
             <div>
                 <div class="order-id">
                     <i class="fa-solid fa-receipt" style="color:#c8922a;font-size:14px"></i>
-                    คำสั่งซื้อ #<?php echo str_pad($o['id'],6,'0',STR_PAD_LEFT); ?>
+                    รายการเช่า #<?php echo str_pad($o['id'],6,'0',STR_PAD_LEFT); ?>
                 </div>
                 <div class="order-date">
                     <i class="fa-regular fa-clock"></i>
@@ -372,7 +372,7 @@ try {
     <?php else: ?>
     <div class="empty-state">
         <i class="fa-solid fa-box-open"></i>
-        <h2>ยังไม่มีคำสั่งซื้อ</h2>
+        <h2>ยังไม่มีรายการเช่า</h2>
         <p>เริ่มช้อปปิ้งพระเครื่องกับ Cenmulet เลย!</p>
         <a href="/views/user/home.php" class="btn btn-primary" style="margin-top:20px">
             <i class="fa-solid fa-store"></i> ไปช้อปปิ้ง
