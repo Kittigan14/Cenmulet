@@ -189,7 +189,7 @@ try {
 <body>
 
 <!-- Navbar -->
-<nav class="navbar">
+<!-- <nav class="navbar">
     <a class="nav-logo" href="/views/user/home.php">
         <img src="/public/images/image.png" alt="">
         <div>
@@ -205,7 +205,22 @@ try {
         <i class="fa-solid fa-user-circle" style="color:#c8922a"></i>
         <?php echo htmlspecialchars($user['fullname']); ?>
     </div>
-</nav>
+</nav> -->
+
+<?php
+// ── ตัวแปรที่ navbar ต้องการ ──
+$active_page = 'orders';
+
+try {
+    $stmt2 = $db->prepare("SELECT SUM(quantity) as cnt FROM cart_items WHERE user_id = :uid");
+    $stmt2->execute([':uid' => $user_id]);
+    $cart_count = (int)($stmt2->fetchColumn() ?? 0);
+} catch (PDOException $e) {
+    $cart_count = 0;
+}
+
+include __DIR__ . '/../../includes/navbar.php';
+?>
 
 <div class="container">
     <h1 class="page-title"><i class="fa-solid fa-box" style="color:#c8922a"></i> รายการเช่าของฉัน</h1>

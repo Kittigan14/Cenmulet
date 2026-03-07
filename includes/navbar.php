@@ -52,6 +52,9 @@ $active_page = $active_page ?? 'home';
 .nav-left ul {
     list-style: none;
     display: flex;
+    justify-content: center;
+    align-items: center;
+
     gap: 4px;
     margin: 0;
     padding: 0;
@@ -134,7 +137,24 @@ $active_page = $active_page ?? 'home';
     gap: 8px;
 }
 
-/* Cart Button */
+/* Cart inline in nav-left */
+.nav-cart-inline {
+    position: relative;
+    
+    i {
+        font-size: 24px;
+        padding: 5px;
+    }
+}
+
+.nav-cart-inline .cart-badge {
+    position: static;
+    display: inline-flex;
+    margin-left: 2px;
+    border: none;
+}
+
+/* Cart Button (standalone — kept for compatibility) */
 .nav-cart {
     position: relative;
     display: flex;
@@ -392,7 +412,14 @@ $active_page = $active_page ?? 'home';
                     </a>
                 </li>
                 <li>
-
+                    <a href="/views/user/cart.php"
+                       class="nav-cart-inline <?php echo $active_page === 'cart' ? 'active' : ''; ?>"
+                       title="ตะกร้าสินค้า">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <?php if ($cart_count > 0): ?>
+                            <span class="cart-badge"><?php echo $cart_count > 99 ? '99+' : $cart_count; ?></span>
+                        <?php endif; ?>
+                    </a>
                 </li>
             </ul>
         </div>
@@ -406,16 +433,8 @@ $active_page = $active_page ?? 'home';
             <span class="nav-logo-sub">ตลาดพระเครื่อง</span>
         </a>
 
-        <!-- Right: Cart + User -->
+        <!-- Right: User -->
         <div class="nav-right">
-
-            <!-- Cart -->
-            <a href="/views/user/cart.php" class="nav-cart" title="ตะกร้าสินค้า">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <?php if ($cart_count > 0): ?>
-                    <span class="cart-badge"><?php echo $cart_count > 99 ? '99+' : $cart_count; ?></span>
-                <?php endif; ?>
-            </a>
 
             <!-- User Dropdown -->
             <div class="user-menu">
