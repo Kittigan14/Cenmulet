@@ -475,7 +475,7 @@ if ($view === 'products') {
                     <th style="width:90px;text-align:right">ราคา</th>
                     <th style="width:75px;text-align:center">คงเหลือ</th>
                     <th style="width:75px;text-align:center">ขายแล้ว</th>
-                    <th style="width:110px;text-align:right">รายได้</th>
+                    <!-- <th style="width:110px;text-align:right">รายได้</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -515,9 +515,7 @@ if ($view === 'products') {
                     <?php endif; ?>
                 </td>
                 <td style="text-align:center;font-weight:600"><?php echo number_format($p['total_sold']); ?></td>
-                <td style="text-align:right;font-weight:700;color:#10b981">
-                    ฿<?php echo number_format($p['revenue'], 2); ?>
-                </td>
+                
             </tr>
             <?php endforeach; ?>
             </tbody>
@@ -527,7 +525,7 @@ if ($view === 'products') {
                     <td></td>
                     <td style="text-align:center;font-weight:700"><?php echo number_format($in_stock); ?> รายการ</td>
                     <td style="text-align:center;font-weight:700"><?php echo number_format($total_sold_all); ?></td>
-                    <td style="text-align:right;font-weight:700;color:#10b981">฿<?php echo number_format($total_revenue, 2); ?></td>
+                    
                 </tr>
             </tfoot>
         </table>
