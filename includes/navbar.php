@@ -11,10 +11,10 @@ $active_page = $active_page ?? 'home';
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sriracha&display=swap');
 
 :root {
-    --primary:        #FF8C00;
-    --primary-dark:   #FF5F00;
-    --primary-light:  #FFC300;
-    --primary-glow:   #ff8c009b;
+    --primary:        #e7cf27;
+    --primary-dark:   #fcf9ed;
+    --primary-light:  #e7cf27;
+    --primary-glow:   #cc9900;
 
     --accent-blue:       #F5824A;
     --accent-blue-dark:  #f77433;
@@ -25,7 +25,7 @@ $active_page = $active_page ?? 'home';
 .navbar {
     width: 100%;
     height: 100px;
-    background: #ffffff;
+    background: #fcf9ed;
     border-bottom: 1px solid #e5e7eb;
     box-shadow: 0 1px 8px rgba(0,0,0,0.06);
     position: sticky;
@@ -82,7 +82,7 @@ $active_page = $active_page ?? 'home';
 
 .nav-left a.active {
     color: var(--primary-dark);
-    background: rgba(255,140,0,0.18);
+    background: #cc9900;
     font-weight: 600;
 }
 
@@ -226,7 +226,7 @@ $active_page = $active_page ?? 'home';
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: rgba(255,140,0,0.15);
+    background: #e7cf27;
     display: flex;
     align-items: center;
     justify-content: center;
