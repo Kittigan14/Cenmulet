@@ -13,7 +13,7 @@ $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // ดึงหมวดหมู่พร้อมนับจำนวนสินค้า
 $categories = $db->query("
-    SELECT c.*,
+    SELECT c.id, c.category_name, COALESCE(c.is_hidden, 0) as is_hidden,
            COUNT(a.id) as product_count
     FROM categories c
     LEFT JOIN amulets a ON c.id = a.categoryId
@@ -82,10 +82,12 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
             color: #fff;
         }
         .btn-purple:hover { background: #4f46e5; }
-        .btn-icon.edit-cat  { background: #ede9fe; color: #7c3aed; }
-        .btn-icon.delete-cat{ background: #fee2e2; color: #ef4444; }
-        .btn-icon.save-cat  { background: #d1fae5; color: #059669; }
-        .btn-icon.cancel-cat{ background: #f3f4f6; color: #6b7280; }
+        .btn-icon.edit-cat   { background: #ede9fe; color: #7c3aed; }
+        .btn-icon.hide-cat   { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        .btn-icon.show-cat   { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+        .btn-icon.save-cat   { background: #d1fae5; color: #059669; }
+        .btn-icon.cancel-cat { background: #f3f4f6; color: #6b7280; }
+        tr.cat-hidden td { opacity: .55; }
         .btn-icon { border: none; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: opacity .2s; }
         .btn-icon:hover { opacity: .8; }
 
@@ -110,15 +112,16 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 
     <?php if (isset($_GET['success'])): ?>
     <div class="alert alert-success">
-        <i class="fa-solid fa-circle-check"></i>
-        <span><?php
-            $ok = [
-                'added'   => 'เพิ่มหมวดหมู่ใหม่เรียบร้อยแล้ว',
-                'edited'  => 'แก้ไขหมวดหมู่เรียบร้อยแล้ว',
-                'deleted' => 'ลบหมวดหมู่เรียบร้อยแล้ว',
-            ];
+        <?php if ($_GET['success'] === 'hidden'): ?>
+        <i class="fa-solid fa-eye-slash"></i> <span>ซ่อนหมวดหมู่เรียบร้อยแล้ว</span>
+        <?php elseif ($_GET['success'] === 'shown'): ?>
+        <i class="fa-solid fa-eye"></i> <span>แสดงหมวดหมู่เรียบร้อยแล้ว</span>
+        <?php else: ?>
+        <i class="fa-solid fa-circle-check"></i> <span><?php
+            $ok = ['added' => 'เพิ่มหมวดหมู่ใหม่เรียบร้อยแล้ว', 'edited' => 'แก้ไขหมวดหมู่เรียบร้อยแล้ว'];
             echo $ok[$_GET['success']] ?? 'ดำเนินการสำเร็จ';
         ?></span>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
@@ -128,7 +131,6 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         <span><?php
             $errs = [
                 'empty'     => 'กรุณากรอกชื่อหมวดหมู่',
-                'has_items' => 'ไม่สามารถลบได้ — หมวดหมู่นี้ยังมีสินค้าอยู่',
                 'duplicate' => 'ชื่อหมวดหมู่นี้มีอยู่แล้ว',
                 'db'        => 'เกิดข้อผิดพลาด กรุณาลองใหม่',
             ];
@@ -168,16 +170,19 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
             </thead>
             <tbody>
             <?php foreach ($categories as $i => $c): ?>
-            <tr id="row-<?php echo $c['id']; ?>">
+            <tr id="row-<?php echo $c['id']; ?>" class="<?php echo $c['is_hidden'] ? 'cat-hidden' : ''; ?>">
                 <td style="color:#9ca3af"><?php echo $i + 1; ?></td>
                 <td>
                     <!-- View mode -->
                     <div id="view-<?php echo $c['id']; ?>"
                          style="display:flex;align-items:center;gap:10px">
-                        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0">
-                            <i class="fa-solid fa-tag"></i>
+                        <div style="width:36px;height:36px;border-radius:8px;background:<?php echo $c['is_hidden'] ? '#e5e7eb' : 'linear-gradient(135deg,#6366f1,#8b5cf6)'; ?>;display:flex;align-items:center;justify-content:center;color:<?php echo $c['is_hidden'] ? '#9ca3af' : '#fff'; ?>;flex-shrink:0">
+                            <i class="fa-solid <?php echo $c['is_hidden'] ? 'fa-eye-slash' : 'fa-tag'; ?>"></i>
                         </div>
                         <strong style="font-size:15px"><?php echo htmlspecialchars($c['category_name']); ?></strong>
+                        <?php if ($c['is_hidden']): ?>
+                        <span class="badge" style="background:#f3f4f6;color:#6b7280;font-size:11px"><i class="fa-solid fa-eye-slash"></i> ซ่อนอยู่</span>
+                        <?php endif; ?>
                     </div>
                     <!-- Edit mode -->
                     <div id="edit-<?php echo $c['id']; ?>" style="display:none">
@@ -200,13 +205,18 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                                 onclick="startEdit(<?php echo $c['id']; ?>)">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <form action="/admin/category_action.php" method="POST"
-                              onsubmit="return confirmDelete(<?php echo $c['product_count']; ?>, '<?php echo htmlspecialchars(addslashes($c['category_name'])); ?>')">
-                            <input type="hidden" name="action" value="delete">
+                        <form action="/admin/category_action.php" method="POST">
+                            <input type="hidden" name="action" value="toggle">
                             <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
-                            <button type="submit" class="btn-icon delete-cat" title="ลบ">
-                                <i class="fa-solid fa-trash"></i>
+                            <?php if ($c['is_hidden']): ?>
+                            <button type="submit" class="btn-icon show-cat" title="แสดงหมวดหมู่">
+                                <i class="fa-solid fa-eye"></i>
                             </button>
+                            <?php else: ?>
+                            <button type="submit" class="btn-icon hide-cat" title="ซ่อนหมวดหมู่">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </button>
+                            <?php endif; ?>
                         </form>
                     </div>
                     <!-- Edit mode buttons -->
@@ -262,13 +272,6 @@ function prepareEdit(id) {
     const val = document.getElementById('editInput-' + id).value.trim();
     if (!val) { alert('กรุณากรอกชื่อหมวดหมู่'); return false; }
     document.getElementById('editHidden-' + id).value = val;
-}
-function confirmDelete(productCount, name) {
-    if (productCount > 0) {
-        alert('ไม่สามารถลบ "' + name + '" ได้ เพราะยังมีสินค้า ' + productCount + ' รายการในหมวดหมู่นี้');
-        return false;
-    }
-    return confirm('ยืนยันการลบหมวดหมู่ "' + name + '"?');
 }
 </script>
 </body>

@@ -162,4 +162,7 @@ try { $db->exec("ALTER TABLE payments ADD COLUMN transfer_time TEXT"); } catch (
 /* --- Add is_hidden column to amulets if not exists --- */
 try { $db->exec("ALTER TABLE amulets ADD COLUMN is_hidden INTEGER DEFAULT 0"); } catch (PDOException $e) {}
 
+/* --- Add is_hidden column to categories if not exists --- */
+try { $db->exec("ALTER TABLE categories ADD COLUMN is_hidden INTEGER DEFAULT 0"); } catch (PDOException $e) {}
+
 echo "✅ Database tables created successfully";

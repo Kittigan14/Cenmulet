@@ -19,7 +19,7 @@ if ($is_logged_in) {
 }
 
 try {
-    $stmt = $db->query("SELECT * FROM categories ORDER BY category_name");
+    $stmt = $db->query("SELECT id, category_name FROM categories WHERE is_hidden = 0 OR is_hidden IS NULL ORDER BY category_name");
     $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $categories = [];

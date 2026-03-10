@@ -55,20 +55,25 @@ try {
             header("Location: $redirect?success=edited");
             exit;
 
-        case 'delete':
+        case 'toggle':
             $id = (int)($_POST['id'] ?? 0);
             if (!$id) {
                 header("Location: $redirect?error=db"); exit;
             }
-            // ตรวจว่ามีสินค้าอยู่ไหม
-            $check = $db->prepare("SELECT COUNT(*) FROM amulets WHERE categoryId = :id");
-            $check->execute([':id' => $id]);
-            if ($check->fetchColumn() > 0) {
-                header("Location: $redirect?error=has_items"); exit;
-            }
-            $stmt = $db->prepare("DELETE FROM categories WHERE id = :id");
+            // Atomic toggle — single round-trip
+            $stmt = $db->prepare(
+                "UPDATE categories SET is_hidden = 1 - COALESCE(is_hidden, 0) WHERE id = :id"
+            );
             $stmt->execute([':id' => $id]);
-            header("Location: $redirect?success=deleted");
+            if ($stmt->rowCount() === 0) {
+                header("Location: $redirect?error=db"); exit;
+            }
+            // Read back new state for redirect message
+            $row = $db->prepare("SELECT is_hidden FROM categories WHERE id = :id");
+            $row->execute([':id' => $id]);
+            $new_hidden = (int)$row->fetch(PDO::FETCH_ASSOC)['is_hidden'];
+            $msg = $new_hidden ? 'hidden' : 'shown';
+            header("Location: $redirect?success=$msg");
             exit;
 
         default:
