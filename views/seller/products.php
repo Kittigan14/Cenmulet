@@ -71,8 +71,14 @@ try {
             </a>
         </div>
 
-        <?php if (isset($_GET['success']) && $_GET['success'] === 'deleted'): ?>
-        <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>ลบสินค้าสำเร็จ!</span></div>
+        <?php if (isset($_GET['success'])): ?>
+            <?php if ($_GET['success'] === 'deleted'): ?>
+            <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>ลบสินค้าสำเร็จ!</span></div>
+            <?php elseif ($_GET['success'] === 'hidden'): ?>
+            <div class="alert alert-success"><i class="fa-solid fa-eye-slash"></i> <span>ซ่อนสินค้าเรียบร้อยแล้ว</span></div>
+            <?php elseif ($_GET['success'] === 'shown'): ?>
+            <div class="alert alert-success"><i class="fa-solid fa-eye"></i> <span>แสดงสินค้าเรียบร้อยแล้ว</span></div>
+            <?php endif; ?>
         <?php endif; ?>
         <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i> <span>เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง</span></div>
@@ -143,7 +149,9 @@ try {
                                 </span>
                             </td>
                             <td>
-                                <?php if ($p['quantity'] > 0): ?>
+                                <?php if ($p['is_hidden']): ?>
+                                <span class="badge" style="background:#f3f4f6;color:#6b7280"><i class="fa-solid fa-eye-slash"></i> ซ่อนอยู่</span>
+                                <?php elseif ($p['quantity'] > 0): ?>
                                 <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> มีสินค้า</span>
                                 <?php else: ?>
                                 <span class="badge badge-warning"><i class="fa-solid fa-circle-exclamation"></i> สินค้าหมด</span>
@@ -155,11 +163,19 @@ try {
                                        class="btn-icon edit" title="แก้ไข">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-                                    <a href="/seller/delete_product_process.php?id=<?php echo $p['id']; ?>"
-                                       class="btn-icon delete" title="ลบ"
-                                       onclick="return confirm('ลบสินค้า \'<?php echo htmlspecialchars(addslashes($p['amulet_name'])); ?>\' ?')">
-                                        <i class="fa-solid fa-trash"></i>
+                                    <?php if ($p['is_hidden']): ?>
+                                    <a href="/seller/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
+                                       class="btn-icon" title="แสดงสินค้า"
+                                       style="background:#d1fae5;color:#059669;border-color:#a7f3d0">
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
+                                    <?php else: ?>
+                                    <a href="/seller/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
+                                       class="btn-icon" title="ซ่อนสินค้า"
+                                       style="background:#fef3c7;color:#d97706;border-color:#fde68a">
+                                        <i class="fa-solid fa-eye-slash"></i>
+                                    </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

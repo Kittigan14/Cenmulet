@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS cart (
 
 /* ---------------- PAYMENTS ---------------- */
 $db->exec("
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id INTEGER,
     slip_image TEXT,
@@ -154,5 +154,12 @@ CREATE TABLE payments (
     FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 ");
+
+/* --- Add transfer_amount / transfer_time columns to payments if not exists --- */
+try { $db->exec("ALTER TABLE payments ADD COLUMN transfer_amount REAL"); } catch (PDOException $e) {}
+try { $db->exec("ALTER TABLE payments ADD COLUMN transfer_time TEXT"); } catch (PDOException $e) {}
+
+/* --- Add is_hidden column to amulets if not exists --- */
+try { $db->exec("ALTER TABLE amulets ADD COLUMN is_hidden INTEGER DEFAULT 0"); } catch (PDOException $e) {}
 
 echo "✅ Database tables created successfully";

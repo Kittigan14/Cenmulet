@@ -480,13 +480,27 @@ foreach ($cart_items as $item) {
                         </div>
                         <?php endforeach; ?>
 
+                        <!-- จำนวนเงินและเวลาที่โอน -->
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px">
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label">จำนวนเงินที่โอน (บาท) <span style="color:#ef4444">*</span></label>
+                                <input type="number" name="transfer_amount" step="0.01" min="0"
+                                       class="form-control" placeholder="0.00" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label">เวลาที่โอน <span style="color:#ef4444">*</span></label>
+                                <input type="datetime-local" name="transfer_time"
+                                       class="form-control" required>
+                            </div>
+                        </div>
+
                         <div class="upload-area" onclick="document.getElementById('slip').click()">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
                             <p>คลิกเพื่ออัพโหลดสลิปโอนเงิน</p>
                             <small style="color: #9ca3af;">รองรับไฟล์: JPG, PNG (ขนาดไม่เกิน 5MB)</small>
                         </div>
                         <input type="file" id="slip" name="slip" accept="image/*" style="display: none;" required onchange="previewSlip(this)">
-                        
+
                         <div class="upload-preview" id="slipPreview">
                             <img id="slipImage" src="" alt="Preview">
                         </div>

@@ -165,6 +165,7 @@ if ($view === 'products') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>รายงานการขาย - <?php echo htmlspecialchars($seller['store_name']); ?></title>
@@ -175,7 +176,7 @@ if ($view === 'products') {
             .sidebar   { display: none !important; }
             .main-content { margin: 0 !important; padding: 14px !important; }
             .dashboard-container { display: block !important; }
-            body { background: #fff !important; }
+            body { background: #fff !important; font-family: 'Sarabun', sans-serif !important; }
             .card { box-shadow: none !important; border: 1px solid #ddd !important; }
             .print-header { display: block !important; }
             canvas { max-height: 220px !important; }
@@ -206,6 +207,7 @@ if ($view === 'products') {
             .print-footer { display: block !important; }
             @page { margin: 12mm; size: A4 landscape; }
         }
+        body { font-family: 'Sarabun', sans-serif; }
         .print-header {
             display: none; text-align: center;
             margin-bottom: 18px; padding-bottom: 14px;

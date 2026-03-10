@@ -151,6 +151,7 @@ switch ($report_type) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap">
     <title><?php echo $title_th; ?> - Cenmulet Admin</title>
     <style>
         /* ── Print Styles ── */
@@ -159,14 +160,15 @@ switch ($report_type) {
             .sidebar    { display: none !important; }
             .main-content { margin: 0 !important; padding: 0 !important; }
             .dashboard-container { display: block !important; }
-            body { background: #fff !important; }
+            body { background: #fff !important; font-family: 'Sarabun', sans-serif !important; }
             .card { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
             .print-header { display: block !important; }
-            table { font-size: 11px !important; }
+            table { font-size: 11px !important; font-family: 'Sarabun', sans-serif !important; }
             th, td { padding: 6px 8px !important; }
             .badge { border: 1px solid currentColor !important; }
             @page { margin: 15mm; size: A4 landscape; }
         }
+        body { font-family: 'Sarabun', sans-serif; }
         .print-header {
             display: none;
             text-align: center;

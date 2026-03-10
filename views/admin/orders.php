@@ -33,6 +33,7 @@ $orders = $db->prepare("
            o.tracking_number, o.shipped_at,
            u.fullname as buyer_name, u.tel as buyer_tel, u.address as buyer_address,
            p.slip_image, p.status as pay_status, p.confirmed_at,
+           p.transfer_amount, p.transfer_time,
            COUNT(DISTINCT oi.id) as item_count,
            GROUP_CONCAT(DISTINCT s.store_name) as store_names
     FROM orders o
@@ -288,16 +289,18 @@ const ordersData = <?php
         $order_map = [];
         foreach ($orders as $o) {
             $order_map[$o['id']] = [
-                'id'       => $o['id'],
-                'buyer'    => $o['buyer_name'],
-                'tel'      => $o['buyer_tel'],
-                'address'  => $o['buyer_address'],
-                'total'    => $o['total_price'],
-                'pay'      => $o['pay_status'],
-                'status'   => $o['status'],
-                'date'     => $o['created_at'],
-                'slip'     => $o['slip_image'],
-                'items'    => $grouped[$o['id']] ?? [],
+                'id'              => $o['id'],
+                'buyer'           => $o['buyer_name'],
+                'tel'             => $o['buyer_tel'],
+                'address'         => $o['buyer_address'],
+                'total'           => $o['total_price'],
+                'pay'             => $o['pay_status'],
+                'status'          => $o['status'],
+                'date'            => $o['created_at'],
+                'slip'            => $o['slip_image'],
+                'transfer_amount' => $o['transfer_amount'],
+                'transfer_time'   => $o['transfer_time'],
+                'items'           => $grouped[$o['id']] ?? [],
             ];
         }
         echo json_encode($order_map, JSON_UNESCAPED_UNICODE);
@@ -366,10 +369,30 @@ function openDetail(id) {
             <span style="font-weight:600">ยอดรวมทั้งหมด</span>
             <span style="font-weight:700;font-size:18px;color:#10b981">฿${Number(o.total).toLocaleString('th-TH', {minimumFractionDigits:2})}</span>
         </div>
-        <div style="display:flex;gap:10px">
+        <div style="display:flex;gap:10px;margin-bottom:12px">
             <div style="flex:1;text-align:center">${payLabels[o.pay] || '-'}</div>
             <div style="flex:1;text-align:center">${statusLabel}</div>
         </div>
+        ${(o.transfer_amount !== null && o.transfer_amount !== undefined) || o.transfer_time ? `
+        <div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:12px 14px;margin-bottom:12px">
+            <div style="font-size:11px;color:#059669;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">
+                <i class="fa-solid fa-money-bill-wave"></i> ข้อมูลการโอนเงิน
+            </div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap">
+                <div>
+                    <div style="font-size:11px;color:#9ca3af">จำนวนเงินที่โอน</div>
+                    <div style="font-weight:700;color:#10b981;font-size:15px">
+                        ${o.transfer_amount !== null && o.transfer_amount !== undefined ? '฿' + Number(o.transfer_amount).toLocaleString('th-TH', {minimumFractionDigits:2}) : '-'}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size:11px;color:#9ca3af">เวลาที่โอน</div>
+                    <div style="font-weight:600;font-size:13px">
+                        ${o.transfer_time ? o.transfer_time.replace('T',' ').substring(0,16) : '-'}
+                    </div>
+                </div>
+            </div>
+        </div>` : ''}
         ${o.slip ? `
         <div style="margin-top:14px;text-align:center">
             <div style="font-size:12px;color:#9ca3af;margin-bottom:8px">สลิปการโอนเงิน</div>
