@@ -473,12 +473,12 @@ $active_page = $active_page ?? 'home';
                 <div class="user-avatar"><i class="fa-solid fa-right-to-bracket"></i></div>
                 <span class="user-name" style="max-width:none">เข้าสู่ระบบ</span>
             </a>
-            <a href="/views/auth/register.php"
+            <!-- <a href="/views/auth/register.php"
                style="padding:7px 14px;background:#e7cf27;color:#111;font-family:'Kanit',sans-serif;
                       font-size:13px;font-weight:600;border-radius:10px;text-decoration:none;
                       border:1.5px solid #cc9900">
                 สมัครสมาชิก
-            </a>
+            </a> -->
             <?php endif; ?>
 
         </div>

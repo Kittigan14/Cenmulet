@@ -10,13 +10,13 @@
 <body>
 
 <div class="navbar">
-    <div class="logo">
+    <a href="/views/user/home.php" class="logo" style="text-decoration:none;color:inherit;cursor:pointer;">
         <div class="content-logo">
             <img src="/public/images/image.png" alt="Cenmulet">
             <h2>Cenmulet</h2>
         </div>
         <p>Amulet market place ตลาดพระเครื่อง</p>
-    </div>
+    </a>
 </div>
 
 <div class="auth-page">
