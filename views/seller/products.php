@@ -149,7 +149,7 @@ try {
                                 </span>
                             </td>
                             <td>
-                                <?php if ($p['is_hidden']): ?>
+                                <?php if (!empty($p['is_hidden'])): ?>
                                 <span class="badge" style="background:#f3f4f6;color:#6b7280"><i class="fa-solid fa-eye-slash"></i> ซ่อนอยู่</span>
                                 <?php elseif ($p['quantity'] > 0): ?>
                                 <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> มีสินค้า</span>
@@ -163,7 +163,7 @@ try {
                                        class="btn-icon edit" title="แก้ไข">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-                                    <?php if ($p['is_hidden']): ?>
+                                    <?php if (!empty($p['is_hidden'])): ?>
                                     <a href="/seller/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
                                        class="btn-icon" title="แสดงสินค้า"
                                        style="background:#d1fae5;color:#059669;border-color:#a7f3d0">

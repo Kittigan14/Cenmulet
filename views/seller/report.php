@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
 }
 
 $seller_id = $_SESSION['user_id'];
-$stmt = $db->prepare("SELECT * FROM sellers WHERE id = :id");
+$stmt = $db->prepare("SELECT id, fullname, store_name, pay_contax FROM sellers WHERE id = :id");
 $stmt->execute([':id' => $seller_id]);
 $seller = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -165,7 +165,6 @@ if ($view === 'products') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>รายงานการขาย - <?php echo htmlspecialchars($seller['store_name']); ?></title>
@@ -207,7 +206,6 @@ if ($view === 'products') {
             .print-footer { display: block !important; }
             @page { margin: 12mm; size: A4 landscape; }
         }
-        body { font-family: 'Sarabun', sans-serif; }
         .print-header {
             display: none; text-align: center;
             margin-bottom: 18px; padding-bottom: 14px;

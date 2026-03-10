@@ -15,19 +15,21 @@ if (!$product_id) {
 }
 
 try {
-    $stmt = $db->prepare("SELECT id, is_hidden FROM amulets WHERE id = :id");
+    // Atomic toggle: no race condition, single DB round-trip
+    $stmt = $db->prepare(
+        "UPDATE amulets SET is_hidden = 1 - COALESCE(is_hidden, 0) WHERE id = :id"
+    );
     $stmt->execute([':id' => $product_id]);
-    $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$product) {
+    if ($stmt->rowCount() === 0) {
         header("Location: /views/admin/products.php?error=notfound");
         exit;
     }
 
-    $new_hidden = $product['is_hidden'] ? 0 : 1;
-
-    $stmt = $db->prepare("UPDATE amulets SET is_hidden = :hidden WHERE id = :id");
-    $stmt->execute([':hidden' => $new_hidden, ':id' => $product_id]);
+    // Read back new state for redirect message
+    $row = $db->prepare("SELECT is_hidden FROM amulets WHERE id = :id");
+    $row->execute([':id' => $product_id]);
+    $new_hidden = (int)$row->fetch(PDO::FETCH_ASSOC)['is_hidden'];
 
     $msg = $new_hidden ? 'hidden' : 'shown';
     header("Location: /views/admin/products.php?success=$msg");

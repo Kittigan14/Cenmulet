@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
 $seller_id = $_SESSION['user_id'];
 
 try {
-    $stmt = $db->prepare("SELECT * FROM sellers WHERE id = :id");
+    $stmt = $db->prepare("SELECT id, fullname, store_name, pay_contax FROM sellers WHERE id = :id");
     $stmt->execute([':id' => $seller_id]);
     $seller = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

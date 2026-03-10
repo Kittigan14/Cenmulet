@@ -1,9 +1,7 @@
 <?php
-
-if (!isset($user) || !isset($cart_count)) {
-    die("Error: Required variables not set for navbar");
-}
-
+// รองรับทั้ง guest (ไม่ล็อกอิน) และ user ที่ล็อกอินแล้ว
+$user       = $user       ?? null;
+$cart_count = $cart_count ?? 0;
 $active_page = $active_page ?? 'home';
 ?>
 
@@ -436,7 +434,8 @@ $active_page = $active_page ?? 'home';
         <!-- Right: User -->
         <div class="nav-right">
 
-            <!-- User Dropdown -->
+            <?php if ($user): ?>
+            <!-- User Dropdown (ล็อกอินแล้ว) -->
             <div class="user-menu">
                 <div class="user-btn">
                     <div class="user-avatar">
@@ -468,6 +467,19 @@ $active_page = $active_page ?? 'home';
                     </div>
                 </div>
             </div>
+            <?php else: ?>
+            <!-- Guest: ปุ่ม Login / Register -->
+            <a href="/views/auth/login.php" class="user-btn" style="text-decoration:none;gap:6px">
+                <div class="user-avatar"><i class="fa-solid fa-right-to-bracket"></i></div>
+                <span class="user-name" style="max-width:none">เข้าสู่ระบบ</span>
+            </a>
+            <a href="/views/auth/register.php"
+               style="padding:7px 14px;background:#e7cf27;color:#111;font-family:'Kanit',sans-serif;
+                      font-size:13px;font-weight:600;border-radius:10px;text-decoration:none;
+                      border:1.5px solid #cc9900">
+                สมัครสมาชิก
+            </a>
+            <?php endif; ?>
 
         </div>
     </div>
