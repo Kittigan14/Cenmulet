@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 $admin_id = $_SESSION['user_id'];
-$stmt = $db->prepare("SELECT * FROM admins WHERE id = :id");
+$stmt = $db->prepare("SELECT id, fullname FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
 $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -315,6 +315,14 @@ function openSlip(src) {
 }
 function closeSlip() { document.getElementById('slipModal').style.display = 'none'; }
 
+// XSS-safe HTML escaping for user-supplied strings in innerHTML
+function esc(s) {
+    if (s == null) return '';
+    const d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+}
+
 function openDetail(id) {
     const o = ordersData[id];
     if (!o) return;
@@ -337,7 +345,7 @@ function openDetail(id) {
                 : `<div style="width:44px;height:44px;border-radius:6px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af"><i class="fa-solid fa-image"></i></div>`
             }
             <div style="flex:1">
-                <div style="font-weight:600;color:#1a1a1a;font-size:14px">${item.amulet_name}</div>
+                <div style="font-weight:600;color:#1a1a1a;font-size:14px">${esc(item.amulet_name)}</div>
                 <div style="font-size:12px;color:#6b7280">จำนวน: ${item.quantity} × ฿${Number(item.price).toLocaleString('th-TH', {minimumFractionDigits:2})}</div>
             </div>
             <div style="font-weight:700;color:#10b981">฿${(item.quantity * item.price).toLocaleString('th-TH', {minimumFractionDigits:2})}</div>
@@ -353,13 +361,13 @@ function openDetail(id) {
             </div>
             <div style="background:#f9fafb;padding:14px;border-radius:10px">
                 <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">ผู้ซื้อ</div>
-                <div style="font-weight:600">${o.buyer}</div>
-                <div style="font-size:12px;color:#6b7280">${o.tel}</div>
+                <div style="font-weight:600">${esc(o.buyer)}</div>
+                <div style="font-size:12px;color:#6b7280">${esc(o.tel)}</div>
             </div>
         </div>
         <div style="background:#f9fafb;padding:14px;border-radius:10px;margin-bottom:16px">
             <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">ที่อยู่จัดส่ง</div>
-            <div style="font-size:14px">${o.address || '-'}</div>
+            <div style="font-size:14px">${esc(o.address) || '-'}</div>
         </div>
         <div style="margin-bottom:16px">
             <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">รายการสินค้า</div>

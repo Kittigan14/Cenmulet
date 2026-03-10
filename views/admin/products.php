@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 $admin_id = $_SESSION['user_id'];
-$stmt = $db->prepare("SELECT * FROM admins WHERE id = :id");
+$stmt = $db->prepare("SELECT id, fullname FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
 $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -153,7 +153,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                 'qty'      => $p['quantity'],
                 'image'    => $p['image'] ?? '',
                 'hidden'   => !empty($p['is_hidden']),
-            ], JSON_UNESCAPED_UNICODE)); ?>)">
+            ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>)">
                 <td>
                     <?php if (!empty($p['image'])): ?>
                     <img src="/uploads/amulets/<?php echo htmlspecialchars($p['image']); ?>"

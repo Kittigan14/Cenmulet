@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 $admin_id = $_SESSION['user_id'];
-$stmt = $db->prepare("SELECT * FROM admins WHERE id = :id");
+$stmt = $db->prepare("SELECT id, fullname FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
 $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pending'")->fetchColumn();
@@ -151,7 +151,6 @@ switch ($report_type) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap">
     <title><?php echo $title_th; ?> - Cenmulet Admin</title>
     <style>
         /* ── Print Styles ── */
@@ -168,7 +167,6 @@ switch ($report_type) {
             .badge { border: 1px solid currentColor !important; }
             @page { margin: 15mm; size: A4 landscape; }
         }
-        body { font-family: 'Sarabun', sans-serif; }
         .print-header {
             display: none;
             text-align: center;

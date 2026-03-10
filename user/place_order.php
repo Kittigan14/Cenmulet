@@ -114,8 +114,21 @@ try {
         ]);
     }
     
-    $transfer_amount = !empty($_POST['transfer_amount']) ? (float)$_POST['transfer_amount'] : null;
-    $transfer_time   = !empty($_POST['transfer_time'])   ? $_POST['transfer_time'] : null;
+    // Validate transfer fields server-side (client-side required attributes are bypassable)
+    $transfer_amount = isset($_POST['transfer_amount']) && $_POST['transfer_amount'] !== ''
+        ? (float)$_POST['transfer_amount'] : null;
+    if ($transfer_amount === null || $transfer_amount <= 0) {
+        $db->rollBack();
+        header("Location: /user/checkout.php?error=missing_transfer_amount");
+        exit;
+    }
+
+    $transfer_time = trim($_POST['transfer_time'] ?? '');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $transfer_time)) {
+        $db->rollBack();
+        header("Location: /user/checkout.php?error=invalid_transfer_time");
+        exit;
+    }
 
     $stmt = $db->prepare("
         INSERT INTO payments (order_id, slip_image, status, created_at, transfer_amount, transfer_time)

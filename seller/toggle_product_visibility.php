@@ -16,20 +16,23 @@ if (!$product_id) {
 }
 
 try {
-    // ตรวจสอบว่าสินค้านี้เป็นของ seller นี้
-    $stmt = $db->prepare("SELECT id, is_hidden FROM amulets WHERE id = :id AND sellerId = :seller_id");
+    // Atomic toggle with ownership check — single DB round-trip
+    $stmt = $db->prepare(
+        "UPDATE amulets SET is_hidden = 1 - COALESCE(is_hidden, 0)
+         WHERE id = :id AND sellerId = :seller_id"
+    );
     $stmt->execute([':id' => $product_id, ':seller_id' => $seller_id]);
-    $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$product) {
+    if ($stmt->rowCount() === 0) {
+        // Either product not found or doesn't belong to this seller
         header("Location: /views/seller/products.php?error=unauthorized");
         exit;
     }
 
-    $new_hidden = $product['is_hidden'] ? 0 : 1;
-
-    $stmt = $db->prepare("UPDATE amulets SET is_hidden = :hidden WHERE id = :id AND sellerId = :seller_id");
-    $stmt->execute([':hidden' => $new_hidden, ':id' => $product_id, ':seller_id' => $seller_id]);
+    // Read back new state for redirect message
+    $row = $db->prepare("SELECT is_hidden FROM amulets WHERE id = :id AND sellerId = :seller_id");
+    $row->execute([':id' => $product_id, ':seller_id' => $seller_id]);
+    $new_hidden = (int)$row->fetch(PDO::FETCH_ASSOC)['is_hidden'];
 
     $msg = $new_hidden ? 'hidden' : 'shown';
     header("Location: /views/seller/products.php?success=$msg");

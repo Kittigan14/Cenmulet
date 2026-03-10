@@ -9,12 +9,13 @@ $is_logged_in = isset($_SESSION['user_id']) && $_SESSION['role'] === 'user';
 $user = null;
 if ($is_logged_in) {
     try {
-        $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt = $db->prepare("SELECT id, fullname, image FROM users WHERE id = :id");
         $stmt->execute([':id' => $user_id]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     } catch (PDOException $e) {
-        // ignore
+        error_log("Home user fetch error: " . $e->getMessage());
     }
+    if (!$user) { $is_logged_in = false; }
 }
 
 try {
