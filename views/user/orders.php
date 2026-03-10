@@ -43,6 +43,28 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
     <title>รายการเช่าของฉัน - Cenmulet</title>
     <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+            .container { max-width: 100% !important; }
+            .order-card { page-break-inside: avoid; }
+            .print-page-header { display: block !important; }
+            .navbar { display: none !important; }
+        }
+        .print-page-header {
+            display: none;
+            text-align: center; margin-bottom: 18px;
+            padding-bottom: 12px; border-bottom: 2px solid #e5e7eb;
+        }
+        .btn-print-history {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 18px; border-radius: 9px; font-size: 14px;
+            font-weight: 600; cursor: pointer; border: none;
+            font-family: inherit; background: #6366f1; color: #fff;
+            transition: all .2s; margin-bottom: 16px;
+        }
+        .btn-print-history:hover { background: #4f46e5; }
+
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Sarabun',sans-serif; background:#f8f8f8; color:#333; }
 
@@ -223,7 +245,21 @@ include __DIR__ . '/../../includes/navbar.php';
 ?>
 
 <div class="container">
-    <h1 class="page-title"><i class="fa-solid fa-box" style="color:#c8922a"></i> รายการเช่าของฉัน</h1>
+    <!-- Print header (show when printing) -->
+    <div class="print-page-header">
+        <h2 style="font-size:18px;margin-bottom:3px">Cenmulet — ประวัติการเช่าพระเครื่อง</h2>
+        <p style="font-size:12px;color:#6b7280">
+            <?php echo htmlspecialchars($user['fullname'] ?? ''); ?>
+            &nbsp;|&nbsp; พิมพ์เมื่อ: <?php echo date('d/m/Y H:i'); ?>
+        </p>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px">
+        <h1 class="page-title" style="margin-bottom:0"><i class="fa-solid fa-box" style="color:#c8922a"></i> รายการเช่าของฉัน</h1>
+        <button onclick="window.print()" class="btn-print-history no-print">
+            <i class="fa-solid fa-print"></i> พิมพ์ประวัติการเช่า
+        </button>
+    </div>
     <p class="page-sub">ตรวจสอบสถานะและรายละเอียดรายการเช่าทั้งหมด</p>
 
     <?php if (isset($_GET['delivery_confirmed'])): ?>

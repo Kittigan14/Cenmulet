@@ -2,19 +2,19 @@
 session_start();
 require_once __DIR__ . "/../../config/db.php";
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
-    header("Location: /views/auth/login.php");
-    exit;
-}
+// หน้าโฮมเข้าได้โดยไม่ต้องล็อกอิน
+$user_id = $_SESSION['user_id'] ?? null;
+$is_logged_in = isset($_SESSION['user_id']) && $_SESSION['role'] === 'user';
 
-$user_id = $_SESSION['user_id'];
-
-try {
-    $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
-    $stmt->execute([':id' => $user_id]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+$user = null;
+if ($is_logged_in) {
+    try {
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute([':id' => $user_id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // ignore
+    }
 }
 
 try {
@@ -29,11 +29,11 @@ $category_filter = $_GET['category'] ?? '';
 
 try {
     $sql = "
-        SELECT a.*, c.category_name, s.store_name 
+        SELECT a.*, c.category_name, s.store_name
         FROM amulets a
         LEFT JOIN categories c ON a.categoryId = c.id
         LEFT JOIN sellers   s ON a.sellerId   = s.id
-        WHERE a.quantity > 0
+        WHERE a.quantity > 0 AND (a.is_hidden = 0 OR a.is_hidden IS NULL)
     ";
     $params = [];
 
@@ -56,12 +56,15 @@ try {
     die("Error: " . $e->getMessage());
 }
 
-try {
-    $stmt = $db->prepare("SELECT COUNT(*) as count FROM cart WHERE user_id = :user_id");
-    $stmt->execute([':user_id' => $user_id]);
-    $cart_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
-} catch (PDOException $e) {
-    $cart_count = 0;
+$cart_count = 0;
+if ($is_logged_in) {
+    try {
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM cart WHERE user_id = :user_id");
+        $stmt->execute([':user_id' => $user_id]);
+        $cart_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    } catch (PDOException $e) {
+        $cart_count = 0;
+    }
 }
 
 $active_page = 'home';
@@ -162,6 +165,7 @@ $active_page = 'home';
                                     <a href="/views/user/product_detail.php?id=<?php echo $product['id']; ?>" class="btn-detail">
                                         <i class="fa-solid fa-eye"></i> ดูเพิ่มเติม
                                     </a>
+                                    <?php if ($is_logged_in): ?>
                                     <form action="/user/add_to_cart_process.php" method="POST" style="display:inline;">
                                         <input type="hidden" name="amulet_id" value="<?php echo $product['id']; ?>">
                                         <input type="hidden" name="quantity"   value="1">
@@ -169,6 +173,11 @@ $active_page = 'home';
                                             <i class="fa-solid fa-cart-plus"></i>
                                         </button>
                                     </form>
+                                    <?php else: ?>
+                                    <a href="/views/auth/login.php" class="btn-add-cart" title="ล็อกอินเพื่อเพิ่มลงตะกร้า">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

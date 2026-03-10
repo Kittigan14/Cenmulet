@@ -38,6 +38,7 @@ try {
             o.id, o.total_price, o.status, o.created_at,
             u.fullname as buyer_name, u.tel as buyer_tel, u.address as buyer_address,
             p.slip_image, p.status as payment_status, p.confirmed_at,
+            p.transfer_amount, p.transfer_time,
             COUNT(DISTINCT oi.id) as item_count,
             o.tracking_number, o.shipped_at
         FROM orders o
@@ -215,6 +216,8 @@ try {
                             <th>ผู้ซื้อ</th>
                             <th>ยอดรวม</th>
                             <th>สลิปโอนเงิน</th>
+                            <th>จำนวนเงินที่โอน</th>
+                            <th>เวลาที่โอน</th>
                             <th>สถานะชำระเงิน</th>
                             <th>สถานะคำสั่งซื้อ</th>
                             <th>วันที่</th>
@@ -242,6 +245,12 @@ try {
                                 <?php else: ?>
                                 <span style="color:#9ca3af;font-size:13px">ไม่มีสลิป</span>
                                 <?php endif; ?>
+                            </td>
+                            <td style="font-size:13px;font-weight:600;color:#10b981">
+                                <?php echo $order['transfer_amount'] !== null ? '฿' . number_format((float)$order['transfer_amount'], 2) : '<span style="color:#9ca3af">-</span>'; ?>
+                            </td>
+                            <td style="font-size:12px;color:#6b7280;white-space:nowrap">
+                                <?php echo $order['transfer_time'] ? date('d/m/Y H:i', strtotime($order['transfer_time'])) : '<span style="color:#9ca3af">-</span>'; ?>
                             </td>
                             <td>
                                 <?php if ($order['payment_status'] === 'waiting'): ?>

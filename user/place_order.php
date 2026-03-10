@@ -114,13 +114,18 @@ try {
         ]);
     }
     
+    $transfer_amount = !empty($_POST['transfer_amount']) ? (float)$_POST['transfer_amount'] : null;
+    $transfer_time   = !empty($_POST['transfer_time'])   ? $_POST['transfer_time'] : null;
+
     $stmt = $db->prepare("
-        INSERT INTO payments (order_id, slip_image, status, created_at)
-        VALUES (:order_id, :slip_image, 'waiting', datetime('now'))
+        INSERT INTO payments (order_id, slip_image, status, created_at, transfer_amount, transfer_time)
+        VALUES (:order_id, :slip_image, 'waiting', datetime('now'), :transfer_amount, :transfer_time)
     ");
     $stmt->execute([
-        ':order_id' => $order_id,
-        ':slip_image' => $slip_image
+        ':order_id'       => $order_id,
+        ':slip_image'     => $slip_image,
+        ':transfer_amount'=> $transfer_amount,
+        ':transfer_time'  => $transfer_time,
     ]);
     
     $stmt = $db->prepare("DELETE FROM cart WHERE user_id = :user_id");

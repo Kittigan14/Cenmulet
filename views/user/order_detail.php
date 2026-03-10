@@ -113,6 +113,31 @@ if ($order['status'] === 'completed') {
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/order_detail.css">
     <title>คำสั่งซื้อ #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?> - Cenmulet</title>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff !important; }
+            .container { max-width: 100% !important; padding: 0 !important; }
+        }
+        .print-receipt-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        @media print {
+            .print-receipt-header { display: block !important; }
+        }
+        .btn-print {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: 9px; font-size: 14px;
+            font-weight: 600; cursor: pointer; border: none;
+            font-family: inherit; transition: all .2s;
+            background: #6366f1; color: #fff; text-decoration: none;
+        }
+        .btn-print:hover { background: #4f46e5; }
+    </style>
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
@@ -152,6 +177,23 @@ if ($order['status'] === 'completed') {
             </div>
         <?php endif; ?>
 
+        <!-- Print header (visible only when printing) -->
+        <div class="print-receipt-header">
+            <h2 style="font-size:20px;margin-bottom:4px">Cenmulet — ตลาดพระเครื่อง</h2>
+            <p style="font-size:13px;color:#6b7280">
+                ร้านค้า: <?php
+                    $store_names = [];
+                    foreach ($order_items as $it) {
+                        if (!empty($it['store_name']) && !in_array($it['store_name'], $store_names)) {
+                            $store_names[] = htmlspecialchars($it['store_name']);
+                        }
+                    }
+                    echo implode(', ', $store_names) ?: '-';
+                ?>
+                &nbsp;|&nbsp; พิมพ์เมื่อ: <?php echo date('d/m/Y H:i'); ?>
+            </p>
+        </div>
+
         <!-- Page Header -->
         <div class="order-detail-header">
             <div>
@@ -161,10 +203,16 @@ if ($order['status'] === 'completed') {
                     <?php echo date('d/m/Y H:i น.', strtotime($order['created_at'])); ?>
                 </div>
             </div>
-            <span class="status-badge <?php echo $status_class; ?>">
-                <i class="fa-solid <?php echo $status_icon; ?>"></i>
-                <?php echo $status_text; ?>
-            </span>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span class="status-badge <?php echo $status_class; ?>">
+                    <i class="fa-solid <?php echo $status_icon; ?>"></i>
+                    <?php echo $status_text; ?>
+                </span>
+                <!-- ปุ่มพิมพ์ -->
+                <button onclick="window.print()" class="btn-print no-print">
+                    <i class="fa-solid fa-file-invoice"></i> พิมพ์ใบสั่งซื้อ / ใบเสร็จ
+                </button>
+            </div>
         </div>
 
         <!-- Main Layout -->
