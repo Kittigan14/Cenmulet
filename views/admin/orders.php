@@ -303,7 +303,7 @@ const ordersData = <?php
                 'items'           => $grouped[$o['id']] ?? [],
             ];
         }
-        echo json_encode($order_map, JSON_UNESCAPED_UNICODE);
+        echo json_encode($order_map, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP);
     } else {
         echo '{}';
     }
@@ -341,7 +341,7 @@ function openDetail(id) {
     let itemsHtml = o.items.map(item => `
         <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f9fafb;border-radius:8px;margin-bottom:8px">
             ${item.image
-                ? `<img src="/uploads/amulets/${item.image}" style="width:44px;height:44px;border-radius:6px;object-fit:cover">`
+                ? `<img src="/uploads/amulets/${esc(item.image)}" style="width:44px;height:44px;border-radius:6px;object-fit:cover">`
                 : `<div style="width:44px;height:44px;border-radius:6px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;color:#9ca3af"><i class="fa-solid fa-image"></i></div>`
             }
             <div style="flex:1">

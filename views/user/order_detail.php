@@ -50,21 +50,17 @@ $amulet_images_map = [];
 if (!empty($order_items)) {
     $amulet_ids = array_unique(array_column($order_items, 'amulet_id'));
     try {
-        // ดึงรูปทั้งหมดจาก amulet_images ทีละ amulet_id
+        // ดึงรูปทั้งหมดจาก amulet_images ด้วย IN() query เดียว (ป้องกัน N+1)
+        $placeholders = implode(',', array_fill(0, count($amulet_ids), '?'));
         $img_stmt = $db->prepare("
             SELECT amulet_id, image
             FROM amulet_images
-            WHERE amulet_id = :amulet_id
-            ORDER BY sort_order ASC
+            WHERE amulet_id IN ($placeholders)
+            ORDER BY amulet_id, sort_order ASC
         ");
-        foreach ($amulet_ids as $aid) {
-            $img_stmt->execute([':amulet_id' => $aid]);
-            $rows = $img_stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (!empty($rows)) {
-                foreach ($rows as $row) {
-                    $amulet_images_map[$aid][] = $row['image'];
-                }
-            }
+        $img_stmt->execute(array_values($amulet_ids));
+        foreach ($img_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $amulet_images_map[$row['amulet_id']][] = $row['image'];
         }
     } catch (PDOException $e) {
         error_log("amulet_images query error: " . $e->getMessage());

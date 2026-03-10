@@ -30,7 +30,8 @@ $category_filter = $_GET['category'] ?? '';
 
 try {
     $sql = "
-        SELECT a.*, c.category_name, s.store_name
+        SELECT a.id, a.amulet_name, a.image, a.price, a.source,
+               c.category_name, s.store_name
         FROM amulets a
         LEFT JOIN categories c ON a.categoryId = c.id
         LEFT JOIN sellers   s ON a.sellerId   = s.id
@@ -54,7 +55,8 @@ try {
     $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    error_log("Home products query error: " . $e->getMessage());
+    $products = [];
 }
 
 $cart_count = 0;

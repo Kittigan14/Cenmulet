@@ -138,11 +138,11 @@ $active_page = $active_page ?? 'home';
 /* Cart inline in nav-left */
 .nav-cart-inline {
     position: relative;
-    
-    i {
-        font-size: 24px;
-        padding: 5px;
-    }
+}
+
+.nav-cart-inline i {
+    font-size: 24px;
+    padding: 5px;
 }
 
 .nav-cart-inline .cart-badge {

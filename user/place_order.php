@@ -49,9 +49,24 @@ if (isset($_FILES['slip']) && $_FILES['slip']['error'] === UPLOAD_ERR_OK) {
     exit;
 }
 
+// Validate transfer fields server-side before opening a transaction
+// (client-side required attributes are bypassable)
+$transfer_amount = isset($_POST['transfer_amount']) && $_POST['transfer_amount'] !== ''
+    ? (float)$_POST['transfer_amount'] : null;
+if ($transfer_amount === null || $transfer_amount <= 0) {
+    header("Location: /user/checkout.php?error=missing_transfer_amount");
+    exit;
+}
+
+$transfer_time = trim($_POST['transfer_time'] ?? '');
+if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $transfer_time)) {
+    header("Location: /user/checkout.php?error=invalid_transfer_time");
+    exit;
+}
+
 try {
     $db->beginTransaction();
-    
+
     $stmt = $db->prepare("
         SELECT c.*, a.price, a.quantity as stock, a.amulet_name
         FROM cart c
@@ -60,26 +75,24 @@ try {
     ");
     $stmt->execute([':user_id' => $user_id]);
     $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     if (count($cart_items) === 0) {
         $db->rollBack();
         header("Location: /views/user/cart.php?error=empty_cart");
         exit;
     }
-    
+
+    // Single pass: validate stock and compute total simultaneously
+    $total_price = 0;
     foreach ($cart_items as $item) {
         if ($item['quantity'] > $item['stock']) {
             $db->rollBack();
             header("Location: /user/checkout.php?error=insufficient_stock");
             exit;
         }
-    }
-    
-    $total_price = 0;
-    foreach ($cart_items as $item) {
         $total_price += $item['price'] * $item['quantity'];
     }
-    
+
     $stmt = $db->prepare("
         INSERT INTO orders (user_id, total_price, status, created_at)
         VALUES (:user_id, :total_price, 'pending', datetime('now'))
@@ -88,9 +101,9 @@ try {
         ':user_id' => $user_id,
         ':total_price' => $total_price
     ]);
-    
+
     $order_id = $db->lastInsertId();
-    
+
     foreach ($cart_items as $item) {
         $stmt = $db->prepare("
             INSERT INTO order_items (order_id, amulet_id, price, quantity)
@@ -102,9 +115,9 @@ try {
             ':price' => $item['price'],
             ':quantity' => $item['quantity']
         ]);
-        
+
         $stmt = $db->prepare("
-            UPDATE amulets 
+            UPDATE amulets
             SET quantity = quantity - :quantity
             WHERE id = :amulet_id
         ");
@@ -112,22 +125,6 @@ try {
             ':quantity' => $item['quantity'],
             ':amulet_id' => $item['amulet_id']
         ]);
-    }
-    
-    // Validate transfer fields server-side (client-side required attributes are bypassable)
-    $transfer_amount = isset($_POST['transfer_amount']) && $_POST['transfer_amount'] !== ''
-        ? (float)$_POST['transfer_amount'] : null;
-    if ($transfer_amount === null || $transfer_amount <= 0) {
-        $db->rollBack();
-        header("Location: /user/checkout.php?error=missing_transfer_amount");
-        exit;
-    }
-
-    $transfer_time = trim($_POST['transfer_time'] ?? '');
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $transfer_time)) {
-        $db->rollBack();
-        header("Location: /user/checkout.php?error=invalid_transfer_time");
-        exit;
     }
 
     $stmt = $db->prepare("
