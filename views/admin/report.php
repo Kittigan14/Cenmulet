@@ -31,8 +31,8 @@ switch ($report_type) {
 
     // ── Orders ─────────────────────────────────────────
     case 'orders':
-        $title_th = 'รายงานคำสั่งซื้อ';
-        $columns  = ['#','รหัส Order','ผู้ซื้อ','เบอร์โทร','ร้านค้า','ยอดรวม','สถานะชำระ','สถานะจัดส่ง','เลขพัสดุ','วันที่สั่ง'];
+        $title_th = 'รายงานคำสั่งเช่า';
+        $columns  = ['#','รหัส Order','ผู้เช่า','เบอร์โทร','ร้านค้า','ยอดรวม','สถานะชำระ','สถานะจัดส่ง','เลขพัสดุ','วันที่สั่ง'];
         $rows = $db->prepare("
             SELECT o.id,
                    u.fullname as buyer, u.tel,
@@ -61,7 +61,7 @@ switch ($report_type) {
         $completed_count = 0;
         foreach ($data as $_r) { if ($_r['order_status'] === 'completed') $completed_count++; }
         $summary = [
-            'คำสั่งซื้อทั้งหมด' => number_format($total_orders) . ' รายการ',
+            'คำสั่งเช่าทั้งหมด' => number_format($total_orders) . ' รายการ',
             'รายได้รวม'          => '฿' . number_format($total_revenue, 2),
             'เสร็จสิ้นแล้ว'      => number_format($completed_count) . ' รายการ',
         ];
@@ -70,7 +70,7 @@ switch ($report_type) {
     // ── Customers ──────────────────────────────────────
     case 'customers':
         $title_th = 'รายงานข้อมูลลูกค้า';
-        $columns  = ['#','ชื่อ-นามสกุล','ชื่อผู้ใช้','เบอร์โทร','เลขบัตรประชาชน','จำนวน Orders','ยอดซื้อรวม','วันที่สมัคร'];
+        $columns  = ['#','ชื่อ-นามสกุล','ชื่อผู้ใช้','เบอร์โทร','เลขบัตรประชาชน','จำนวน Orders','ยอดเช่ารวม','วันที่สมัคร'];
         $rows = $db->query("
             SELECT u.*,
                    COUNT(DISTINCT o.id) as order_count,
@@ -84,15 +84,15 @@ switch ($report_type) {
 
         $summary = [
             'ลูกค้าทั้งหมด' => number_format(count($data)) . ' คน',
-            'มีประวัติสั่งซื้อ' => number_format(count(array_filter($data, function($r){ return $r['order_count'] > 0; }))) . ' คน',
-            'ยอดซื้อรวมทุกคน' => '฿' . number_format(array_sum(array_column($data, 'total_spent')), 2),
+            'มีประวัติสั่งเช่า' => number_format(count(array_filter($data, function($r){ return $r['order_count'] > 0; }))) . ' คน',
+            'ยอดเช่ารวมทุกคน' => '฿' . number_format(array_sum(array_column($data, 'total_spent')), 2),
         ];
         break;
 
     // ── Stores ─────────────────────────────────────────
     case 'stores':
         $title_th = 'รายงานข้อมูลร้านค้า';
-        $columns  = ['#','ชื่อร้าน','เจ้าของ','เบอร์โทร','ช่องทางชำระ','จำนวนสินค้า','จำนวน Orders','รายได้ร้าน','สถานะ'];
+        $columns  = ['#','ชื่อร้าน','เจ้าของ','เบอร์โทร','ช่องทางชำระ','จำนวนพระเครื่อง','จำนวน Orders','รายได้ร้าน','สถานะ'];
         $rows = $db->query("
             SELECT s.*,
                    COUNT(DISTINCT a.id)  as product_count,
@@ -117,8 +117,8 @@ switch ($report_type) {
 
     // ── Products ───────────────────────────────────────
     case 'products':
-        $title_th = 'รายงานข้อมูลสินค้า';
-        $columns  = ['#','ชื่อสินค้า','หมวดหมู่','ร้านค้า','ราคา','คงเหลือ','ขายแล้ว','รายได้จากสินค้า'];
+        $title_th = 'รายงานข้อมูลพระเครื่อง';
+        $columns  = ['#','ชื่อพระเครื่อง','หมวดหมู่','ร้านค้า','ราคา','คงเหลือ','ขายแล้ว','รายได้จากพระเครื่อง'];
         $rows = $db->query("
             SELECT a.*,
                    c.category_name,
@@ -137,8 +137,8 @@ switch ($report_type) {
 
         $in_stock = 0; foreach ($data as $_r) { if ($_r['quantity'] > 0) $in_stock++; }
         $summary = [
-            'สินค้าทั้งหมด'  => number_format(count($data)) . ' รายการ',
-            'มีสินค้าในสต็อก' => number_format($in_stock) . ' รายการ',
+            'พระเครื่องทั้งหมด'  => number_format(count($data)) . ' รายการ',
+            'มีพระเครื่องในสต็อก' => number_format($in_stock) . ' รายการ',
             'รายได้รวม'      => '฿' . number_format(array_sum(array_column($data, 'revenue')), 2),
         ];
         break;
@@ -299,7 +299,7 @@ switch ($report_type) {
                 'orders'    => ['fa-cart-shopping',  'รายงาน Orders'],
                 'customers' => ['fa-users',           'ข้อมูลลูกค้า'],
                 'stores'    => ['fa-store',           'ข้อมูลร้านค้า'],
-                'products'  => ['fa-box',             'ข้อมูลสินค้า'],
+                'products'  => ['fa-box',             'ข้อมูลพระเครื่อง'],
             ];
             foreach ($tabs as $key => [$icon, $label]):
                 $q = $key === 'orders'

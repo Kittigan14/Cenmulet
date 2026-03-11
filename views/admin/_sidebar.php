@@ -43,7 +43,7 @@ $current = basename($_SERVER['PHP_SELF']);
         <li>
             <a href="/views/admin/products.php"
                class="<?php echo $current === 'products.php' ? 'active' : ''; ?>">
-                <i class="fa-solid fa-box"></i> จัดการสินค้า
+                <i class="fa-solid fa-box"></i> จัดการพระเครื่อง
             </a>
         </li>
         <li>
@@ -55,7 +55,7 @@ $current = basename($_SERVER['PHP_SELF']);
         <li>
             <a href="/views/admin/orders.php"
                class="<?php echo $current === 'orders.php' ? 'active' : ''; ?>">
-                <i class="fa-solid fa-cart-shopping"></i> จัดการคำสั่งซื้อ
+                <i class="fa-solid fa-cart-shopping"></i> จัดการคำสั่งเช่า
             </a>
         </li>
         <li>

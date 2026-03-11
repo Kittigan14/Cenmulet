@@ -45,7 +45,7 @@ try {
         LIMIT 5
     ")->fetchAll(PDO::FETCH_ASSOC);
 
-    // คำสั่งซื้อล่าสุด
+    // คำสั่งเช่าล่าสุด
     $recent_orders = $db->query("
         SELECT o.*, u.fullname as buyer, p.status as pay_status
         FROM orders o
@@ -166,7 +166,7 @@ try {
                 <div class="stat-header-row">
                     <div>
                         <div class="stat-value"><?php echo number_format($total_products); ?></div>
-                        <div class="stat-label">สินค้าทั้งหมด</div>
+                        <div class="stat-label">พระเครื่องทั้งหมด</div>
                     </div>
                     <div class="stat-icon blue"><i class="fa-solid fa-box"></i></div>
                 </div>
@@ -176,7 +176,7 @@ try {
                 <div class="stat-header-row">
                     <div>
                         <div class="stat-value"><?php echo number_format($total_orders); ?></div>
-                        <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
+                        <div class="stat-label">คำสั่งเช่าทั้งหมด</div>
                     </div>
                     <div class="stat-icon orange"><i class="fa-solid fa-shopping-cart"></i></div>
                 </div>
@@ -293,10 +293,10 @@ try {
 
         <!-- ── Orders + Top Products ── -->
         <div class="content-row">
-            <!-- คำสั่งซื้อล่าสุด -->
+            <!-- คำสั่งเช่าล่าสุด -->
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อล่าสุด</h2>
+                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่าล่าสุด</h2>
                     <a href="/views/admin/orders.php" style="font-size:13px;color:var(--admin-primary);text-decoration:none;font-weight:600">
                         ดูทั้งหมด →
                     </a>
@@ -307,7 +307,7 @@ try {
                         <thead>
                             <tr>
                                 <th>รหัส</th>
-                                <th>ผู้ซื้อ</th>
+                                <th>ผู้เช่า</th>
                                 <th>ยอดรวม</th>
                                 <th>สถานะ</th>
                                 <th>วันที่</th>
@@ -336,7 +336,7 @@ try {
                         </tbody>
                     </table>
                     <?php else: ?>
-                    <div class="empty-state"><i class="fa-solid fa-shopping-cart"></i><p>ยังไม่มีคำสั่งซื้อ</p></div>
+                    <div class="empty-state"><i class="fa-solid fa-shopping-cart"></i><p>ยังไม่มีคำสั่งเช่า</p></div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -344,7 +344,7 @@ try {
             <!-- สินค้ายอดนิยม -->
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fa-solid fa-fire"></i> สินค้ายอดนิยม</h2>
+                    <h2><i class="fa-solid fa-fire"></i> พระเครื่องยอดนิยม</h2>
                 </div>
                 <div class="card-body">
                     <?php if (count($top_products) > 0): ?>

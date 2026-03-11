@@ -164,7 +164,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                 <tr>
                     <th style="width:60px">#</th>
                     <th>ชื่อหมวดหมู่</th>
-                    <th>จำนวนสินค้า</th>
+                    <th>จำนวนพระเครื่อง</th>
                     <th style="width:140px">จัดการ</th>
                 </tr>
             </thead>
@@ -195,7 +195,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                 <td>
                     <span class="cat-count-chip">
                         <i class="fa-solid fa-box"></i>
-                        <?php echo number_format($c['product_count']); ?> สินค้า
+                        <?php echo number_format($c['product_count']); ?> พระเครื่อง
                     </span>
                 </td>
                 <td>

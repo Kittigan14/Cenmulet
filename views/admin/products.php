@@ -48,7 +48,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>จัดการสินค้า - Cenmulet Admin</title>
+    <title>จัดการพระเครื่อง - Cenmulet Admin</title>
     <style>
         #prodModal { display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:center;justify-content:center; }
         .prod-detail-box { background:#fff;border-radius:16px;padding:28px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2); }
@@ -62,7 +62,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 
 <main class="main-content">
     <div class="top-bar">
-        <h1><i class="fa-solid fa-box"></i> จัดการสินค้า</h1>
+        <h1><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</h1>
         <span class="badge badge-info" style="font-size:14px;padding:8px 16px">
             ทั้งหมด <?php echo number_format($total_products); ?> รายการ
         </span>
@@ -70,9 +70,9 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 
     <?php if (isset($_GET['success'])): ?>
         <?php if ($_GET['success'] === 'hidden'): ?>
-        <div class="alert alert-success"><i class="fa-solid fa-eye-slash"></i> <span>ซ่อนสินค้าเรียบร้อยแล้ว</span></div>
+        <div class="alert alert-success"><i class="fa-solid fa-eye-slash"></i> <span>ซ่อนพระเครื่องเรียบร้อยแล้ว</span></div>
         <?php elseif ($_GET['success'] === 'shown'): ?>
-        <div class="alert alert-success"><i class="fa-solid fa-eye"></i> <span>แสดงสินค้าเรียบร้อยแล้ว</span></div>
+        <div class="alert alert-success"><i class="fa-solid fa-eye"></i> <span>แสดงพระเครื่องเรียบร้อยแล้ว</span></div>
         <?php endif; ?>
     <?php endif; ?>
     <?php if (isset($_GET['error'])): ?>
@@ -82,15 +82,15 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <!-- Stats -->
     <div class="stats-mini" style="margin-bottom:20px">
         <div class="stat-mini">
-            <div><div class="stat-mini-value"><?php echo $total_products; ?></div><div class="stat-mini-label">สินค้าทั้งหมด</div></div>
+            <div><div class="stat-mini-value"><?php echo $total_products; ?></div><div class="stat-mini-label"พระเครื่องทั้งหมด</div></div>
             <div class="stat-mini-icon" style="background:#e0e7ff;color:#6366f1"><i class="fa-solid fa-box"></i></div>
         </div>
         <div class="stat-mini">
-            <div><div class="stat-mini-value"><?php echo $in_stock; ?></div><div class="stat-mini-label">มีสินค้า</div></div>
+            <div><div class="stat-mini-value"><?php echo $in_stock; ?></div><div class="stat-mini-label">มีพระเครื่อง</div></div>
             <div class="stat-mini-icon" style="background:#d1fae5;color:#10b981"><i class="fa-solid fa-check-circle"></i></div>
         </div>
         <div class="stat-mini">
-            <div><div class="stat-mini-value"><?php echo $out_stock; ?></div><div class="stat-mini-label">สินค้าหมด</div></div>
+            <div><div class="stat-mini-value"><?php echo $out_stock; ?></div><div class="stat-mini-label"พระเครื่องหมด</div></div>
             <div class="stat-mini-icon" style="background:#fef3c7;color:#f59e0b"><i class="fa-solid fa-exclamation-circle"></i></div>
         </div>
     </div>
@@ -98,7 +98,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <!-- Filter bar -->
     <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center">
         <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
-               placeholder="ค้นหาชื่อสินค้า..."
+               placeholder="ค้นหาชื่อพระเครื่อง..."
                style="flex:2;min-width:180px;padding:9px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
         <select name="cat" style="flex:1;min-width:140px;padding:9px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
             <option value="0">ทุกหมวดหมู่</option>
@@ -124,7 +124,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 
     <div class="card">
         <div class="card-header">
-            <h2><i class="fa-solid fa-box"></i> รายการสินค้า (<?php echo count($products); ?>)</h2>
+            <h2><i class="fa-solid fa-box"></i> รายการพระเครื่อง (<?php echo count($products); ?>)</h2>
         </div>
         <div class="table-wrapper">
         <?php if (count($products) > 0): ?>
@@ -132,7 +132,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
             <thead>
                 <tr>
                     <th>รูปภาพ</th>
-                    <th>ชื่อสินค้า</th>
+                    <th>ชื่อพระเครื่อง</th>
                     <th>หมวดหมู่</th>
                     <th>ร้านค้า</th>
                     <th>ราคา</th>
@@ -180,7 +180,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                     <?php if (!empty($p['is_hidden'])): ?>
                     <span class="badge" style="background:#f3f4f6;color:#6b7280"><i class="fa-solid fa-eye-slash"></i> ซ่อนอยู่</span>
                     <?php elseif ($p['quantity'] > 0): ?>
-                    <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> มีสินค้า</span>
+                    <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> มีพระเครื่อง</span>
                     <?php else: ?>
                     <span class="badge badge-warning"><i class="fa-solid fa-circle-exclamation"></i> หมด</span>
                     <?php endif; ?>
@@ -188,13 +188,13 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                 <td onclick="event.stopPropagation()">
                     <?php if (!empty($p['is_hidden'])): ?>
                     <a href="/admin/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
-                       class="btn-icon" title="แสดงสินค้า"
+                       class="btn-icon" title="แสดงพระเครื่อง"
                        style="background:#d1fae5;color:#059669;border-color:#a7f3d0">
                         <i class="fa-solid fa-eye"></i>
                     </a>
                     <?php else: ?>
                     <a href="/admin/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
-                       class="btn-icon" title="ซ่อนสินค้า"
+                       class="btn-icon" title="ซ่อนพระเครื่อง"
                        style="background:#fef3c7;color:#d97706;border-color:#fde68a">
                         <i class="fa-solid fa-eye-slash"></i>
                     </a>
@@ -207,7 +207,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         <?php else: ?>
         <div class="empty-state">
             <i class="fa-solid fa-box-open"></i>
-            <h2>ไม่พบสินค้า</h2>
+            <h2>ไม่พบพระเครื่อง</h2>
             <p>ลองเปลี่ยนตัวกรองหรือคำค้นหา</p>
         </div>
         <?php endif; ?>
@@ -221,7 +221,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <div class="prod-detail-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
             <h3 style="font-size:17px;display:flex;align-items:center;gap:8px">
-                <i class="fa-solid fa-box" style="color:#6366f1"></i> ข้อมูลสินค้า
+                <i class="fa-solid fa-box" style="color:#6366f1"></i> ข้อมูลพระเครื่อง
             </h3>
             <button onclick="closeProdDetail()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer">×</button>
         </div>
@@ -232,11 +232,11 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 <script>
 function openProdDetail(p) {
     const qtyColor = p.hidden ? '#6b7280' : (p.qty > 0 ? '#059669' : '#dc2626');
-    const qtyText  = p.hidden ? 'ซ่อนอยู่' : (p.qty > 0 ? 'มีสินค้า (' + Number(p.qty).toLocaleString() + ')' : 'สินค้าหมด');
+    const qtyText  = p.hidden ? 'ซ่อนอยู่' : (p.qty > 0 ? 'มีพระเครื่อง (' + Number(p.qty).toLocaleString() + ')' : 'พระเครื่องหมด');
     document.getElementById('prodDetailContent').innerHTML = `
         ${p.image ? `<img src="/uploads/amulets/${p.image}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:2px solid #e5e7eb;margin-bottom:16px">` : ''}
         <table style="width:100%;border-collapse:collapse;font-size:14px">
-            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:8px 4px;color:#9ca3af;width:40%">ชื่อสินค้า</td><td style="padding:8px 4px;font-weight:600">${p.name}</td></tr>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:8px 4px;color:#9ca3af;width:40%">ชื่อพระเครื่อง</td><td style="padding:8px 4px;font-weight:600">${p.name}</td></tr>
             <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:8px 4px;color:#9ca3af">ที่มา / แหล่งที่มา</td><td style="padding:8px 4px">${p.source || '-'}</td></tr>
             <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:8px 4px;color:#9ca3af">หมวดหมู่</td><td style="padding:8px 4px"><span style="background:#e0e7ff;color:#6366f1;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600">${p.category}</span></td></tr>
             <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:8px 4px;color:#9ca3af">ร้านค้า</td><td style="padding:8px 4px"><span style="background:#ede9fe;color:#6d28d9;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600">${p.store}</span></td></tr>
