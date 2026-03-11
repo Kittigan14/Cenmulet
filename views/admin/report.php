@@ -296,7 +296,7 @@ switch ($report_type) {
         <div class="report-tabs no-print">
             <?php
             $tabs = [
-                'orders'    => ['fa-cart-shopping',  'รายงาน Orders'],
+                'orders'    => ['fa-cart-shopping',  'รายงาน คำสั่งเช่า'],
                 'customers' => ['fa-users',           'ข้อมูลลูกค้า'],
                 'stores'    => ['fa-store',           'ข้อมูลร้านค้า'],
                 'products'  => ['fa-box',             'ข้อมูลพระเครื่อง'],

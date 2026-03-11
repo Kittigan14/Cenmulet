@@ -6,6 +6,41 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: /views/auth/login.php"); exit;
 }
 
+// ── Handle POST: update seller ──────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'update_seller') {
+    $id         = (int)($_POST['id']         ?? 0);
+    $store_name = trim($_POST['store_name']  ?? '');
+    $fullname   = trim($_POST['fullname']    ?? '');
+    $username   = trim($_POST['username']    ?? '');
+    $tel        = trim($_POST['tel']         ?? '');
+    $pay_bank   = trim($_POST['pay_bank']    ?? '');
+    $pay_contax = trim($_POST['pay_contax']  ?? '');
+    $id_per     = preg_replace('/\D/', '', $_POST['id_per'] ?? '');
+    $address    = trim($_POST['address']     ?? '');
+
+    if ($id && $store_name && $fullname && $username) {
+        $check = $db->prepare("SELECT id FROM sellers WHERE username = :u AND id != :id");
+        $check->execute([':u' => $username, ':id' => $id]);
+        if ($check->fetch()) {
+            header("Location: /views/admin/sellers.php?error=duplicate"); exit;
+        }
+        $stmt = $db->prepare("
+            UPDATE sellers SET
+                store_name = :store_name, fullname = :fullname, username = :username,
+                tel = :tel, pay_bank = :pay_bank, pay_contax = :pay_contax,
+                id_per = :id_per, address = :address
+            WHERE id = :id
+        ");
+        $stmt->execute([
+            ':store_name' => $store_name, ':fullname' => $fullname, ':username' => $username,
+            ':tel' => $tel, ':pay_bank' => $pay_bank, ':pay_contax' => $pay_contax,
+            ':id_per' => $id_per, ':address' => $address, ':id' => $id,
+        ]);
+    }
+    header("Location: /views/admin/sellers.php?done=updated"); exit;
+}
+// ───────────────────────────────────────────────────────
+
 $admin_id = $_SESSION['user_id'];
 $stmt = $db->prepare("SELECT * FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
@@ -39,6 +74,21 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>จัดการผู้ขาย - Cenmulet Admin</title>
+    <style>
+        #editSellerModal { display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:center;justify-content:center; }
+        .edit-box { background:#fff;border-radius:16px;padding:28px;max-width:540px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2); }
+        .edit-box label { display:block;font-size:13px;color:#6b7280;margin-bottom:4px;font-weight:600; }
+        .edit-box input, .edit-box textarea, .edit-box select {
+            width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;
+            font-family:inherit;font-size:14px;box-sizing:border-box;transition:border-color .2s;
+        }
+        .edit-box input:focus, .edit-box textarea:focus, .edit-box select:focus { outline:none;border-color:#6366f1; }
+        .edit-box textarea { resize:vertical;min-height:70px; }
+        .form-group { margin-bottom:14px; }
+        .form-row { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+        tr.clickable-row { cursor:pointer; }
+        tr.clickable-row:hover td { background:#f5f3ff !important; }
+    </style>
 </head>
 <body class="admin">
 <div class="dashboard-container">
@@ -53,6 +103,13 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
         </a>
         <?php endif; ?>
     </div>
+
+    <?php if (isset($_GET['done']) && $_GET['done'] === 'updated'): ?>
+    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลผู้ขายเรียบร้อยแล้ว</span></div>
+    <?php endif; ?>
+    <?php if (isset($_GET['error'])): ?>
+    <div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i> <span>เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง</span></div>
+    <?php endif; ?>
 
     <?php if ($pending_sellers > 0): ?>
     <div class="pending-banner">
@@ -121,11 +178,25 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
                     <th>ที่อยู่</th>
                     <th>เอกสาร</th>
                     <th>สถานะ</th>
+                    <th>จัดการ</th>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($sellers as $s): ?>
-            <tr>
+            <?php $sB64 = base64_encode(json_encode([
+                'id'         => (int)$s['id'],
+                'store_name' => $s['store_name'],
+                'fullname'   => $s['fullname'],
+                'username'   => $s['username'],
+                'tel'        => $s['tel'] ?? '',
+                'id_per'     => $s['id_per'] ?? '',
+                'address'    => $s['address'] ?? '',
+                'pay_bank'   => $s['pay_bank'] ?? '',
+                'pay_contax' => $s['pay_contax'] ?? '',
+                'status'     => $s['status'],
+            ], JSON_UNESCAPED_UNICODE)); ?>
+            <tr class="clickable-row" onclick="openEdit('<?php echo $sB64; ?>')"
+                style="cursor:pointer">
                 <td>
                     <div style="display:flex;align-items:center;gap:10px">
                         <?php if (!empty($s['img_store'])): ?>
@@ -183,6 +254,39 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
                     </div>
                     <?php endif; ?>
                 </td>
+                <td class="no-row-click">
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                        <!-- ปุ่มแก้ไข -->
+                        <button onclick="event.stopPropagation();openEdit('<?php echo $sB64; ?>')"
+                            class="btn-icon" title="แก้ไข"
+                            style="background:#e0e7ff;color:#6366f1;border-color:#c7d2fe">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <!-- ปุ่มอนุมัติ/ถอน/ปฏิเสธ -->
+                        <?php if ($s['status'] === 'pending'): ?>
+                        <form method="POST" action="/views/admin/seller_action.php">
+                            <input type="hidden" name="seller_id" value="<?php echo $s['id']; ?>">
+                            <input type="hidden" name="action" value="approve">
+                            <input type="hidden" name="redirect_to" value="/views/admin/sellers.php">
+                            <button type="submit" class="btn-icon" title="อนุมัติ"
+                                style="background:#d1fae5;color:#059669;border-color:#a7f3d0">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </form>
+                        <?php elseif ($s['status'] === 'approved'): ?>
+                        <form method="POST" action="/views/admin/seller_action.php"
+                              onsubmit="return confirm('ถอนสิทธิ์ผู้ขายรายนี้?')">
+                            <input type="hidden" name="seller_id" value="<?php echo $s['id']; ?>">
+                            <input type="hidden" name="action" value="revoke">
+                            <input type="hidden" name="redirect_to" value="/views/admin/sellers.php">
+                            <button type="submit" class="btn-icon" title="ถอนสิทธิ์"
+                                style="background:#fef3c7;color:#d97706;border-color:#fde68a">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                    </div>
+                </td>
             </tr>
             <?php endforeach; ?>
             </tbody>
@@ -198,5 +302,89 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
     </div>
 </main>
 </div>
+
+<!-- Edit Seller Modal -->
+<div id="editSellerModal" onclick="if(event.target===this)closeEdit()">
+    <div class="edit-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="font-size:17px;display:flex;align-items:center;gap:8px">
+                <i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขข้อมูลผู้ขาย
+            </h3>
+            <button onclick="closeEdit()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer">×</button>
+        </div>
+        <form action="/views/admin/sellers.php" method="POST">
+            <input type="hidden" name="_action" value="update_seller">
+            <input type="hidden" name="id" id="es_id">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-store"></i> ชื่อร้านค้า</label>
+                    <input type="text" name="store_name" id="es_store_name" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-at"></i> ชื่อผู้ใช้</label>
+                    <input type="text" name="username" id="es_username" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-user"></i> ชื่อ-นามสกุล</label>
+                    <input type="text" name="fullname" id="es_fullname" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-phone"></i> เบอร์โทร</label>
+                    <input type="text" name="tel" id="es_tel">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fa-solid fa-building-columns"></i> ธนาคาร</label>
+                    <input type="text" name="pay_bank" id="es_pay_bank" placeholder="เช่น ธนาคารกสิกรไทย">
+                </div>
+                <div class="form-group">
+                    <label><i class="fa-solid fa-credit-card"></i> เลขบัญชี / พร้อมเพย์</label>
+                    <input type="text" name="pay_contax" id="es_pay_contax">
+                </div>
+            </div>
+            <div class="form-group">
+                <label><i class="fa-solid fa-id-card"></i> เลขบัตรประชาชน</label>
+                <input type="text" name="id_per" id="es_id_per" maxlength="13" placeholder="13 หลัก">
+            </div>
+            <div class="form-group">
+                <label><i class="fa-solid fa-location-dot"></i> ที่อยู่</label>
+                <textarea name="address" id="es_address"></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+                <button type="button" onclick="closeEdit()" class="btn btn-secondary">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> บันทึก
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEdit(b64) {
+    var s = JSON.parse(decodeURIComponent(escape(atob(b64))));
+    document.getElementById('es_id').value         = s.id;
+    document.getElementById('es_store_name').value = s.store_name;
+    document.getElementById('es_username').value   = s.username;
+    document.getElementById('es_fullname').value   = s.fullname;
+    document.getElementById('es_tel').value        = s.tel;
+    document.getElementById('es_pay_bank').value   = s.pay_bank;
+    document.getElementById('es_pay_contax').value = s.pay_contax;
+    document.getElementById('es_id_per').value     = s.id_per;
+    document.getElementById('es_address').value    = s.address;
+    document.getElementById('editSellerModal').style.display = 'flex';
+}
+function closeEdit() {
+    document.getElementById('editSellerModal').style.display = 'none';
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeEdit();
+});
+</script>
 </body>
 </html>

@@ -6,6 +6,22 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: /views/auth/login.php"); exit;
 }
 
+// ── Handle POST: update product ─────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'update_product') {
+    $upd_id  = (int)($_POST['id']          ?? 0);
+    $name    = trim($_POST['amulet_name']  ?? '');
+    $source  = trim($_POST['source']       ?? '');
+    $upd_cat = (int)($_POST['categoryId']  ?? 0);
+    $price   = (float)($_POST['price']     ?? 0);
+    $qty     = (int)($_POST['quantity']    ?? 0);
+    if ($upd_id && $name) {
+        $s = $db->prepare("UPDATE amulets SET amulet_name=:n,source=:s,categoryId=:c,price=:p,quantity=:q WHERE id=:id");
+        $s->execute([':n'=>$name,':s'=>$source,':c'=>$upd_cat,':p'=>$price,':q'=>$qty,':id'=>$upd_id]);
+    }
+    header("Location: /views/admin/products.php?success=updated"); exit;
+}
+// ────────────────────────────────────────────────────────
+
 $admin_id = $_SESSION['user_id'];
 $stmt = $db->prepare("SELECT id, fullname FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
@@ -69,7 +85,9 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     </div>
 
     <?php if (isset($_GET['success'])): ?>
-        <?php if ($_GET['success'] === 'hidden'): ?>
+        <?php if ($_GET['success'] === 'updated'): ?>
+        <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลพระเครื่องเรียบร้อยแล้ว</span></div>
+        <?php elseif ($_GET['success'] === 'hidden'): ?>
         <div class="alert alert-success"><i class="fa-solid fa-eye-slash"></i> <span>ซ่อนพระเครื่องเรียบร้อยแล้ว</span></div>
         <?php elseif ($_GET['success'] === 'shown'): ?>
         <div class="alert alert-success"><i class="fa-solid fa-eye"></i> <span>แสดงพระเครื่องเรียบร้อยแล้ว</span></div>
@@ -148,6 +166,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                 'name'     => $p['amulet_name'],
                 'source'   => $p['source'] ?? '',
                 'category' => $p['category_name'] ?? '-',
+                'cat_id'   => (int)($p['categoryId'] ?? 0),
                 'store'    => $p['store_name'] ?? '-',
                 'price'    => $p['price'],
                 'qty'      => $p['quantity'],
@@ -186,6 +205,23 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                     <?php endif; ?>
                 </td>
                 <td onclick="event.stopPropagation()">
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                    <button onclick="openProdDetail(<?php echo htmlspecialchars(json_encode([
+                        'id'       => $p['id'],
+                        'name'     => $p['amulet_name'],
+                        'source'   => $p['source'] ?? '',
+                        'category' => $p['category_name'] ?? '-',
+                        'cat_id'   => (int)($p['categoryId'] ?? 0),
+                        'store'    => $p['store_name'] ?? '-',
+                        'price'    => $p['price'],
+                        'qty'      => $p['quantity'],
+                        'image'    => $p['image'] ?? '',
+                        'hidden'   => !empty($p['is_hidden']),
+                    ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); ?>);switchToEdit()"
+                        class="btn-icon" title="แก้ไข"
+                        style="background:#e0e7ff;color:#6366f1;border-color:#c7d2fe">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
                     <?php if (!empty($p['is_hidden'])): ?>
                     <a href="/admin/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
                        class="btn-icon" title="แสดงพระเครื่อง"
@@ -199,6 +235,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                         <i class="fa-solid fa-eye-slash"></i>
                     </a>
                     <?php endif; ?>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -216,21 +253,96 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 </main>
 </div>
 
-<!-- Product Detail Modal -->
+<!-- Product Detail / Edit Modal -->
 <div id="prodModal" onclick="if(event.target===this)closeProdDetail()">
     <div class="prod-detail-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-            <h3 style="font-size:17px;display:flex;align-items:center;gap:8px">
+            <h3 id="modalTitle" style="font-size:17px;display:flex;align-items:center;gap:8px">
                 <i class="fa-solid fa-box" style="color:#6366f1"></i> ข้อมูลพระเครื่อง
             </h3>
             <button onclick="closeProdDetail()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer">×</button>
         </div>
-        <div id="prodDetailContent"></div>
+
+        <!-- View Mode -->
+        <div id="prodViewMode">
+            <div id="prodDetailContent"></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+                <button onclick="closeProdDetail()" class="btn btn-secondary">ปิด</button>
+                <button onclick="switchToEdit()" class="btn btn-primary">
+                    <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                </button>
+            </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="prodEditMode" style="display:none">
+            <form action="/views/admin/products.php" method="POST">
+                <input type="hidden" name="_action" value="update_product">
+                <input type="hidden" name="id" id="ep_id">
+                <div style="margin-bottom:14px">
+                    <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                        <i class="fa-solid fa-box"></i> ชื่อพระเครื่อง
+                    </label>
+                    <input type="text" name="amulet_name" id="ep_name" required
+                        style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                </div>
+                <div style="margin-bottom:14px">
+                    <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                        <i class="fa-solid fa-landmark"></i> ที่มา / แหล่งที่มา
+                    </label>
+                    <input type="text" name="source" id="ep_source"
+                        style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                </div>
+                <div style="margin-bottom:14px">
+                    <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                        <i class="fa-solid fa-tag"></i> หมวดหมู่
+                    </label>
+                    <select name="categoryId" id="ep_cat"
+                        style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                        <?php foreach ($categories as $c): ?>
+                        <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['category_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+                    <div>
+                        <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                            <i class="fa-solid fa-baht-sign"></i> ราคา (บาท)
+                        </label>
+                        <input type="number" name="price" id="ep_price" min="0" step="0.01" required
+                            style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                            <i class="fa-solid fa-cubes"></i> จำนวนคงเหลือ
+                        </label>
+                        <input type="number" name="quantity" id="ep_qty" min="0" required
+                            style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+                    <button type="button" onclick="switchToView()" class="btn btn-secondary">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> บันทึก
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <script>
+var _currentProd = null;
+
 function openProdDetail(p) {
+    _currentProd = p;
+    switchToView();
+    document.getElementById('prodModal').style.display = 'flex';
+}
+
+function switchToView() {
+    var p = _currentProd;
+    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-box" style="color:#6366f1"></i> ข้อมูลพระเครื่อง';
     const qtyColor = p.hidden ? '#6b7280' : (p.qty > 0 ? '#059669' : '#dc2626');
     const qtyText  = p.hidden ? 'ซ่อนอยู่' : (p.qty > 0 ? 'มีพระเครื่อง (' + Number(p.qty).toLocaleString() + ')' : 'พระเครื่องหมด');
     document.getElementById('prodDetailContent').innerHTML = `
@@ -244,8 +356,23 @@ function openProdDetail(p) {
             <tr><td style="padding:8px 4px;color:#9ca3af">สถานะ / คงเหลือ</td><td style="padding:8px 4px;font-weight:700;color:${qtyColor}">${qtyText}</td></tr>
         </table>
     `;
-    document.getElementById('prodModal').style.display = 'flex';
+    document.getElementById('prodViewMode').style.display = 'block';
+    document.getElementById('prodEditMode').style.display = 'none';
 }
+
+function switchToEdit() {
+    var p = _currentProd;
+    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขพระเครื่อง';
+    document.getElementById('ep_id').value    = p.id;
+    document.getElementById('ep_name').value  = p.name;
+    document.getElementById('ep_source').value = p.source || '';
+    document.getElementById('ep_cat').value   = p.cat_id || '';
+    document.getElementById('ep_price').value = p.price;
+    document.getElementById('ep_qty').value   = p.qty;
+    document.getElementById('prodViewMode').style.display = 'none';
+    document.getElementById('prodEditMode').style.display = 'block';
+}
+
 function closeProdDetail() { document.getElementById('prodModal').style.display = 'none'; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProdDetail(); });
 </script>

@@ -6,6 +6,35 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: /views/auth/login.php"); exit;
 }
 
+// ── Handle POST: update order ────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'update_order') {
+    $oid      = (int)($_POST['id']              ?? 0);
+    $tracking = trim($_POST['tracking_number']  ?? '');
+    $o_status = trim($_POST['order_status']     ?? '');
+    $p_status = trim($_POST['pay_status']       ?? '');
+    $address  = trim($_POST['address']          ?? '');
+
+    $allowed_o = ['pending','confirmed','completed'];
+    $allowed_p = ['waiting','confirmed','rejected'];
+
+    if ($oid) {
+        if (in_array($o_status, $allowed_o)) {
+            $db->prepare("UPDATE orders SET status=:s, tracking_number=:t WHERE id=:id")
+               ->execute([':s'=>$o_status, ':t'=>$tracking, ':id'=>$oid]);
+            if ($address) {
+                $db->prepare("UPDATE users SET address=:a WHERE id=(SELECT user_id FROM orders WHERE id=:id)")
+                   ->execute([':a'=>$address, ':id'=>$oid]);
+            }
+        }
+        if (in_array($p_status, $allowed_p)) {
+            $db->prepare("UPDATE payments SET status=:s WHERE order_id=:id")
+               ->execute([':s'=>$p_status, ':id'=>$oid]);
+        }
+    }
+    header("Location: /views/admin/orders.php?success=updated"); exit;
+}
+// ─────────────────────────────────────────────────────────
+
 $admin_id = $_SESSION['user_id'];
 $stmt = $db->prepare("SELECT id, fullname FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
@@ -89,6 +118,10 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
             </a>
         </div>
     </div>
+
+    <?php if (isset($_GET['success']) && $_GET['success'] === 'updated'): ?>
+    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลคำสั่งเช่าเรียบร้อยแล้ว</span></div>
+    <?php endif; ?>
 
     <!-- Stats -->
     <div class="stats-mini" style="margin-bottom:20px">
@@ -220,10 +253,17 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                     <span style="color:#9ca3af"><?php echo date('H:i', strtotime($o['created_at'])); ?></span>
                 </td>
                 <td>
-                    <button class="btn-icon view" title="ดูรายละเอียด"
-                            onclick="openDetail(<?php echo $o['id']; ?>)">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
+                    <div style="display:flex;flex-direction:column;gap:5px">
+                        <button class="btn-icon view" title="ดูรายละเอียด"
+                                onclick="openDetail(<?php echo $o['id']; ?>)">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="btn-icon" title="แก้ไข"
+                                style="background:#e0e7ff;color:#6366f1;border-color:#c7d2fe"
+                                onclick="openDetail(<?php echo $o['id']; ?>);setTimeout(switchOrderEdit,50)">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -249,15 +289,76 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 <div id="detailModal" onclick="if(event.target===this)closeDetail()">
     <div class="detail-box" id="detailBox">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-            <h3 style="font-size:18px;display:flex;align-items:center;gap:8px">
+            <h3 id="detailTitle" style="font-size:18px;display:flex;align-items:center;gap:8px">
                 <i class="fa-solid fa-receipt" style="color:#6366f1"></i>
                 รายละเอียดคำสั่งเช่า
             </h3>
             <button onclick="closeDetail()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer">×</button>
         </div>
-        <div id="detailContent" style="color:#6b7280;text-align:center;padding:20px">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;margin-bottom:10px;display:block"></i>
-            กำลังโหลด...
+        <!-- View mode -->
+        <div id="detailViewMode">
+            <div id="detailContent" style="color:#6b7280;text-align:center;padding:20px">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;margin-bottom:10px;display:block"></i>
+                กำลังโหลด...
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+                <button onclick="closeDetail()" class="btn btn-secondary">ปิด</button>
+                <button onclick="switchOrderEdit()" class="btn btn-primary">
+                    <i class="fa-solid fa-pen-to-square"></i> แก้ไข
+                </button>
+            </div>
+        </div>
+        <!-- Edit mode -->
+        <div id="detailEditMode" style="display:none">
+            <form action="/views/admin/orders.php" method="POST">
+                <input type="hidden" name="_action" value="update_order">
+                <input type="hidden" name="id" id="eo_id">
+                <div style="margin-bottom:14px">
+                    <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                        <i class="fa-solid fa-truck"></i> เลขพัสดุ
+                    </label>
+                    <input type="text" name="tracking_number" id="eo_tracking"
+                        placeholder="กรอกเลขพัสดุ"
+                        style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+                    <div>
+                        <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                            <i class="fa-solid fa-cart-shopping"></i> สถานะคำสั่งเช่า
+                        </label>
+                        <select name="order_status" id="eo_ostatus"
+                            style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                            <option value="pending">รอดำเนินการ</option>
+                            <option value="confirmed">กำลังจัดส่ง</option>
+                            <option value="completed">เสร็จสิ้น</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                            <i class="fa-solid fa-money-bill"></i> สถานะชำระเงิน
+                        </label>
+                        <select name="pay_status" id="eo_pstatus"
+                            style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
+                            <option value="waiting">รอยืนยัน</option>
+                            <option value="confirmed">ยืนยันแล้ว</option>
+                            <option value="rejected">ปฏิเสธ</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom:14px">
+                    <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
+                        <i class="fa-solid fa-location-dot"></i> ที่อยู่จัดส่ง
+                    </label>
+                    <textarea name="address" id="eo_address" rows="3"
+                        style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box;resize:vertical"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+                    <button type="button" onclick="switchOrderView()" class="btn btn-secondary">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> บันทึก
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -300,6 +401,7 @@ const ordersData = <?php
                 'slip'            => $o['slip_image'],
                 'transfer_amount' => $o['transfer_amount'],
                 'transfer_time'   => $o['transfer_time'],
+                'tracking'        => $o['tracking_number'] ?? '',
                 'items'           => $grouped[$o['id']] ?? [],
             ];
         }
@@ -323,9 +425,15 @@ function esc(s) {
     return d.innerHTML;
 }
 
+var _currentOrder = null;
+
 function openDetail(id) {
     const o = ordersData[id];
     if (!o) return;
+    _currentOrder = o;
+    document.getElementById('detailViewMode').style.display = 'block';
+    document.getElementById('detailEditMode').style.display = 'none';
+    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-receipt" style="color:#6366f1"></i> รายละเอียดคำสั่งเช่า';
 
     const payLabels = {
         waiting:  '<span class="badge badge-warning"><i class="fa-solid fa-clock"></i> รอยืนยัน</span>',
@@ -411,6 +519,25 @@ function openDetail(id) {
 
     document.getElementById('detailModal').style.display = 'flex';
 }
+
+function switchOrderEdit() {
+    const o = _currentOrder;
+    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขคำสั่งเช่า';
+    document.getElementById('eo_id').value       = o.id;
+    document.getElementById('eo_tracking').value = o.tracking || '';
+    document.getElementById('eo_ostatus').value  = o.status  || 'pending';
+    document.getElementById('eo_pstatus').value  = o.pay     || 'waiting';
+    document.getElementById('eo_address').value  = o.address || '';
+    document.getElementById('detailViewMode').style.display = 'none';
+    document.getElementById('detailEditMode').style.display = 'block';
+}
+
+function switchOrderView() {
+    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-receipt" style="color:#6366f1"></i> รายละเอียดคำสั่งเช่า';
+    document.getElementById('detailViewMode').style.display = 'block';
+    document.getElementById('detailEditMode').style.display = 'none';
+}
+
 function closeDetail() { document.getElementById('detailModal').style.display = 'none'; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSlip(); closeDetail(); } });
 </script>
