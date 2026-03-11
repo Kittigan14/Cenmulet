@@ -172,7 +172,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
                 <tr>
                     <th>ร้านค้า</th>
                     <th>เจ้าของ</th>
-                    <th>เบอร์โทร</th>
+                    <th>เบอร์โทรศัพท์</th>
                     <th>เลขบัตรประชาชน</th>
                     <th>ช่องทางชำระเงิน</th>
                     <th>ที่อยู่</th>
@@ -332,7 +332,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
                     <input type="text" name="fullname" id="es_fullname" required>
                 </div>
                 <div class="form-group">
-                    <label><i class="fa-solid fa-phone"></i> เบอร์โทร</label>
+                    <label><i class="fa-solid fa-phone"></i> เบอร์โทรศัพท์</label>
                     <input type="text" name="tel" id="es_tel">
                 </div>
             </div>
