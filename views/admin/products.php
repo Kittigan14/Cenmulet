@@ -82,7 +82,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <!-- Stats -->
     <div class="stats-mini" style="margin-bottom:20px">
         <div class="stat-mini">
-            <div><div class="stat-mini-value"><?php echo $total_products; ?></div><div class="stat-mini-label"พระเครื่องทั้งหมด</div></div>
+            <div><div class="stat-mini-value"><?php echo $total_products; ?></div><div class="stat-mini-label">พระเครื่องทั้งหมด</div></div>
             <div class="stat-mini-icon" style="background:#e0e7ff;color:#6366f1"><i class="fa-solid fa-box"></i></div>
         </div>
         <div class="stat-mini">
@@ -90,7 +90,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
             <div class="stat-mini-icon" style="background:#d1fae5;color:#10b981"><i class="fa-solid fa-check-circle"></i></div>
         </div>
         <div class="stat-mini">
-            <div><div class="stat-mini-value"><?php echo $out_stock; ?></div><div class="stat-mini-label"พระเครื่องหมด</div></div>
+            <div><div class="stat-mini-value"><?php echo $out_stock; ?></div><div class="stat-mini-label">พระเครื่องหมด</div></div>
             <div class="stat-mini-icon" style="background:#fef3c7;color:#f59e0b"><i class="fa-solid fa-exclamation-circle"></i></div>
         </div>
     </div>
