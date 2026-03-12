@@ -26,6 +26,14 @@ $filter = $_GET['filter'] ?? 'all';
 $allowed = ['all','waiting','confirmed','completed'];
 if (!in_array($filter, $allowed)) $filter = 'all';
 
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);   // ดึงปี ค.ศ. เช่น 2026
+    $year_be = $year_ad + 543;                // บวก 543 → 2569
+    $formatted = date($format, $timestamp);   // แปลงเป็น string ปกติก่อน
+    return str_replace($year_ad, $year_be, $formatted); // แทนปีใน string
+}
+
 // ดึงคำสั่งเช่าที่มีพระเครื่องของ seller นี้
 try {
     $filter_sql = '';
@@ -303,7 +311,7 @@ try {
                                 <?php echo $order['transfer_amount'] !== null ? '฿' . number_format((float)$order['transfer_amount'], 2) : '<span style="color:#9ca3af">-</span>'; ?>
                             </td>
                             <td style="font-size:12px;color:#6b7280;white-space:nowrap">
-                                <?php echo $order['transfer_time'] ? date('d/m/Y H:i', strtotime($order['transfer_time'])) : '<span style="color:#9ca3af">-</span>'; ?>
+                                <?php echo $order['transfer_time'] ? dateTH('d/m/Y H:i', strtotime($order['transfer_time'])) : '<span style="color:#9ca3af">-</span>'; ?>
                             </td>
                             <td>
                                 <?php if ($order['payment_status'] === 'waiting'): ?>
@@ -356,8 +364,8 @@ try {
                                 <?php endif; ?>
                             </td>
                             <td style="font-size:13px;color:#6b7280;white-space:nowrap">
-                                <?php echo date('d/m/Y', strtotime($order['created_at'])); ?><br>
-                                <span style="color:#9ca3af"><?php echo date('H:i', strtotime($order['created_at'])); ?></span>
+                                <?php echo dateTH('d/m/Y', strtotime($order['created_at'])); ?><br>
+                                <span style="color:#9ca3af"><?php echo dateTH('H:i', strtotime($order['created_at'])); ?></span>
                             </td>
                             <td>
                                 <div class="action-buttons">

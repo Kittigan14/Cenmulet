@@ -21,6 +21,15 @@ if (!in_array($report_type, $allowed_types)) $report_type = 'orders';
 $date_from = $_GET['date_from'] ?? date('Y-m-01');         // ต้นเดือนปัจจุบัน
 $date_to   = $_GET['date_to']   ?? date('Y-m-d');          // วันนี้
 
+// แปลงวันที่เป็นปี พ.ศ.
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);
+    $year_be = $year_ad + 543;
+    $formatted = date($format, $timestamp);
+    return str_replace($year_ad, $year_be, $formatted);
+}
+
 // ── ดึงข้อมูลตามประเภท ────────────────────────────────
 $data     = [];
 $summary  = [];
@@ -280,7 +289,7 @@ switch ($report_type) {
         </div>
         <?php if ($report_type === 'orders'): ?>
         <div class="print-date-range">
-            สรุปยอดขายภายในวันที่ <?php echo date('d/m/Y', strtotime($date_from)); ?> – <?php echo date('d/m/Y', strtotime($date_to)); ?>
+            สรุปยอดขายภายในวันที่ <?php echo dateTH('d/m/Y', strtotime($date_from)); ?> – <?php echo dateTH('d/m/Y', strtotime($date_to)); ?>
         </div>
         <?php endif; ?>
 
@@ -315,18 +324,29 @@ switch ($report_type) {
         </div>
 
         <!-- Date filter (Orders เท่านั้น) -->
+        <!-- [แก้ไข] เปลี่ยนจาก input type="date" เป็น Flatpickr เพื่อแสดงปี พ.ศ. ได้ -->
+        <!-- โครงสร้าง: input[text] แสดงผล พ.ศ. + input[hidden] ส่งค่า ค.ศ. จริงไปยัง DB -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+        <style>
+            .flatpickr-input { padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;background:#fff;cursor:pointer; }
+            .flatpickr-input:focus { outline:none;border-color:#6366f1; }
+        </style>
         <?php if ($report_type === 'orders'): ?>
         <form method="GET" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px" class="no-print">
             <input type="hidden" name="type" value="orders">
             <div>
                 <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">ตั้งแต่วันที่</label>
-                <input type="date" name="date_from" value="<?php echo $date_from; ?>"
-                       style="padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
+                <!-- input text แสดง พ.ศ. ให้ user -->
+                <input type="text" id="display_date_from" class="flatpickr-input"
+                       value="<?php echo dateTH('d/m/Y', strtotime($date_from)); ?>" readonly>
+                <!-- hidden ส่งค่า ค.ศ. จริงไป query DB -->
+                <input type="hidden" name="date_from" id="date_from" value="<?php echo $date_from; ?>">
             </div>
             <div>
                 <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">ถึงวันที่</label>
-                <input type="date" name="date_to" value="<?php echo $date_to; ?>"
-                       style="padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
+                <input type="text" id="display_date_to" class="flatpickr-input"
+                       value="<?php echo dateTH('d/m/Y', strtotime($date_to)); ?>" readonly>
+                <input type="hidden" name="date_to" id="date_to" value="<?php echo $date_to; ?>">
             </div>
             <button type="submit" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-filter"></i> กรอง
@@ -398,7 +418,7 @@ switch ($report_type) {
                         <?php echo $r['tracking_number'] ? htmlspecialchars($r['tracking_number']) : '<span style="color:#d1d5db">-</span>'; ?>
                     </td>
                     <td style="font-size:12px;white-space:nowrap">
-                        <?php echo date('d/m/Y H:i', strtotime($r['created_at'])); ?>
+                        <?php echo dateTH('d/m/Y H:i', strtotime($r['created_at'])); ?>
                     </td>
                 </tr>
                 <?php endforeach; endif; ?>
@@ -414,7 +434,7 @@ switch ($report_type) {
                     <td style="text-align:center;font-weight:600"><?php echo number_format($r['order_count']); ?></td>
                     <td><strong style="color:#10b981">฿<?php echo number_format($r['total_spent'],2); ?></strong></td>
                     <td style="font-size:12px;color:#6b7280">
-                        <?php echo isset($r['created_at']) ? date('d/m/Y',strtotime($r['created_at'])) : '-'; ?>
+                        <?php echo isset($r['created_at']) ? dateTH('d/m/Y',strtotime($r['created_at'])) : '-'; ?>
                     </td>
                 </tr>
                 <?php endforeach; endif; ?>
@@ -471,8 +491,8 @@ switch ($report_type) {
         <!-- Print Footer (แสดงเฉพาะตอนพิมพ์) -->
         <div class="print-footer">
             <div>ผู้พิมพ์รายงาน : <?php echo htmlspecialchars($admin['fullname']); ?></div>
-            <div>วันที่พิมพ์ : <?php echo date('d') . ' ' . ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'][date('n')] . ' ' . (date('Y') + 543); ?></div>
-            <div>เวลาที่พิมพ์ : <?php echo date('H:i'); ?> น.</div>
+            <div>วันที่พิมพ์ : <?php echo dateTH('d') . ' ' . ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'][date('n')] . ' ' . (date('Y') + 543); ?></div>
+            <div>เวลาที่พิมพ์ : <?php echo dateTH('H:i'); ?> น.</div>
         </div>
 
         <div style="text-align:center;margin-top:20px" class="no-print">
@@ -486,5 +506,69 @@ switch ($report_type) {
 
     </main>
 </div>
+<!-- [แก้ไข] Flatpickr script — แปลงปีเป็น พ.ศ. ทั้งใน input และ header ปฏิทิน -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+<script>
+// แปลงวันที่ Date object → string dd/mm/พ.ศ.
+function toBEString(d) {
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yy = d.getFullYear() + 543;
+    return dd + '/' + mm + '/' + yy;
+}
+
+// แปลงปีใน calendar header (month/year dropdowns) เป็น พ.ศ.
+function fixCalendarHeader(fp) {
+    const yearEl = fp.calendarContainer.querySelector('.numInput.cur-year');
+    if (yearEl) {
+        yearEl.value = parseInt(yearEl.value) + 543;
+        // ดักการพิมพ์ปีในช่อง year input ของ flatpickr
+        yearEl.addEventListener('input', function() {
+            if (this.value.length === 4) {
+                const adYear = parseInt(this.value) - 543;
+                fp.set('maxDate', adYear + '-12-31');
+                fp.changeYear(adYear);
+            }
+        });
+    }
+}
+
+function initDatePicker(displayId, hiddenId, defaultDate) {
+    const fp = flatpickr('#' + displayId, {
+        dateFormat: 'Y-m-d',
+        defaultDate: defaultDate,
+        locale: { firstDayOfWeek: 1 },
+
+        // onReady: ทำงานหลัง Flatpickr render เสร็จ
+        // แก้ค่าใน input และ header ให้เป็น พ.ศ. ทันที
+        onReady: function(selectedDates, dateStr, fp) {
+            if (selectedDates.length > 0) {
+                document.getElementById(displayId).value = toBEString(selectedDates[0]);
+            }
+            fixCalendarHeader(fp);
+        },
+
+        // onMonthChange / onYearChange: แก้ header ทุกครั้งที่เปลี่ยนเดือน/ปี
+        onMonthChange: function(selectedDates, dateStr, fp) {
+            fixCalendarHeader(fp);
+        },
+        onYearChange: function(selectedDates, dateStr, fp) {
+            fixCalendarHeader(fp);
+        },
+
+        onChange: function(selectedDates, dateStr, fp) {
+            // hidden input รับค่า ค.ศ. ส่งไป DB
+            document.getElementById(hiddenId).value = dateStr;
+            // text input แสดง พ.ศ.
+            if (selectedDates.length > 0) {
+                document.getElementById(displayId).value = toBEString(selectedDates[0]);
+            }
+        }
+    });
+}
+
+initDatePicker('display_date_from', 'date_from', '<?php echo $date_from; ?>');
+initDatePicker('display_date_to',   'date_to',   '<?php echo $date_to; ?>');
+</script>
 </body>
 </html>

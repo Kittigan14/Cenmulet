@@ -9,6 +9,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 
 $admin_id = $_SESSION['user_id'];
 
+// แปลงวันที่เป็นปี พ.ศ.
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);
+    $year_be = $year_ad + 543;
+    $formatted = date($format, $timestamp);
+    return str_replace($year_ad, $year_be, $formatted);
+}
+
 try {
     $stmt = $db->prepare("SELECT * FROM admins WHERE id = :id");
     $stmt->execute([':id' => $admin_id]);
@@ -89,7 +98,7 @@ try {
             <h1><i class="fa-solid fa-chart-line"></i> แดชบอร์ดภาพรวม</h1>
             <span style="font-size:13px;color:#6b7280">
                 <i class="fa-solid fa-calendar"></i>
-                <?php echo date('d/m/Y'); ?>
+                <?php echo dateTH('d/m/Y'); ?>
             </span>
         </div>
 
@@ -330,7 +339,7 @@ try {
                                         <span class="badge badge-warning">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td style="font-size:12px;color:#6b7280"><?php echo date('d/m/Y H:i', strtotime($o['created_at'])); ?></td>
+                                <td style="font-size:12px;color:#6b7280"><?php echo dateTH('d/m/Y H:i', strtotime($o['created_at'])); ?></td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>

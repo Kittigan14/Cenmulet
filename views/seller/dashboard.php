@@ -65,6 +65,14 @@ try {
     ");
     $stmt->execute([':seller_id' => $seller_id]);
     $low_stock = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+    function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);   // ดึงปี ค.ศ. เช่น 2026
+    $year_be = $year_ad + 543;                // บวก 543 → 2569
+    $formatted = date($format, $timestamp);   // แปลงเป็น string ปกติก่อน
+    return str_replace($year_ad, $year_be, $formatted); // แทนปีใน string
+}
     
     // พระเครื่องล่าสุด
     $stmt = $db->prepare("
@@ -538,7 +546,7 @@ try {
                                             <span class="badge badge-warning">ไม่ทราบสถานะ</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?></td>
+                                    <td><?php echo dateTH('d/m/Y H:i', strtotime($order['created_at'])); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

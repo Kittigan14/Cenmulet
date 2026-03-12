@@ -36,6 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'upda
 // ─────────────────────────────────────────────────────────
 
 $admin_id = $_SESSION['user_id'];
+
+// แปลงวันที่เป็นปี พ.ศ.
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);
+    $year_be = $year_ad + 543;
+    $formatted = date($format, $timestamp);
+    return str_replace($year_ad, $year_be, $formatted);
+}
+
 $stmt = $db->prepare("SELECT id, fullname FROM admins WHERE id = :id");
 $stmt->execute([':id' => $admin_id]);
 $admin = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -249,8 +259,8 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                     <?php else: ?><span style="color:#d1d5db;font-size:11px">-</span><?php endif; ?>
                 </td>
                 <td style="font-size:12px;color:#6b7280;white-space:nowrap">
-                    <?php echo date('d/m/Y', strtotime($o['created_at'])); ?><br>
-                    <span style="color:#9ca3af"><?php echo date('H:i', strtotime($o['created_at'])); ?></span>
+                    <?php echo dateTH('d/m/Y', strtotime($o['created_at'])); ?><br>
+                    <span style="color:#9ca3af"><?php echo dateTH('H:i', strtotime($o['created_at'])); ?></span>
                 </td>
                 <td>
                     <div style="display:flex;flex-direction:column;gap:5px">
@@ -411,6 +421,7 @@ const ordersData = <?php
     }
 ?>;
 
+
 function openSlip(src) {
     document.getElementById('slipImg').src = src;
     document.getElementById('slipModal').style.display = 'flex';
@@ -444,7 +455,7 @@ function openDetail(id) {
         ? '<span class="badge badge-success"><i class="fa-solid fa-check-double"></i> เสร็จสิ้น</span>'
         : '<span class="badge badge-warning"><i class="fa-solid fa-hourglass"></i> รอดำเนินการ</span>';
 
-    const date = new Date(o.date).toLocaleString('th-TH');
+    const date = new Date(o.date).toLocaleString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', calendar: 'buddhist' });
 
     let itemsHtml = o.items.map(item => `
         <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f9fafb;border-radius:8px;margin-bottom:8px">
@@ -465,7 +476,7 @@ function openDetail(id) {
             <div style="background:#f9fafb;padding:14px;border-radius:10px">
                 <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">คำสั่งเช่า</div>
                 <div style="font-weight:700;font-size:16px">#${String(o.id).padStart(6,'0')}</div>
-                <div style="font-size:12px;color:#6b7280;margin-top:2px">${o.date ? o.date.replace('T',' ').substring(0,16) : '-'}</div>
+                <div style="font-size:12px;color:#6b7280;margin-top:2px">${o.date ? new Date(o.date).toLocaleString('th-TH', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',calendar:'buddhist'}) : '-'}</div>
             </div>
             <div style="background:#f9fafb;padding:14px;border-radius:10px">
                 <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">ผู้เช่า</div>
@@ -504,7 +515,7 @@ function openDetail(id) {
                 <div>
                     <div style="font-size:11px;color:#9ca3af">เวลาที่โอน</div>
                     <div style="font-weight:600;font-size:13px">
-                        ${o.transfer_time ? o.transfer_time.replace('T',' ').substring(0,16) : '-'}
+                        ${o.transfer_time ? new Date(o.transfer_time).toLocaleString('th-TH', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',calendar:'buddhist'}) : '-'}
                     </div>
                 </div>
             </div>

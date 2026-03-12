@@ -11,6 +11,15 @@ $stmt = $db->prepare("SELECT id, fullname, store_name, pay_contax, address, tel 
 $stmt->execute([':id' => $seller_id]);
 $seller = $stmt->fetch(PDO::FETCH_ASSOC);
 
+// [แก้ไข] เพิ่ม function แปลงวันที่ ค.ศ. → พ.ศ.
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);
+    $year_be = $year_ad + 543;
+    $formatted = date($format, $timestamp);
+    return str_replace($year_ad, $year_be, $formatted);
+}
+
 // ── ประเภทรายงาน: sales / products ────────────────────
 $view = $_GET['view'] ?? 'sales';
 if (!in_array($view, ['sales', 'products'])) $view = 'sales';
@@ -67,19 +76,22 @@ if ($view === 'products') {
 
     switch ($period) {
         case 'daily':
-            $date_label = date('d เดือน m ปี Y', strtotime($day));
+            // [แก้ไข] date() → dateTH() แสดงปี พ.ศ. ใน label
+            $date_label = dateTH('d เดือน m ปี Y', strtotime($day));
             $where_time = "AND DATE(o.created_at) = '$day'";
             $group_by   = "strftime('%H', o.created_at)";
             $x_label    = "ชั่วโมง";
             break;
         case 'monthly':
-            $date_label = "เดือน " . date('F Y', mktime(0,0,0,$month,1,$year));
+            // [แก้ไข] date() → dateTH() แสดงปี พ.ศ. ใน label + dropdown ปี
+            $date_label = "เดือน " . dateTH('F Y', mktime(0,0,0,$month,1,$year));
             $where_time = "AND strftime('%Y-%m', o.created_at) = '" . sprintf('%04d-%02d',$year,$month) . "'";
             $group_by   = "strftime('%d', o.created_at)";
             $x_label    = "วัน";
             break;
         case 'yearly':
-            $date_label = "ปี $year";
+            // [แก้ไข] แสดงปี พ.ศ.
+            $date_label = "ปี " . ($year + 543);
             $where_time = "AND strftime('%Y', o.created_at) = '$year'";
             $group_by   = "strftime('%m', o.created_at)";
             $x_label    = "เดือน";
@@ -155,6 +167,7 @@ if ($view === 'products') {
     $top_stmt->execute([':sid' => $seller_id]);
     $top_products = $top_stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // [แก้ไข] $years เก็บค่า ค.ศ. จริง (ใช้ query) แต่แสดง พ.ศ. ใน dropdown
     $years     = range(date('Y'), date('Y') - 4);
     $months_th = ['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                   'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
@@ -167,6 +180,8 @@ if ($view === 'products') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- [แก้ไข] Flatpickr CSS สำหรับ date picker แสดง พ.ศ. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     <title>รายงานการปล่อยเช่า - <?php echo htmlspecialchars($seller['store_name']); ?></title>
     <style>
         /* ── Print ── */
@@ -588,8 +603,11 @@ if ($view === 'products') {
             <?php if ($period === 'daily'): ?>
             <div>
                 <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">เลือกวัน</label>
-                <input type="date" name="day" value="<?php echo $day; ?>"
-                       style="padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
+                <!-- [แก้ไข] เปลี่ยนจาก input type="date" เป็น Flatpickr แสดง พ.ศ. -->
+                <input type="text" id="display_day" class="flatpickr-input"
+                       value="<?php echo dateTH('d/m/Y', strtotime($day)); ?>" readonly
+                       style="padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;background:#fff;cursor:pointer">
+                <input type="hidden" name="day" id="hidden_day" value="<?php echo $day; ?>">
             </div>
 
             <?php elseif ($period === 'monthly'): ?>
@@ -597,7 +615,8 @@ if ($view === 'products') {
                 <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">ปี</label>
                 <select name="year" style="padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
                     <?php foreach ($years as $y): ?>
-                    <option value="<?php echo $y; ?>" <?php echo $y==$year?'selected':''; ?>><?php echo $y; ?></option>
+                    <!-- [แก้ไข] value เป็น ค.ศ. (ส่ง query), แสดงเป็น พ.ศ. -->
+                    <option value="<?php echo $y; ?>" <?php echo $y==$year?'selected':''; ?>><?php echo $y + 543; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -615,7 +634,8 @@ if ($view === 'products') {
                 <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">ปี</label>
                 <select name="year" style="padding:9px 12px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
                     <?php foreach ($years as $y): ?>
-                    <option value="<?php echo $y; ?>" <?php echo $y==$year?'selected':''; ?>><?php echo $y; ?></option>
+                    <!-- [แก้ไข] value เป็น ค.ศ. (ส่ง query), แสดงเป็น พ.ศ. -->
+                    <option value="<?php echo $y; ?>" <?php echo $y==$year?'selected':''; ?>><?php echo $y + 543; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -737,8 +757,9 @@ if ($view === 'products') {
                             : '<span style="color:#d1d5db">-</span>'; ?>
                     </td>
                     <td style="font-size:12px;color:#6b7280;white-space:nowrap">
-                        <?php echo date('d/m/Y', strtotime($o['created_at'])); ?><br>
-                        <span style="color:#9ca3af"><?php echo date('H:i', strtotime($o['created_at'])); ?></span>
+                        <!-- [แก้ไข] date() → dateTH() แสดงปี พ.ศ. ในตาราง -->
+                        <?php echo dateTH('d/m/Y', strtotime($o['created_at'])); ?><br>
+                        <span style="color:#9ca3af"><?php echo dateTH('H:i', strtotime($o['created_at'])); ?></span>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -852,5 +873,43 @@ function setNowTime(){
 setNowTime();
 window.addEventListener('beforeprint',setNowTime);
 </script>
+
+<!-- [แก้ไข] Flatpickr สำหรับ input วันที่ period=daily แสดง พ.ศ. -->
+<?php if (($view ?? '') === 'sales' && ($period ?? '') === 'daily'): ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+<script>
+function toBEString(d) {
+    return String(d.getDate()).padStart(2,'0') + '/' +
+           String(d.getMonth()+1).padStart(2,'0') + '/' +
+           (d.getFullYear() + 543);
+}
+function fixCalendarHeader(fp) {
+    const yearEl = fp.calendarContainer.querySelector('.numInput.cur-year');
+    if (yearEl && !yearEl._be_patched) {
+        yearEl._be_patched = true;
+        // แสดงปี พ.ศ. ใน header
+        yearEl.value = parseInt(yearEl.value) + 543;
+        yearEl.addEventListener('input', function() {
+            if (this.value.length === 4) fp.changeYear(parseInt(this.value) - 543);
+        });
+    }
+}
+flatpickr('#display_day', {
+    dateFormat: 'Y-m-d',
+    defaultDate: '<?php echo $day; ?>',
+    locale: { firstDayOfWeek: 1 },
+    onReady: function(sel, str, fp) {
+        if (sel.length) document.getElementById('display_day').value = toBEString(sel[0]);
+        fixCalendarHeader(fp);
+    },
+    onMonthChange: function(sel, str, fp) { fixCalendarHeader(fp); },
+    onYearChange:  function(sel, str, fp) { fixCalendarHeader(fp); },
+    onChange: function(sel, dateStr) {
+        document.getElementById('hidden_day').value = dateStr;
+        if (sel.length) document.getElementById('display_day').value = toBEString(sel[0]);
+    }
+});
+</script>
+<?php endif; ?>
 </body>
 </html>

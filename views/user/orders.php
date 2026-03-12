@@ -34,6 +34,15 @@ try {
     $stmt->execute([':uid' => $user_id]);
     $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { die("Error: " . $e->getMessage()); }
+
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);   // ดึงปี ค.ศ. เช่น 2026
+    $year_be = $year_ad + 543;                // บวก 543 → 2569
+    $formatted = date($format, $timestamp);   // แปลงเป็น string ปกติก่อน
+    return str_replace($year_ad, $year_be, $formatted); // แทนปีใน string
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -312,7 +321,7 @@ include __DIR__ . '/../../includes/navbar.php';
             <tr>
                 <td><?php echo $idx+1; ?></td>
                 <td><strong>#<?php echo str_pad($o['id'],6,'0',STR_PAD_LEFT); ?></strong></td>
-                <td><?php echo date('d/m/Y H:i', strtotime($o['created_at'])); ?></td>
+                <td><?php echo dateTH('d/m/Y H:i', strtotime($o['created_at'])); ?></td>
                 <td style="text-align:left"><?php echo htmlspecialchars($o['amulet_names'] ?? '-'); ?></td>
                 <td><?php echo htmlspecialchars(implode(', ', array_map('trim', $stores))); ?></td>
                 <td><strong>฿<?php echo number_format($o['total_price'],2); ?></strong></td>
@@ -330,7 +339,7 @@ include __DIR__ . '/../../includes/navbar.php';
         <div>วันที่พิมพ์ : <?php
             $mn=['','มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-            echo date('j').' '.$mn[(int)date('n')].' '.(date('Y')+543);
+            echo dateTH('j').' '.$mn[(int)date('n')].' '.(date('Y')+543);
         ?></div>
         <div>เวลาที่พิมพ์ : <span class="print-time-now"></span> น.</div>
     </div>
@@ -365,7 +374,7 @@ include __DIR__ . '/../../includes/navbar.php';
                 </div>
                 <div class="order-date">
                     <i class="fa-regular fa-clock"></i>
-                    <?php echo date('d/m/Y H:i', strtotime($o['created_at'])); ?> น.
+                    <?php echo dateTH('d/m/Y H:i', strtotime($o['created_at'])); ?> น.
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
@@ -461,7 +470,7 @@ include __DIR__ . '/../../includes/navbar.php';
                     <?php if (!empty($o['shipped_at'])): ?>
                     <div style="font-size:11px;color:#059669;margin-top:3px">
                         <i class="fa-regular fa-clock"></i>
-                        ส่งเมื่อ: <?php echo date('d/m/Y H:i', strtotime($o['shipped_at'])); ?> น.
+                        ส่งเมื่อ: <?php echo dateTH('d/m/Y H:i', strtotime($o['shipped_at'])); ?> น.
                     </div>
                     <?php endif; ?>
                 </div>
@@ -520,7 +529,7 @@ include __DIR__ . '/../../includes/navbar.php';
 
 <script>
 function setNowTime(){
-    var n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0');
+    var n=new DateTH(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0');
     document.querySelectorAll('.print-time-now').forEach(function(e){e.textContent=h+':'+m;});
 }
 setNowTime();

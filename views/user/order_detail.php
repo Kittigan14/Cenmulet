@@ -99,6 +99,15 @@ if ($order['status'] === 'completed') {
     $status_text  = 'ยกเลิก';
     $status_icon  = 'fa-times-circle';
 }
+
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);   // ดึงปี ค.ศ. เช่น 2026
+    $year_be = $year_ad + 543;                // บวก 543 → 2569
+    $formatted = date($format, $timestamp);   // แปลงเป็น string ปกติก่อน
+    return str_replace($year_ad, $year_be, $formatted); // แทนปีใน string
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -343,7 +352,7 @@ if ($order['status'] === 'completed') {
                 <tr>
                     <td><?php echo $idx+1; ?></td>
                     <td><?php echo str_pad($item['amulet_id'],4,'0',STR_PAD_LEFT); ?></td>
-                    <td><?php echo date('d/m/y', strtotime($order['created_at'])); ?></td>
+                    <td><?php echo dateTH('d/m/y', strtotime($order['created_at'])); ?></td>
                     <td class="td-name"><?php echo htmlspecialchars($item['amulet_name']); ?></td>
                     <td><?php echo $item['quantity']; ?></td>
                     <td><?php echo number_format($item['price'] * $item['quantity'], 0, '.', ','); ?></td>
@@ -418,8 +427,8 @@ if ($order['status'] === 'completed') {
                 <tr>
                     <td><?php echo $idx+1; ?></td>
                     <td><?php echo str_pad($item['amulet_id'],4,'0',STR_PAD_LEFT); ?></td>
-                    <td><?php echo date('d/m/y', strtotime($order['created_at'])); ?></td>
-                    <td><?php echo date('H:i', strtotime($order['created_at'])); ?> น.</td>
+                    <td><?php echo dateTH('d/m/y', strtotime($order['created_at'])); ?></td>
+                    <td><?php echo dateTH('H:i', strtotime($order['created_at'])); ?> น.</td>
                     <td class="td-name"><?php echo htmlspecialchars($item['amulet_name']); ?></td>
                     <td><?php echo $item['quantity']; ?></td>
                     <td><?php echo number_format($item['price'] * $item['quantity'], 0, '.', ','); ?></td>
@@ -451,7 +460,7 @@ if ($order['status'] === 'completed') {
                 <h1>คำสั่งเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></h1>
                 <div class="order-datetime">
                     <i class="fa-regular fa-calendar"></i>
-                    <?php echo date('d/m/Y H:i น.', strtotime($order['created_at'])); ?>
+                    <?php echo dateTH('d/m/Y H:i น.', strtotime($order['created_at'])); ?>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -541,7 +550,7 @@ if ($order['status'] === 'completed') {
                             <div class="timeline-dot active"></div>
                             <div class="timeline-content">
                                 <h4>สั่งเช่าสำเร็จ</h4>
-                                <p><?php echo date('d/m/Y H:i น.', strtotime($order['created_at'])); ?></p>
+                                <p><?php echo dateTH('d/m/Y H:i น.', strtotime($order['created_at'])); ?></p>
                             </div>
                         </div>
                         <div class="timeline-item">

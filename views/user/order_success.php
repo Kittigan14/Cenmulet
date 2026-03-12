@@ -23,6 +23,15 @@ try {
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
+
+function dateTH(string $format, $timestamp = null): string {
+    if ($timestamp === null) $timestamp = time();
+    $year_ad = (int) date('Y', $timestamp);   // ดึงปี ค.ศ. เช่น 2026
+    $year_be = $year_ad + 543;                // บวก 543 → 2569
+    $formatted = date($format, $timestamp);   // แปลงเป็น string ปกติก่อน
+    return str_replace($year_ad, $year_be, $formatted); // แทนปีใน string
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -61,7 +70,7 @@ try {
         <div class="success-summary">
             <div class="s-row">
                 <span>วันที่สั่งเช่า</span>
-                <span><?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?> น.</span>
+                <span><?php echo dateTH('d/m/Y H:i', strtotime($order['created_at'])); ?> น.</span>
             </div>
             <div class="s-row">
                 <span>สถานะการชำระเงิน</span>
