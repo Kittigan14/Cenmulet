@@ -212,7 +212,7 @@ try {
                     <div class="product-desc">
                         <h3 class="desc-title">
                             <i class="fa-solid fa-info-circle"></i>
-                            รายละเอียดสินค้า
+                            ที่มาของพระเครื่อง
                         </h3>
                         <div class="desc-body"><?php echo htmlspecialchars($product['source']); ?></div>
                     </div>

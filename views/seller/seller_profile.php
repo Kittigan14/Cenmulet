@@ -156,14 +156,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 5px;
         }
 
-        .user-info {
+        .sidebar-user {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
 
-        .user-info h3 {
+        .sidebar-user h3 {
             font-size: 16px;
             margin-bottom: 5px;
         }
@@ -396,17 +396,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p>แดชบอร์ดผู้ขาย</p>
             </div>
 
-            <div class="user-info">
+            <div class="sidebar-user">
                 <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
                 <p><?php echo htmlspecialchars($seller['fullname']); ?></p>
             </div>
 
             <ul class="sidebar-menu">
                 <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-                <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-                <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
-                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
+                <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+                <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
                 <li><a href="/views/seller/seller_profile.php" class="active"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+                <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
                 <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
             </ul>
         </aside>

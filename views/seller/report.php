@@ -16,7 +16,7 @@ $view = $_GET['view'] ?? 'sales';
 if (!in_array($view, ['sales', 'products'])) $view = 'sales';
 
 // ════════════════════════════════════════════════════════
-//  VIEW: PRODUCTS — สินค้าทั้งหมดของ seller คนนี้
+//  VIEW: PRODUCTS — พระเครื่องทั้งหมดของ seller คนนี้
 // ════════════════════════════════════════════════════════
 if ($view === 'products') {
 
@@ -54,7 +54,7 @@ if ($view === 'products') {
 
 } else {
     // ════════════════════════════════════════════════════
-    //  VIEW: SALES — รายงานการขาย (โค้ดเดิม)
+    //  VIEW: SALES — รายงานการปล่อยเช่า (โค้ดเดิม)
     // ════════════════════════════════════════════════════
 
     $period = $_GET['period'] ?? 'monthly';
@@ -167,7 +167,7 @@ if ($view === 'products') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>รายงานการขาย - <?php echo htmlspecialchars($seller['store_name']); ?></title>
+    <title>รายงานการปล่อยเช่า - <?php echo htmlspecialchars($seller['store_name']); ?></title>
     <style>
         /* ── Print ── */
         @media print {
@@ -371,19 +371,19 @@ if ($view === 'products') {
         <div class="sidebar-header">
             <img src="/public/images/image.png" alt="">
             <h2>Cenmulet</h2>
-            <p>แดชบอร์ดผู้ขาย</p>
+            <p>แดชบอร์ดผู้ปล่อยเช่า</p>
         </div>
         <div class="sidebar-user">
             <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
-            <p><i class="fa-solid fa-store"></i> ผู้ขาย</p>
+            <p><?php echo htmlspecialchars($seller['fullname']); ?></p>
         </div>
         <ul class="sidebar-menu">
-            <li class="menu-sep">เมนูหลัก</li>
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-            <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> สินค้าของฉัน</a></li>
-            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
-            <li><a href="/views/seller/report.php" class="active"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
-            <li class="menu-sep">ระบบ</li>
+            <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
+            <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+            <li><a href="/views/seller/report.php" class="active"><i class="fa-solid fa-chart-bar"></i> รายงานการปล่อยเช่า</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
         </ul>
     </aside>
@@ -398,9 +398,9 @@ if ($view === 'products') {
                 <div class="ph-addr"><?php echo htmlspecialchars($seller['address'] ?? ''); ?></div>
                 <div class="ph-tel">โทรศัพท์ : <?php echo htmlspecialchars($seller['tel'] ?? ''); ?></div>
                 <?php if ($view === 'products'): ?>
-                <div class="ph-title">รายการสินค้าทั้งหมด</div>
+                <div class="ph-title">รายการพระเครื่องทั้งหมด</div>
                 <?php else: ?>
-                <div class="ph-title">รายงานสรุปการขาย</div>
+                <div class="ph-title">รายงานสรุปการปล่อยเช่า</div>
                 <div class="ph-sub">ช่วงเวลา: <?php echo $date_label; ?></div>
                 <?php endif; ?>
             </div>
@@ -408,7 +408,7 @@ if ($view === 'products') {
 
         <!-- ════ TOP BAR ════ -->
         <div class="top-bar no-print">
-            <h1><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</h1>
+            <h1><i class="fa-solid fa-chart-bar"></i> รายงานการปล่อยเช่า</h1>
             <div style="display:flex;gap:8px">
                 <button onclick="window.print()" class="btn btn-primary btn-sm">
                     <i class="fa-solid fa-print"></i> พิมพ์ / PDF
@@ -423,33 +423,33 @@ if ($view === 'products') {
         <div class="view-tabs no-print">
             <a href="?view=sales"
                class="view-tab <?php echo $view === 'sales' ? 'active' : ''; ?>">
-                <i class="fa-solid fa-chart-bar"></i> รายงานการขาย
+                <i class="fa-solid fa-chart-bar"></i> รายงานการปล่อยเช่า
             </a>
             <a href="?view=products"
                class="view-tab <?php echo $view === 'products' ? 'active' : ''; ?>">
-                <i class="fa-solid fa-box"></i> ข้อมูลสินค้า
+                <i class="fa-solid fa-box"></i> ข้อมูลพระเครื่อง
             </a>
         </div>
 
 
         <?php if ($view === 'products'): ?>
         <!-- ════════════════════════════════════════════
-             TAB: ข้อมูลสินค้า
+             TAB: ข้อมูลพระเครื่อง
         ════════════════════════════════════════════ -->
 
         <!-- Summary -->
         <div class="summary-row">
             <div class="summary-box">
                 <div class="s-val"><?php echo number_format($total_products); ?></div>
-                <div class="s-lbl"><i class="fa-solid fa-box"></i> สินค้าทั้งหมด</div>
+                <div class="s-lbl"><i class="fa-solid fa-box"></i> พระเครื่องทั้งหมด</div>
             </div>
             <div class="summary-box">
                 <div class="s-val"><?php echo number_format($in_stock); ?></div>
-                <div class="s-lbl"><i class="fa-solid fa-cubes"></i> มีสินค้าในสต็อก</div>
+                <div class="s-lbl"><i class="fa-solid fa-cubes"></i> มีพระเครื่องในสต็อก</div>
             </div>
             <div class="summary-box">
                 <div class="s-val"><?php echo number_format($total_sold_all); ?></div>
-                <div class="s-lbl"><i class="fa-solid fa-cart-check"></i> ขายแล้วทั้งหมด</div>
+                <div class="s-lbl"><i class="fa-solid fa-cart-check"></i> ปล่อยเช่าแล้วทั้งหมด</div>
             </div>
             <div class="summary-box">
                 <div class="s-val" style="font-size:20px">฿<?php echo number_format($total_revenue, 2); ?></div>
@@ -486,7 +486,7 @@ if ($view === 'products') {
                         </span>
                     </div>
                     <div class="sold-info">
-                        <span><i class="fa-solid fa-cart-check"></i> ขาย <?php echo number_format($p['total_sold']); ?> ชิ้น</span>
+                        <span><i class="fa-solid fa-cart-check"></i> ปล่อยเช่า <?php echo number_format($p['total_sold']); ?> ชิ้น</span>
                         <span style="color:#10b981;font-weight:600">฿<?php echo number_format($p['revenue'], 2); ?></span>
                     </div>
                 </div>
@@ -500,11 +500,11 @@ if ($view === 'products') {
                 <tr>
                     <th style="width:4%">#</th>
                     <th style="width:8%">รหัส</th>
-                    <th style="width:30%">ชื่อสินค้า</th>
+                    <th style="width:30%">ชื่อพระเครื่อง</th>
                     <th style="width:14%">หมวดหมู่</th>
                     <th style="width:12%">ราคา</th>
                     <th style="width:10%">คงเหลือ</th>
-                    <th style="width:10%">ขายแล้ว</th>
+                    <th style="width:10%">ปล่อยเช่าแล้ว</th>
                     <th style="width:12%">รายได้</th>
                 </tr>
             </thead>
@@ -536,7 +536,7 @@ if ($view === 'products') {
         <?php else: ?>
         <div class="empty-state">
             <i class="fa-solid fa-box-open"></i>
-            <h2>ยังไม่มีสินค้าในร้าน</h2>
+            <h2>ยังไม่มีพระเครื่องในร้าน</h2>
         </div>
         <?php endif; ?>
 
@@ -561,7 +561,7 @@ if ($view === 'products') {
 
         <?php else: ?>
         <!-- ════════════════════════════════════════════
-             TAB: รายงานการขาย (โค้ดเดิมทั้งหมด)
+             TAB: รายงานการปล่อยเช่า (โค้ดเดิมทั้งหมด)
         ════════════════════════════════════════════ -->
 
         <!-- Period tabs -->
@@ -640,7 +640,7 @@ if ($view === 'products') {
             </div>
             <div class="summary-box">
                 <div class="s-val"><?php echo number_format($summary['total_qty']); ?></div>
-                <div class="s-lbl"><i class="fa-solid fa-box"></i> จำนวนชิ้นที่ขาย</div>
+                <div class="s-lbl"><i class="fa-solid fa-box"></i> จำนวนชิ้นที่ปล่อยเช่า</div>
             </div>
             <div class="summary-box">
                 <div class="s-val" style="font-size:20px">
@@ -667,7 +667,7 @@ if ($view === 'products') {
             </div>
 
             <div class="chart-wrap">
-                <h3><i class="fa-solid fa-fire" style="color:#f59e0b"></i> สินค้าขายดี</h3>
+                <h3><i class="fa-solid fa-fire" style="color:#f59e0b"></i> พระเครื่องปล่อยเช่าดี</h3>
                 <?php if (count($top_products) > 0): ?>
                 <?php foreach ($top_products as $i => $p): ?>
                 <div class="top-item">
@@ -679,7 +679,7 @@ if ($view === 'products') {
                             <?php echo htmlspecialchars($p['amulet_name']); ?>
                         </div>
                         <div style="font-size:11px;color:#9ca3af">
-                            ขาย <?php echo number_format($p['qty_sold']); ?> ชิ้น
+                            ปล่อยเช่า <?php echo number_format($p['qty_sold']); ?> ชิ้น
                         </div>
                     </div>
                     <div style="font-size:12px;font-weight:700;color:#10b981;white-space:nowrap">
@@ -696,7 +696,7 @@ if ($view === 'products') {
         <!-- Orders Table -->
         <div class="card">
             <div class="card-header">
-                <h2><i class="fa-solid fa-list"></i> รายการคำสั่งซื้อ (<?php echo count($orders); ?> รายการ)</h2>
+                <h2><i class="fa-solid fa-list"></i> รายการคำสั่งเช่า (<?php echo count($orders); ?> รายการ)</h2>
             </div>
             <div class="table-wrapper">
             <?php if (count($orders) > 0): ?>
@@ -704,7 +704,7 @@ if ($view === 'products') {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>ผู้ซื้อ</th>
+                        <th>ผู้เช่า</th>
                         <th>รายได้ร้านนี้</th>
                         <th>สถานะชำระ</th>
                         <th>สถานะส่ง</th>
@@ -747,7 +747,7 @@ if ($view === 'products') {
             <?php else: ?>
             <div class="empty-state">
                 <i class="fa-solid fa-chart-bar"></i>
-                <h2>ไม่มีคำสั่งซื้อในช่วงนี้</h2>
+                <h2>ไม่มีคำสั่งเช่าในช่วงนี้</h2>
             </div>
             <?php endif; ?>
             </div>

@@ -47,15 +47,15 @@ $cart_count = count($cart_items);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/cart.css">
-    <title>รายการเช่าพระเครื่อง - Cenmulet</title>
+    <title>ตะกร้าพระเครื่อง - Cenmulet</title>
 </head>
 <body>
     <?php include __DIR__ . '/../../includes/navbar.php'; ?>
 
     <div class="container">
         <div class="page-header">
-            <h1><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i>รายการเช่าพระเครื่อง</h1>
-            <p>ตรวจสอบพระเครื่องก่อนดำเนินการสั่งซื้อ</p>
+            <h1><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i>ตะกร้าพระเครื่อง</h1>
+            <p>ตรวจสอบพระเครื่องก่อนดำเนินการสั่งเช่า</p>
         </div>
 
         <?php if (count($cart_items) > 0): ?>
@@ -137,7 +137,7 @@ $cart_count = count($cart_items);
                     <form action="/user/checkout.php" method="POST">
                         <button type="submit" class="btn-checkout">
                             <i class="fa-solid fa-credit-card"></i>
-                            ดำเนินการสั่งซื้อ
+                            ดำเนินการสั่งเช่า
                         </button>
                     </form>
 
@@ -151,8 +151,8 @@ $cart_count = count($cart_items);
         <?php else: ?>
             <div class="empty-cart">
                 <div class="big-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-                <h2>รายการเช่าพระเครื่องว่างเปล่า</h2>
-                <p>คุณยังไม่มีพระเครื่องในรายการเช่า</p>
+                <h2>ตะกร้าพระเครื่องว่างเปล่า</h2>
+                <p>คุณยังไม่มีพระเครื่องในตะกร้า</p>
                 <a href="/views/user/home.php" class="btn btn-primary">
                     <i class="fa-solid fa-shopping-bag"></i>
                     เริ่มเลือกเช่าพระ

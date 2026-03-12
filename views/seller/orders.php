@@ -1,7 +1,7 @@
 <?php
 /**
  * views/seller/orders.php
- * Seller ดูคำสั่งซื้อและยืนยัน/ตรวจสอบการชำระเงิน
+ * Seller ดูคำสั่งเช่าและยืนยัน/ตรวจสอบการชำระเงิน
  */
 session_start();
 require_once __DIR__ . "/../../config/db.php";
@@ -26,7 +26,7 @@ $filter = $_GET['filter'] ?? 'all';
 $allowed = ['all','waiting','confirmed','completed'];
 if (!in_array($filter, $allowed)) $filter = 'all';
 
-// ดึงคำสั่งซื้อที่มีสินค้าของ seller นี้
+// ดึงคำสั่งเช่าที่มีพระเครื่องของ seller นี้
 try {
     $filter_sql = '';
     if ($filter === 'waiting')   $filter_sql = "AND p.status = 'waiting'";
@@ -79,8 +79,11 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>คำสั่งซื้อ - Cenmulet Seller</title>
+    <title>คำสั่งเช่า - Cenmulet Seller</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+        body { font-family: "Kanit", sans-serif; background: #f3f4f6; }
+
         .slip-thumb {
             width: 52px; height: 52px;
             border-radius: 8px;
@@ -107,6 +110,59 @@ try {
             box-shadow: 0 20px 60px rgba(0,0,0,.5);
         }
         .confirm-form button { font-family: inherit; }
+
+        /* Edit Modal */
+        #editModal {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.55);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        #editModal.open { display: flex; }
+        .edit-modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px 32px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 24px 60px rgba(0,0,0,.2);
+            animation: slideUp .25s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+        .edit-modal-box h3 {
+            font-size: 18px; font-weight: 700;
+            color: #1f2937; margin: 0 0 20px;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 12px;
+        }
+        .edit-field { margin-bottom: 16px; }
+        .edit-field label {
+            display: block; font-size: 13px;
+            color: #6b7280; margin-bottom: 5px;
+        }
+        .edit-field input, .edit-field select, .edit-field textarea {
+            width: 100%; padding: 9px 12px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px; font-size: 14px;
+            font-family: inherit; box-sizing: border-box;
+            transition: border-color .2s;
+        }
+        .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus {
+            outline: none; border-color: #6366f1;
+        }
+        .edit-modal-actions {
+            display: flex; gap: 10px;
+            justify-content: flex-end; margin-top: 22px;
+        }
+        .btn-edit { background: #6366f1; color: #fff; }
+        .btn-edit:hover { background: #4f46e5; }
+        .btn-cancel-modal { background: #f3f4f6; color: #374151; }
+        .btn-cancel-modal:hover { background: #e5e7eb; }
     </style>
 </head>
 <body>
@@ -125,14 +181,11 @@ try {
         </div>
         <ul class="sidebar-menu">
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-            <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
-            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ
-                <?php if ($n_waiting > 0): ?>
-                <span style="background:#ef4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:auto"><?php echo $n_waiting; ?></span>
-                <?php endif; ?>
-            </a></li>
+            <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+            <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
         </ul>
     </aside>
@@ -140,7 +193,7 @@ try {
     <!-- Main -->
     <main class="main-content">
         <div class="top-bar">
-            <h1><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</h1>
+            <h1><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</h1>
             <a href="/views/seller/report.php" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-print"></i> รายงานการขาย
             </a>
@@ -167,7 +220,7 @@ try {
             <?php
             $errs = [
                 'no_tracking'      => '<strong>ต้องกรอกเลขพัสดุก่อนกดยืนยันการชำระเงิน</strong> – กรุณากรอกเลขพัสดุในช่องวันที่ก่อน',
-                'already_processed'=> 'คำสั่งซื้อนี้ได้รับการดำเนินการไปแล้ว',
+                'already_processed'=> 'คำสั่งเช่านี้ได้รับการดำเนินการไปแล้ว',
                 'invalid'          => 'คำขอไม่ถูกต้อง กรุณาลองใหม่',
                 'unauthorized'     => 'ไม่มีสิทธิ์ดำเนินการนี้',
                 'database'         => 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
@@ -212,14 +265,14 @@ try {
                 <table>
                     <thead>
                         <tr>
-                            <th>คำสั่งซื้อ</th>
-                            <th>ผู้ซื้อ</th>
+                            <th>คำสั่งเช่า</th>
+                            <th>ผู้เช่า</th>
                             <th>ยอดรวม</th>
                             <th>สลิปโอนเงิน</th>
                             <th>จำนวนเงินที่โอน</th>
                             <th>เวลาที่โอน</th>
                             <th>สถานะชำระเงิน</th>
-                            <th>สถานะคำสั่งซื้อ</th>
+                            <th>สถานะคำสั่งเช่า</th>
                             <th>วันที่</th>
                             <th>จัดการ</th>
                         </tr>
@@ -335,6 +388,21 @@ try {
                                        class="btn-icon view" title="ดูรายละเอียด">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
+                                    <button type="button"
+                                        class="btn-icon"
+                                        style="background:#e0e7ff;color:#6366f1;border:none;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:14px"
+                                        title="แก้ไขข้อมูล"
+                                        onclick="openEdit({
+                                            id:   '<?php echo $order['id']; ?>',
+                                            name: '<?php echo addslashes(htmlspecialchars($order['buyer_name'])); ?>',
+                                            tel:  '<?php echo addslashes(htmlspecialchars($order['buyer_tel'])); ?>',
+                                            addr: '<?php echo addslashes(htmlspecialchars($order['buyer_address'])); ?>',
+                                            tracking: '<?php echo addslashes(htmlspecialchars($order['tracking_number'] ?? '')); ?>',
+                                            status: '<?php echo $order['status']; ?>',
+                                            payment_status: '<?php echo $order['payment_status']; ?>'
+                                        })">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -344,13 +412,56 @@ try {
                 <?php else: ?>
                 <div class="empty-state">
                     <i class="fa-solid fa-shopping-cart"></i>
-                    <h2>ยังไม่มีคำสั่งซื้อ</h2>
-                    <p>เมื่อมีลูกค้าสั่งซื้อสินค้าของคุณ จะแสดงที่นี่</p>
+                    <h2>ยังไม่มีคำสั่งเช่า</h2>
+                    <p>เมื่อมีลูกค้าสั่งเช่าพระเครื่องของคุณ จะแสดงที่นี่</p>
                 </div>
                 <?php endif; ?>
             </div>
         </div>
     </main>
+</div>
+
+<!-- Edit Order Modal -->
+<div id="editModal" onclick="handleModalOverlayClick(event)">
+    <div class="edit-modal-box">
+        <h3><i class="fa-solid fa-pen-to-square" style="color:#6366f1;margin-right:8px"></i>แก้ไขข้อมูลคำสั่งเช่า <span id="editOrderNum" style="color:#6366f1"></span></h3>
+        <form action="/views/seller/update_order.php" method="POST">
+            <input type="hidden" name="order_id" id="editOrderId">
+
+            <div class="edit-field">
+                <label><i class="fa-solid fa-user" style="margin-right:4px"></i>ชื่อผู้เช่า</label>
+                <input type="text" name="buyer_name" id="editBuyerName" placeholder="ชื่อผู้เช่า">
+            </div>
+            <div class="edit-field">
+                <label><i class="fa-solid fa-phone" style="margin-right:4px"></i>เบอร์โทรศัพท์</label>
+                <input type="text" name="buyer_tel" id="editBuyerTel" placeholder="เบอร์โทรศัพท์">
+            </div>
+            <div class="edit-field">
+                <label><i class="fa-solid fa-location-dot" style="margin-right:4px"></i>ที่อยู่จัดส่ง</label>
+                <textarea name="buyer_address" id="editBuyerAddr" rows="3" placeholder="ที่อยู่จัดส่ง"></textarea>
+            </div>
+            <div class="edit-field">
+                <label><i class="fa-solid fa-truck" style="margin-right:4px"></i>เลขพัสดุ</label>
+                <input type="text" name="tracking_number" id="editTracking" placeholder="กรอกเลขพัสดุ">
+            </div>
+            <div class="edit-field">
+                <label><i class="fa-solid fa-circle-dot" style="margin-right:4px"></i>สถานะคำสั่งเช่า</label>
+                <select name="order_status" id="editStatus">
+                    <option value="pending">รอดำเนินการ</option>
+                    <option value="confirmed">ยืนยันแล้ว</option>
+                    <option value="completed">เสร็จสิ้น</option>
+                </select>
+            </div>
+            <div class="edit-modal-actions">
+                <button type="button" class="btn btn-sm btn-cancel-modal" onclick="closeEdit()">
+                    <i class="fa-solid fa-xmark"></i> ยกเลิก
+                </button>
+                <button type="submit" class="btn btn-sm btn-edit">
+                    <i class="fa-solid fa-floppy-disk"></i> บันทึก
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Slip Lightbox -->
@@ -368,8 +479,27 @@ function closeSlip() {
     document.getElementById('slipModal').style.display = 'none';
 }
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeSlip();
+    if (e.key === 'Escape') { closeSlip(); closeEdit(); }
 });
+
+function openEdit(data) {
+    document.getElementById('editOrderId').value   = data.id;
+    document.getElementById('editOrderNum').textContent = '#' + String(data.id).padStart(6, '0');
+    document.getElementById('editBuyerName').value  = data.name;
+    document.getElementById('editBuyerTel').value   = data.tel;
+    document.getElementById('editBuyerAddr').value  = data.addr;
+    document.getElementById('editTracking').value   = data.tracking;
+    document.getElementById('editStatus').value     = data.status;
+    document.getElementById('editModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeEdit() {
+    document.getElementById('editModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function handleModalOverlayClick(e) {
+    if (e.target === document.getElementById('editModal')) closeEdit();
+}
 </script>
 </body>
 </html>

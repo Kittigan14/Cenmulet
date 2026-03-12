@@ -32,7 +32,7 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/order_success.css">
-    <title>สั่งซื้อสำเร็จ - Cenmulet</title>
+    <title>สั่งเช่าสำเร็จ - Cenmulet</title>
 </head>
 <body class="success-page">
     <div class="success-card">
@@ -41,10 +41,10 @@ try {
             <i class="fa-solid fa-check"></i>
         </div>
 
-        <h1>สั่งซื้อสำเร็จ!</h1>
+        <h1>สั่งเช่าสำเร็จ!</h1>
 
         <p class="order-ref">
-            หมายเลขคำสั่งซื้อ:
+            หมายเลขคำสั่งเช่า:
             <strong>#<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></strong>
         </p>
 
@@ -54,13 +54,13 @@ try {
         </div>
 
         <p class="success-msg">
-            ขอบคุณที่สั่งซื้อกับเรา เราได้รับคำสั่งซื้อของคุณเรียบร้อยแล้ว<br>
+            ขอบคุณที่สั่งเช่ากับเรา เราได้รับคำสั่งเช่าของคุณเรียบร้อยแล้ว<br>
             และกำลังตรวจสอบการชำระเงิน
         </p>
 
         <div class="success-summary">
             <div class="s-row">
-                <span>วันที่สั่งซื้อ</span>
+                <span>วันที่สั่งเช่า</span>
                 <span><?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?> น.</span>
             </div>
             <div class="s-row">
@@ -76,7 +76,7 @@ try {
         <div class="success-actions">
             <a href="/views/user/orders.php" class="btn btn-primary">
                 <i class="fa-solid fa-receipt"></i>
-                ดูคำสั่งซื้อของฉัน
+                ดูคำสั่งเช่าของฉัน
             </a>
             <a href="/views/user/home.php" class="btn btn-secondary">
                 <i class="fa-solid fa-home"></i>
@@ -92,7 +92,7 @@ try {
             <p>
                 • เราจะตรวจสอบหลักฐานการโอนเงินของคุณภายใน 24 ชั่วโมง<br>
                 • หลังจากได้รับการยืนยันการชำระเงิน เราจะจัดส่งสินค้าให้คุณทันที<br>
-                • คุณสามารถตรวจสอบสถานะคำสั่งซื้อได้ที่ "คำสั่งซื้อของฉัน"
+                • คุณสามารถตรวจสอบสถานะคำสั่งเช่าได้ที่ "คำสั่งเช่าของฉัน"
             </p>
         </div>
 

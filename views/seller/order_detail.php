@@ -77,6 +77,9 @@ $seller_subtotal = array_sum(array_map(function($i) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>รายละเอียด Order #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?> - Cenmulet Seller</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+        body { font-family: "Kanit", sans-serif; background: #f3f4f6; }
+
         .detail-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -191,14 +194,15 @@ $seller_subtotal = array_sum(array_map(function($i) {
         </div>
         <ul class="sidebar-menu">
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-            <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
-            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ
+            <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า
                 <?php if ($n_waiting > 0): ?>
                 <span style="background:#ef4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:auto"><?php echo $n_waiting; ?></span>
                 <?php endif; ?>
             </a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+            <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
         </ul>
     </aside>
@@ -207,7 +211,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
     <main class="main-content">
         <div class="top-bar">
             <div>
-                <h1><i class="fa-solid fa-file-invoice"></i> รายละเอียดคำสั่งซื้อ</h1>
+                <h1><i class="fa-solid fa-file-invoice"></i> รายละเอียดคำสั่งเช่า</h1>
             </div>
             <a href="/views/seller/orders.php" class="btn btn-secondary btn-sm">
                 <i class="fa-solid fa-arrow-left"></i> กลับ
@@ -215,7 +219,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
         </div>
 
         <a href="/views/seller/orders.php" class="back-btn">
-            <i class="fa-solid fa-arrow-left"></i> กลับไปหน้าคำสั่งซื้อ
+            <i class="fa-solid fa-arrow-left"></i> กลับไปหน้าคำสั่งเช่า
         </a>
 
         <!-- Order Header -->
@@ -251,9 +255,9 @@ $seller_subtotal = array_sum(array_map(function($i) {
         <!-- Info Grid -->
         <div class="detail-grid">
 
-            <!-- ข้อมูลผู้ซื้อ -->
+            <!-- ข้อมูลผู้เช่า -->
             <div class="info-card">
-                <h3><i class="fa-solid fa-user"></i> ข้อมูลผู้ซื้อ</h3>
+                <h3><i class="fa-solid fa-user"></i> ข้อมูลผู้เช่า</h3>
                 <div class="info-row">
                     <span class="info-label">ชื่อ-นามสกุล</span>
                     <span class="info-value"><?php echo htmlspecialchars($order['buyer_name']); ?></span>
@@ -327,17 +331,17 @@ $seller_subtotal = array_sum(array_map(function($i) {
         </div>
         <?php endif; ?>
 
-        <!-- รายการสินค้า -->
+        <!-- รายการพระเครื่อง -->
         <div class="card">
             <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-                <h2><i class="fa-solid fa-box"></i> รายการสินค้า (<?php echo count($items); ?> รายการ)</h2>
+                <h2><i class="fa-solid fa-box"></i> รายการพระเครื่อง (<?php echo count($items); ?> รายการ)</h2>
                 <strong style="color:#10b981;font-size:16px">฿<?php echo number_format($seller_subtotal, 2); ?></strong>
             </div>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>สินค้า</th>
+                            <th>พระเครื่อง</th>
                             <th>หมวดหมู่</th>
                             <th>ราคาต่อชิ้น</th>
                             <th>จำนวน</th>
@@ -377,7 +381,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
                     </tbody>
                     <tfoot>
                         <tr style="background:#f9fafb">
-                            <td colspan="4" style="text-align:right;font-weight:700;font-size:15px;padding:14px 12px">ยอดรวมสินค้าของร้าน</td>
+                            <td colspan="4" style="text-align:right;font-weight:700;font-size:15px;padding:14px 12px">ยอดรวมพระเครื่องของร้าน</td>
                             <td style="font-weight:800;font-size:16px;color:#10b981">฿<?php echo number_format($seller_subtotal, 2); ?></td>
                         </tr>
                     </tfoot>

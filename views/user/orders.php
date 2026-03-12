@@ -42,7 +42,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
-    <title>รายการเช่าของฉัน - Cenmulet</title>
+    <title>ประวัติเช่าของฉัน - Cenmulet</title>
     <style>
         @media print {
             .no-print, .navbar { display: none !important; }
@@ -294,7 +294,7 @@ include __DIR__ . '/../../includes/navbar.php';
                     <th style="width:4%">#</th>
                     <th style="width:10%">รหัสการเช่า</th>
                     <th style="width:14%">วันที่สั่ง</th>
-                    <th style="width:20%">ชื่อสินค้า</th>
+                    <th style="width:20%">ชื่อพระเครื่อง</th>
                     <th style="width:14%">ร้านค้า</th>
                     <th style="width:10%">ยอดชำระ</th>
                     <th style="width:14%">สถานะการชำระ</th>
@@ -337,7 +337,7 @@ include __DIR__ . '/../../includes/navbar.php';
 
     <div class="no-print">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px">
-        <h1 class="page-title" style="margin-bottom:0"><i class="fa-solid fa-box" style="color:#c8922a"></i> รายการเช่าของฉัน</h1>
+        <h1 class="page-title" style="margin-bottom:0"><i class="fa-solid fa-box" style="color:#c8922a"></i> ประวัติเช่าของฉัน</h1>
         <button onclick="window.print()" class="btn-print-history no-print">
             <i class="fa-solid fa-print"></i> พิมพ์ประวัติการเช่า
         </button>
@@ -347,7 +347,7 @@ include __DIR__ . '/../../includes/navbar.php';
     <?php if (isset($_GET['delivery_confirmed'])): ?>
     <div style="background:#d1fae5;border:1.5px solid #a7f3d0;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:#059669">
         <i class="fa-solid fa-check-circle fa-lg"></i>
-        <span style="font-weight:600">ยืนยันรับสินค้าเรียบร้อยแล้ว! ขอบคุณที่ใช้บริการ Cenmulet</span>
+        <span style="font-weight:600">ยืนยันรับพระเครื่องเรียบร้อยแล้ว! ขอบคุณที่ใช้บริการ Cenmulet</span>
     </div>
     <?php endif; ?>
 
@@ -405,13 +405,13 @@ include __DIR__ . '/../../includes/navbar.php';
             </div>
             <?php endif; ?>
 
-            <!-- รายการสินค้า -->
+            <!-- รายการพระเครื่อง -->
             <div class="order-row">
                 <div class="order-icon" style="background:#fef3c7;color:#d97706">
                     <i class="fa-solid fa-box"></i>
                 </div>
                 <div>
-                    <div class="order-label">จำนวนสินค้า</div>
+                    <div class="order-label">จำนวนพระเครื่อง</div>
                     <div class="order-value"><?php echo $o['item_count']; ?> รายการ</div>
                 </div>
             </div>
@@ -489,8 +489,8 @@ include __DIR__ . '/../../includes/navbar.php';
                 <form action="/user/confirm_delivery.php" method="POST">
                     <input type="hidden" name="order_id" value="<?php echo $o['id']; ?>">
                     <button type="submit" class="confirm-btn"
-                            onclick="return confirm('ยืนยันว่าได้รับสินค้าแล้ว?')">
-                        <i class="fa-solid fa-box-open"></i> ยืนยันรับสินค้า
+                            onclick="return confirm('ยืนยันว่าได้รับพระเครื่องแล้ว?')">
+                        <i class="fa-solid fa-box-open"></i> ยืนยันรับพระเครื่อง
                     </button>
                 </form>
                 <?php endif; ?>

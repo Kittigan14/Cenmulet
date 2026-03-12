@@ -108,7 +108,7 @@ if ($order['status'] === 'completed') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/order_detail.css">
-    <title>คำสั่งซื้อ #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?> - Cenmulet</title>
+    <title>คำสั่งเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?> - Cenmulet</title>
     <style>
         /* ═══ PRINT BASE ═══ */
         @media print {
@@ -230,7 +230,7 @@ if ($order['status'] === 'completed') {
         <nav class="breadcrumb">
             <a href="/views/user/home.php">หน้าแรก</a>
             <span class="separator"><i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
-            <a href="/views/user/orders.php">คำสั่งซื้อของฉัน</a>
+            <a href="/views/user/orders.php">คำสั่งเช่าของฉัน</a>
             <span class="separator"><i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
             <span>#<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></span>
         </nav>
@@ -250,7 +250,7 @@ if ($order['status'] === 'completed') {
                     if ($_GET['error'] === 'payment_not_confirmed') {
                         echo 'กรุณารอการยืนยันการชำระเงินก่อน';
                     } elseif ($_GET['error'] === 'already_confirmed') {
-                        echo 'คำสั่งซื้อนี้ได้รับการยืนยันแล้ว';
+                        echo 'คำสั่งเช่านี้ได้รับการยืนยันแล้ว';
                     } else {
                         echo 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
                     }
@@ -448,7 +448,7 @@ if ($order['status'] === 'completed') {
         <!-- Page Header -->
         <div class="order-detail-header">
             <div>
-                <h1>คำสั่งซื้อ #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></h1>
+                <h1>คำสั่งเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></h1>
                 <div class="order-datetime">
                     <i class="fa-regular fa-calendar"></i>
                     <?php echo date('d/m/Y H:i น.', strtotime($order['created_at'])); ?>
@@ -534,13 +534,13 @@ if ($order['status'] === 'completed') {
                 <!-- Timeline -->
                 <div class="detail-section">
                     <h2 class="section-title">
-                        <i class="fa-solid fa-list-check"></i> สถานะการสั่งซื้อ
+                        <i class="fa-solid fa-list-check"></i> สถานะการสั่งเช่า
                     </h2>
                     <div class="status-timeline">
                         <div class="timeline-item">
                             <div class="timeline-dot active"></div>
                             <div class="timeline-content">
-                                <h4>สั่งซื้อสำเร็จ</h4>
+                                <h4>สั่งเช่าสำเร็จ</h4>
                                 <p><?php echo date('d/m/Y H:i น.', strtotime($order['created_at'])); ?></p>
                             </div>
                         </div>
@@ -567,7 +567,7 @@ if ($order['status'] === 'completed') {
                 <!-- Order Summary -->
                 <div class="detail-section">
                     <h2 class="section-title">
-                        <i class="fa-solid fa-file-invoice"></i> สรุปคำสั่งซื้อ
+                        <i class="fa-solid fa-file-invoice"></i> สรุปคำสั่งเช่า
                     </h2>
                     <div class="summary-line">
                         <span>จำนวนสินค้า</span>
@@ -658,7 +658,7 @@ if ($order['status'] === 'completed') {
 
                 <a href="/views/user/orders.php" class="btn-back-page">
                     <i class="fa-solid fa-arrow-left"></i>
-                    กลับไปหน้าคำสั่งซื้อ
+                    กลับไปหน้าคำสั่งเช่า
                 </a>
             </div>
 

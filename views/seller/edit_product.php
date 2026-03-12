@@ -48,7 +48,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>แก้ไขสินค้า - Cenmulet</title>
+    <title>แก้ไขพระเครื่อง - Cenmulet</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -62,9 +62,9 @@ try {
         .sidebar-header { text-align:center; padding:20px 0; border-bottom:1px solid rgba(255,255,255,.2); margin-bottom:20px; }
         .sidebar-header h2 { font-size:24px; margin-bottom:5px; }
         .sidebar-header p  { font-size:14px; opacity:.9; }
-        .user-info { background:rgba(255,255,255,.1); padding:15px; border-radius:10px; margin-bottom:20px; }
-        .user-info h3 { font-size:16px; margin-bottom:5px; }
-        .user-info p  { font-size:13px; opacity:.9; }
+        .sidebar-user { background:rgba(255,255,255,.1); padding:15px; border-radius:10px; margin-bottom:20px; }
+        .sidebar-user h3 { font-size:16px; margin-bottom:5px; }
+        .sidebar-user p  { font-size:13px; opacity:.9; }
         .sidebar-menu { list-style:none; }
         .sidebar-menu li { margin-bottom:5px; }
         .sidebar-menu a {
@@ -231,27 +231,28 @@ try {
             <h2>Cenmulet</h2>
             <p>แดชบอร์ดผู้ขาย</p>
         </div>
-        <div class="user-info">
+        <div class="sidebar-user">
             <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
             <p><?php echo htmlspecialchars($seller['fullname']); ?></p>
         </div>
         <ul class="sidebar-menu">
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-            <li><a href="/views/seller/products.php" class="active"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
-            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
+            <li><a href="/views/seller/products.php" class="active"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+            <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <div class="top-bar">
-            <h1>แก้ไขสินค้า</h1>
+            <h1>แก้ไขพระเครื่อง</h1>
             <div class="breadcrumb">
                 <a href="/views/seller/dashboard.php">แดชบอร์ด</a>
                 <span>/</span>
-                <a href="/views/seller/products.php">จัดการสินค้า</a>
+                <a href="/views/seller/products.php">จัดการพระเครื่อง</a>
                 <span>/</span>
                 <span>แก้ไข</span>
             </div>
@@ -262,14 +263,14 @@ try {
             <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success">
                 <i class="fa-solid fa-circle-check"></i>
-                <span>แก้ไขสินค้าสำเร็จ!</span>
+                <span>แก้ไขพระเครื่องสำเร็จ!</span>
             </div>
             <?php endif; ?>
 
             <?php if (isset($_GET['error'])): ?>
             <div class="alert alert-error">
                 <i class="fa-solid fa-circle-exclamation"></i>
-                <span><?php echo $_GET['error']==='empty' ? 'กรุณากรอกข้อมูลให้ครบถ้วน' : 'เกิดข้อผิดพลาดในการแก้ไขสินค้า'; ?></span>
+                <span><?php echo $_GET['error']==='empty' ? 'กรุณากรอกข้อมูลให้ครบถ้วน' : 'เกิดข้อผิดพลาดในการแก้ไขพระเครื่อง'; ?></span>
             </div>
             <?php endif; ?>
 
@@ -279,10 +280,10 @@ try {
                 <!-- id ของรูปใน amulet_images ที่ต้องการลบ คั่นด้วย comma -->
                 <input type="hidden" name="delete_image_ids" id="deleteImageIds" value="">
 
-                <!-- ══ ข้อมูลสินค้า ══ -->
+                <!-- ══ ข้อมูลพระเครื่อง ══ -->
                 <div class="form-section">
                     <h2 class="section-title">
-                        <i class="fa-solid fa-info-circle"></i> ข้อมูลสินค้า
+                        <i class="fa-solid fa-info-circle"></i> ข้อมูลพระเครื่อง
                     </h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -321,11 +322,11 @@ try {
                     </div>
                 </div>
 
-                <!-- ══ รูปภาพสินค้า ══ -->
+                <!-- ══ รูปภาพพระเครื่อง ══ -->
                 <div class="form-section">
                     <h2 class="section-title">
                         <i class="fa-solid fa-images"></i>
-                        รูปภาพสินค้า
+                        รูปภาพพระเครื่อง
                         <span style="font-size:13px;color:#6b7280;font-weight:400;margin-left:6px">
                             (<?php echo count($existing_images); ?> รูป)
                         </span>
@@ -361,7 +362,7 @@ try {
                     <?php else: ?>
                     <div class="empty-images">
                         <i class="fa-solid fa-image"></i>
-                        ยังไม่มีรูปภาพสินค้า
+                        ยังไม่มีรูปภาพพระเครื่อง
                     </div>
                     <?php endif; ?>
 

@@ -18,12 +18,12 @@ try {
 }
 
 try {
-    // สินค้าทั้งหมด
+    // พระเครื่องทั้งหมด
     $stmt = $db->prepare("SELECT COUNT(*) as total FROM amulets WHERE sellerId = :seller_id");
     $stmt->execute([':seller_id' => $seller_id]);
     $total_products = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // คำสั่งซื้อทั้งหมด
+    // คำสั่งเช่าทั้งหมด
     $stmt = $db->prepare("
         SELECT COUNT(DISTINCT o.id) as total 
         FROM orders o
@@ -34,7 +34,7 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $total_orders = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // คำสั่งซื้อรอตรวจสอบ
+    // คำสั่งเช่ารอตรวจสอบ
     $stmt = $db->prepare("
         SELECT COUNT(DISTINCT o.id) as total 
         FROM orders o
@@ -57,7 +57,7 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $total_sales = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // สินค้าใกล้หมด (น้อยกว่า 5 ชิ้น)
+    // พระเครื่องใกล้หมด (น้อยกว่า 5 ชิ้น)
     $stmt = $db->prepare("
         SELECT COUNT(*) as total 
         FROM amulets 
@@ -66,7 +66,7 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $low_stock = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
-    // สินค้าล่าสุด
+    // พระเครื่องล่าสุด
     $stmt = $db->prepare("
         SELECT a.*, c.category_name 
         FROM amulets a
@@ -78,7 +78,7 @@ try {
     $stmt->execute([':seller_id' => $seller_id]);
     $recent_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // คำสั่งซื้อล่าสุด
+    // คำสั่งเช่าล่าสุด
     $stmt = $db->prepare("
         SELECT DISTINCT o.*, u.fullname, p.status as payment_status
         FROM orders o
@@ -147,16 +147,26 @@ try {
             margin-bottom: 5px;
         }
 
-        .user-info {
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .sidebar-user {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
 
-        .user-info h3 {
+        .sidebar-user h3 {
             font-size: 16px;
             margin-bottom: 5px;
+        }
+
+        .sidebar-user p {
+            font-size: 13px;
+            opacity: 0.9;
         }
 
         .sidebar-menu {
@@ -181,6 +191,11 @@ try {
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
             background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            font-size: 18px;
+            width: 20px;
         }
 
         .main-content {
@@ -403,17 +418,18 @@ try {
                 <p>แดชบอร์ดผู้ขาย</p>
             </div>
 
-            <div class="user-info">
+            <div class="sidebar-user">
                 <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
                 <p><?php echo htmlspecialchars($seller['fullname']); ?></p>
             </div>
 
             <ul class="sidebar-menu">
                 <li><a href="/views/seller/dashboard.php" class="active"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-                <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-                <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
-                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
+                <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+                <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
                 <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+                <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
                 <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
             </ul>
         </aside>
@@ -422,7 +438,7 @@ try {
             <div class="top-bar">
                 <h1>แดชบอร์ด</h1>
                 <a href="/views/seller/add_product.php" class="btn-primary">
-                    <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
+                    <i class="fa-solid fa-plus"></i> เพิ่มพระเครื่องใหม่
                 </a>
             </div>
 
@@ -431,7 +447,7 @@ try {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value"><?php echo number_format($total_products); ?></div>
-                            <div class="stat-label">สินค้าทั้งหมด</div>
+                            <div class="stat-label">พระเครื่องทั้งหมด</div>
                         </div>
                         <div class="stat-icon green">
                             <i class="fa-solid fa-box"></i>
@@ -443,7 +459,7 @@ try {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value"><?php echo number_format($total_orders); ?></div>
-                            <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
+                            <div class="stat-label">คำสั่งเช่าทั้งหมด</div>
                         </div>
                         <div class="stat-icon blue">
                             <i class="fa-solid fa-shopping-cart"></i>
@@ -480,7 +496,7 @@ try {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value"><?php echo number_format($low_stock); ?></div>
-                            <div class="stat-label">สินค้าใกล้หมด</div>
+                            <div class="stat-label">พระเครื่องใกล้หมด</div>
                         </div>
                         <div class="stat-icon red">
                             <i class="fa-solid fa-exclamation-triangle"></i>
@@ -492,7 +508,7 @@ try {
 
             <div class="content-section">
                 <div class="section-header">
-                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อล่าสุด</h2>
+                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่าล่าสุด</h2>
                     <a href="/views/seller/orders.php" class="btn-primary">ดูทั้งหมด</a>
                 </div>
 
@@ -501,7 +517,7 @@ try {
                         <thead>
                             <tr>
                                 <th>รหัส</th>
-                                <th>ผู้สั่งซื้อ</th>
+                                <th>ผู้สั่งเช่า</th>
                                 <th>ยอดรวม</th>
                                 <th>สถานะชำระเงิน</th>
                                 <th>วันที่</th>
@@ -530,15 +546,15 @@ try {
                 <?php else: ?>
                     <div class="empty-state">
                         <i class="fa-solid fa-shopping-cart"></i>
-                        <p>ยังไม่มีคำสั่งซื้อ</p>
+                        <p>ยังไม่มีคำสั่งเช่า</p>
                     </div>
                 <?php endif; ?>
             </div>
 
-            <!-- สินค้าล่าสุด -->
+            <!-- พระเครื่องล่าสุด -->
             <div class="content-section">
                 <div class="section-header">
-                    <h2><i class="fa-solid fa-box"></i> สินค้าล่าสุด</h2>
+                    <h2><i class="fa-solid fa-box"></i> พระเครื่องล่าสุด</h2>
                     <a href="/views/seller/products.php" class="btn-primary">ดูทั้งหมด</a>
                 </div>
 
@@ -547,7 +563,7 @@ try {
                         <thead>
                             <tr>
                                 <th>รูปภาพ</th>
-                                <th>ชื่อสินค้า</th>
+                                <th>ชื่อพระเครื่อง</th>
                                 <th>หมวดหมู่</th>
                                 <th>ราคา</th>
                                 <th>คงเหลือ</th>
@@ -578,11 +594,11 @@ try {
                                     </td>
                                     <td>
                                         <?php if ($product['quantity'] > 5): ?>
-                                            <span class="badge badge-success">มีสินค้า</span>
+                                            <span class="badge badge-success">มีพระเครื่อง</span>
                                         <?php elseif ($product['quantity'] > 0): ?>
                                             <span class="badge badge-warning">ใกล้หมด</span>
                                         <?php else: ?>
-                                            <span class="badge badge-danger">สินค้าหมด</span>
+                                            <span class="badge badge-danger">พระเครื่องหมด</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -592,10 +608,10 @@ try {
                 <?php else: ?>
                     <div class="empty-state">
                         <i class="fa-solid fa-box-open"></i>
-                        <h3>ยังไม่มีสินค้า</h3>
-                        <p>เริ่มต้นเพิ่มสินค้าของคุณเลย</p>
+                        <h3>ยังไม่มีพระเครื่อง</h3>
+                        <p>เริ่มต้นเพิ่มพระเครื่องของคุณเลย</p>
                         <a href="/views/seller/add_product.php" class="btn-primary" style="margin-top: 15px;">
-                            <i class="fa-solid fa-plus"></i> เพิ่มสินค้าแรก
+                            <i class="fa-solid fa-plus"></i> เพิ่มพระเครื่องแรก
                         </a>
                     </div>
                 <?php endif; ?>

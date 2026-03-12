@@ -38,7 +38,11 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>จัดการสินค้า - Cenmulet</title>
+    <title>จัดการพระเครื่อง - Cenmulet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+        body { font-family: "Kanit", sans-serif; background: #f3f4f6; }
+    </style>
 </head>
 <body>
 <div class="dashboard-container">
@@ -55,29 +59,30 @@ try {
         </div>
         <ul class="sidebar-menu">
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
-            <li><a href="/views/seller/products.php" class="active"><i class="fa-solid fa-box"></i> จัดการสินค้า</a></li>
-            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มสินค้า</a></li>
-            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งซื้อ</a></li>
+            <li><a href="/views/seller/products.php" class="active"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
+            <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
+            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
+            <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
         </ul>
     </aside>
 
     <main class="main-content">
         <div class="top-bar">
-            <h1><i class="fa-solid fa-box"></i> จัดการสินค้า</h1>
+            <h1><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</h1>
             <a href="/views/seller/add_product.php" class="btn btn-primary">
-                <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
+                <i class="fa-solid fa-plus"></i> เพิ่มพระเครื่องใหม่
             </a>
         </div>
 
         <?php if (isset($_GET['success'])): ?>
             <?php if ($_GET['success'] === 'deleted'): ?>
-            <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>ลบสินค้าสำเร็จ!</span></div>
+            <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>ลบพระเครื่องสำเร็จ!</span></div>
             <?php elseif ($_GET['success'] === 'hidden'): ?>
-            <div class="alert alert-success"><i class="fa-solid fa-eye-slash"></i> <span>ซ่อนสินค้าเรียบร้อยแล้ว</span></div>
+            <div class="alert alert-success"><i class="fa-solid fa-eye-slash"></i> <span>ซ่อนพระเครื่องเรียบร้อยแล้ว</span></div>
             <?php elseif ($_GET['success'] === 'shown'): ?>
-            <div class="alert alert-success"><i class="fa-solid fa-eye"></i> <span>แสดงสินค้าเรียบร้อยแล้ว</span></div>
+            <div class="alert alert-success"><i class="fa-solid fa-eye"></i> <span>แสดงพระเครื่องเรียบร้อยแล้ว</span></div>
             <?php endif; ?>
         <?php endif; ?>
         <?php if (isset($_GET['error'])): ?>
@@ -92,15 +97,15 @@ try {
             $outStock = $total - $inStock;
             ?>
             <div class="stat-mini">
-                <div><div class="stat-mini-value"><?php echo $total; ?></div><div class="stat-mini-label">สินค้าทั้งหมด</div></div>
+                <div><div class="stat-mini-value"><?php echo $total; ?></div><div class="stat-mini-label">พระเครื่องทั้งหมด</div></div>
                 <div class="stat-mini-icon" style="background:#e0e7ff;color:#6366f1"><i class="fa-solid fa-box"></i></div>
             </div>
             <div class="stat-mini">
-                <div><div class="stat-mini-value"><?php echo $inStock; ?></div><div class="stat-mini-label">มีสินค้า</div></div>
+                <div><div class="stat-mini-value"><?php echo $inStock; ?></div><div class="stat-mini-label">มีพระเครื่อง</div></div>
                 <div class="stat-mini-icon" style="background:#d1fae5;color:#10b981"><i class="fa-solid fa-check-circle"></i></div>
             </div>
             <div class="stat-mini">
-                <div><div class="stat-mini-value"><?php echo $outStock; ?></div><div class="stat-mini-label">สินค้าหมด</div></div>
+                <div><div class="stat-mini-value"><?php echo $outStock; ?></div><div class="stat-mini-label">พระเครื่องหมด</div></div>
                 <div class="stat-mini-icon" style="background:#fef3c7;color:#f59e0b"><i class="fa-solid fa-exclamation-circle"></i></div>
             </div>
         </div>
@@ -112,7 +117,7 @@ try {
                     <thead>
                         <tr>
                             <th>รูปภาพ</th>
-                            <th>ชื่อสินค้า</th>
+                            <th>ชื่อพระเครื่อง</th>
                             <th>หมวดหมู่</th>
                             <th>ราคา</th>
                             <th>คงเหลือ</th>
@@ -152,9 +157,9 @@ try {
                                 <?php if (!empty($p['is_hidden'])): ?>
                                 <span class="badge" style="background:#f3f4f6;color:#6b7280"><i class="fa-solid fa-eye-slash"></i> ซ่อนอยู่</span>
                                 <?php elseif ($p['quantity'] > 0): ?>
-                                <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> มีสินค้า</span>
+                                <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> มีพระเครื่อง</span>
                                 <?php else: ?>
-                                <span class="badge badge-warning"><i class="fa-solid fa-circle-exclamation"></i> สินค้าหมด</span>
+                                <span class="badge badge-warning"><i class="fa-solid fa-circle-exclamation"></i> พระเครื่องหมด</span>
                                 <?php endif; ?>
                             </td>
                             <td>
@@ -165,13 +170,13 @@ try {
                                     </a>
                                     <?php if (!empty($p['is_hidden'])): ?>
                                     <a href="/seller/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
-                                       class="btn-icon" title="แสดงสินค้า"
+                                       class="btn-icon" title="แสดงพระเครื่อง"
                                        style="background:#d1fae5;color:#059669;border-color:#a7f3d0">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
                                     <?php else: ?>
                                     <a href="/seller/toggle_product_visibility.php?id=<?php echo $p['id']; ?>"
-                                       class="btn-icon" title="ซ่อนสินค้า"
+                                       class="btn-icon" title="ซ่อนพระเครื่อง"
                                        style="background:#fef3c7;color:#d97706;border-color:#fde68a">
                                         <i class="fa-solid fa-eye-slash"></i>
                                     </a>
@@ -185,10 +190,10 @@ try {
                 <?php else: ?>
                 <div class="empty-state">
                     <i class="fa-solid fa-box-open"></i>
-                    <h2>ยังไม่มีสินค้า</h2>
-                    <p>เริ่มต้นเพิ่มสินค้าของคุณเลย</p>
+                    <h2>ยังไม่มีพระเครื่อง</h2>
+                    <p>เริ่มต้นเพิ่มพระเครื่องของคุณเลย</p>
                     <a href="/views/seller/add_product.php" class="btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> เพิ่มสินค้าแรก
+                        <i class="fa-solid fa-plus"></i> เพิ่มพระเครื่องแรก
                     </a>
                 </div>
                 <?php endif; ?>
