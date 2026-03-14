@@ -400,7 +400,7 @@ try {
                 <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
                 <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
                 <li><a href="/views/seller/add_product.php" class="active"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> เช่า</a></li>
+                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> การเช่า</a></li>
                 <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
                 <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
                 <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
