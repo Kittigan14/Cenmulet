@@ -396,7 +396,7 @@ if ($view === 'products') {
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
             <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
             <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
+            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> การเช่า</a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
             <li><a href="/views/seller/report.php" class="active"><i class="fa-solid fa-chart-bar"></i> รายงานการปล่อยเช่า</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
@@ -716,7 +716,7 @@ if ($view === 'products') {
         <!-- Orders Table -->
         <div class="card">
             <div class="card-header">
-                <h2><i class="fa-solid fa-list"></i> รายการคำสั่งเช่า (<?php echo count($orders); ?> รายการ)</h2>
+                <h2><i class="fa-solid fa-list"></i> รายการเช่า (<?php echo count($orders); ?> รายการ)</h2>
             </div>
             <div class="table-wrapper">
             <?php if (count($orders) > 0): ?>
@@ -768,7 +768,7 @@ if ($view === 'products') {
             <?php else: ?>
             <div class="empty-state">
                 <i class="fa-solid fa-chart-bar"></i>
-                <h2>ไม่มีคำสั่งเช่าในช่วงนี้</h2>
+                <h2>ไม่มีการเช่าในช่วงนี้</h2>
             </div>
             <?php endif; ?>
             </div>

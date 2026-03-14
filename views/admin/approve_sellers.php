@@ -46,7 +46,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>อนุมัติผู้ขาย - Cenmulet Admin</title>
+    <title>อนุมัติร้านค้า - Cenmulet Admin</title>
 </head>
 <body class="admin">
 <div class="dashboard-container">
@@ -56,13 +56,13 @@ try {
     <!-- Main -->
     <main class="main-content">
         <div class="top-bar">
-            <h1><i class="fa-solid fa-store"></i> อนุมัติผู้ขาย</h1>
+            <h1><i class="fa-solid fa-store"></i> อนุมัติร้านค้า</h1>
         </div>
 
         <?php if (isset($_GET['done'])): ?>
         <div class="alert alert-success">
             <i class="fa-solid fa-circle-check"></i>
-            <span><?php echo $_GET['done'] === 'approved' ? 'อนุมัติผู้ขายเรียบร้อยแล้ว' : 'ปฏิเสธคำขอเรียบร้อยแล้ว'; ?></span>
+            <span><?php echo $_GET['done'] === 'approved' ? 'อนุมัติร้านค้าเรียบร้อยแล้ว' : 'ปฏิเสธคำขอเรียบร้อยแล้ว'; ?></span>
         </div>
         <?php endif; ?>
 
@@ -168,7 +168,7 @@ try {
                                         <input type="hidden" name="seller_id" value="<?php echo $s['id']; ?>">
                                         <input type="hidden" name="action" value="approve">
                                         <button type="submit" class="btn btn-sm btn-primary"
-                                                onclick="return confirm('อนุมัติผู้ขาย <?php echo htmlspecialchars(addslashes($s['store_name'])); ?> ?')">
+                                                onclick="return confirm('อนุมัติร้านค้า <?php echo htmlspecialchars(addslashes($s['store_name'])); ?> ?')">
                                             <i class="fa-solid fa-check"></i> อนุมัติ
                                         </button>
                                     </form>
@@ -181,7 +181,7 @@ try {
                                         <input type="hidden" name="seller_id" value="<?php echo $s['id']; ?>">
                                         <input type="hidden" name="action" value="revoke">
                                         <button type="submit" class="btn btn-sm btn-secondary"
-                                                onclick="return confirm('ยกเลิกสิทธิ์ผู้ขายนี้?')">
+                                                onclick="return confirm('ยกเลิกสิทธิ์ร้านค้านี้?')">
                                             <i class="fa-solid fa-ban"></i> ยกเลิกสิทธิ์
                                         </button>
                                     </form>
@@ -204,7 +204,7 @@ try {
                 <div class="empty-state">
                     <i class="fa-solid fa-store"></i>
                     <h2>ไม่มีรายการ</h2>
-                    <p>ไม่พบผู้ขายในหมวดหมู่นี้</p>
+                    <p>ไม่พบร้านค้าในหมวดหมู่นี้</p>
                 </div>
                 <?php endif; ?>
             </div>

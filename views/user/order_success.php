@@ -41,7 +41,7 @@ function dateTH(string $format, $timestamp = null): string {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/order_success.css">
-    <title>สั่งเช่าสำเร็จ - Cenmulet</title>
+    <title>เช่าสำเร็จ - Cenmulet</title>
 </head>
 <body class="success-page">
     <div class="success-card">
@@ -50,10 +50,10 @@ function dateTH(string $format, $timestamp = null): string {
             <i class="fa-solid fa-check"></i>
         </div>
 
-        <h1>สั่งเช่าสำเร็จ!</h1>
+        <h1>เช่าสำเร็จ!</h1>
 
         <p class="order-ref">
-            หมายเลขคำสั่งเช่า:
+            หมายเลขการเช่า:
             <strong>#<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></strong>
         </p>
 
@@ -63,13 +63,13 @@ function dateTH(string $format, $timestamp = null): string {
         </div>
 
         <p class="success-msg">
-            ขอบคุณที่สั่งเช่ากับเรา เราได้รับคำสั่งเช่าของคุณเรียบร้อยแล้ว<br>
+            ขอบคุณที่เช่ากับเรา เราได้รับการเช่าของคุณเรียบร้อยแล้ว<br>
             และกำลังตรวจสอบการชำระเงิน
         </p>
 
         <div class="success-summary">
             <div class="s-row">
-                <span>วันที่สั่งเช่า</span>
+                <span>วันที่เช่า</span>
                 <span><?php echo dateTH('d/m/Y H:i', strtotime($order['created_at'])); ?> น.</span>
             </div>
             <div class="s-row">
@@ -85,7 +85,7 @@ function dateTH(string $format, $timestamp = null): string {
         <div class="success-actions">
             <a href="/views/user/orders.php" class="btn btn-primary">
                 <i class="fa-solid fa-receipt"></i>
-                ดูคำสั่งเช่าของฉัน
+                ดูการเช่าของฉัน
             </a>
             <a href="/views/user/home.php" class="btn btn-secondary">
                 <i class="fa-solid fa-home"></i>
@@ -101,7 +101,7 @@ function dateTH(string $format, $timestamp = null): string {
             <p>
                 • เราจะตรวจสอบหลักฐานการโอนเงินของคุณภายใน 24 ชั่วโมง<br>
                 • หลังจากได้รับการยืนยันการชำระเงิน เราจะจัดส่งสินค้าให้คุณทันที<br>
-                • คุณสามารถตรวจสอบสถานะคำสั่งเช่าได้ที่ "คำสั่งเช่าของฉัน"
+                • คุณสามารถตรวจสอบสถานะการเช่าได้ที่ "การเช่าของฉัน"
             </p>
         </div>
 

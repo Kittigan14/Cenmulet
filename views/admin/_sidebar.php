@@ -32,7 +32,7 @@ $current = basename($_SERVER['PHP_SELF']);
         <li>
             <a href="/views/admin/sellers.php"
                class="<?php echo in_array($current, ['sellers.php','approve_sellers.php']) ? 'active' : ''; ?>">
-                <i class="fa-solid fa-store"></i> จัดการผู้ขาย
+                <i class="fa-solid fa-store"></i> จัดการร้านค้า
                 <?php if ($pending_sellers > 0): ?>
                 <span style="background:#ef4444;color:#fff;border-radius:99px;padding:1px 8px;font-size:11px;margin-left:auto;font-weight:700">
                     <?php echo $pending_sellers; ?>
@@ -55,7 +55,7 @@ $current = basename($_SERVER['PHP_SELF']);
         <li>
             <a href="/views/admin/orders.php"
                class="<?php echo $current === 'orders.php' ? 'active' : ''; ?>">
-                <i class="fa-solid fa-cart-shopping"></i> จัดการคำสั่งเช่า
+                <i class="fa-solid fa-cart-shopping"></i> จัดการการเช่า
             </a>
         </li>
         <li>

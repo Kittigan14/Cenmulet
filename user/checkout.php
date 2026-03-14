@@ -511,7 +511,7 @@ foreach ($cart_items as $item) {
                     <div class="section">
                         <h2 class="section-title">
                             <i class="fa-solid fa-file-invoice"></i>
-                            สรุปคำสั่งเช่า
+                            สรุปการเช่า
                         </h2>
 
                         <div style="margin-bottom: 20px;">
@@ -550,7 +550,7 @@ foreach ($cart_items as $item) {
 
                         <button type="submit" class="btn-submit" <?php echo $stock_error ? 'disabled' : ''; ?>>
                             <i class="fa-solid fa-check-circle"></i>
-                            ยืนยันคำสั่งเช่า
+                            ยืนยันการเช่า
                         </button>
                     </div>
                 </div>

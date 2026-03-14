@@ -51,7 +51,7 @@ try {
         <div class="sidebar-header">
             <img src="/public/images/image.png" alt="">
             <h2>Cenmulet</h2>
-            <p>แดชบอร์ดผู้ขาย</p>
+            <p>แดชบอร์ดร้านค้า</p>
         </div>
         <div class="sidebar-user">
             <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
@@ -61,7 +61,7 @@ try {
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
             <li><a href="/views/seller/products.php" class="active"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
             <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
+            <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> การเช่า</a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
             <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>

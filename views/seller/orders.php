@@ -87,7 +87,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>คำสั่งเช่า - Cenmulet Seller</title>
+    <title>การเช่า - Cenmulet Seller</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
         body { font-family: "Kanit", sans-serif; background: #f3f4f6; }
@@ -181,7 +181,7 @@ try {
         <div class="sidebar-header">
             <img src="/public/images/image.png" alt="">
             <h2>Cenmulet</h2>
-            <p>แดชบอร์ดผู้ขาย</p>
+            <p>แดชบอร์ดร้านค้า</p>
         </div>
         <div class="sidebar-user">
             <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
@@ -191,7 +191,7 @@ try {
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
             <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
             <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
+            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> การเช่า</a></li>
             <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
             <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
             <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
@@ -201,7 +201,7 @@ try {
     <!-- Main -->
     <main class="main-content">
         <div class="top-bar">
-            <h1><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</h1>
+            <h1><i class="fa-solid fa-shopping-cart"></i> การเช่า</h1>
             <a href="/views/seller/report.php" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-print"></i> รายงานการขาย
             </a>
@@ -228,7 +228,7 @@ try {
             <?php
             $errs = [
                 'no_tracking'      => '<strong>ต้องกรอกเลขพัสดุก่อนกดยืนยันการชำระเงิน</strong> – กรุณากรอกเลขพัสดุในช่องวันที่ก่อน',
-                'already_processed'=> 'คำสั่งเช่านี้ได้รับการดำเนินการไปแล้ว',
+                'already_processed'=> 'การเช่านี้ได้รับการดำเนินการไปแล้ว',
                 'invalid'          => 'คำขอไม่ถูกต้อง กรุณาลองใหม่',
                 'unauthorized'     => 'ไม่มีสิทธิ์ดำเนินการนี้',
                 'database'         => 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
@@ -273,14 +273,14 @@ try {
                 <table>
                     <thead>
                         <tr>
-                            <th>คำสั่งเช่า</th>
-                            <th>ผู้เช่า</th>
+                            <th>การเช่า</th>
+                            <th>ลูกค้า</th>
                             <th>ยอดรวม</th>
                             <th>สลิปโอนเงิน</th>
                             <th>จำนวนเงินที่โอน</th>
                             <th>เวลาที่โอน</th>
                             <th>สถานะชำระเงิน</th>
-                            <th>สถานะคำสั่งเช่า</th>
+                            <th>สถานะการเช่า</th>
                             <th>วันที่</th>
                             <th>จัดการ</th>
                         </tr>
@@ -420,8 +420,8 @@ try {
                 <?php else: ?>
                 <div class="empty-state">
                     <i class="fa-solid fa-shopping-cart"></i>
-                    <h2>ยังไม่มีคำสั่งเช่า</h2>
-                    <p>เมื่อมีลูกค้าสั่งเช่าพระเครื่องของคุณ จะแสดงที่นี่</p>
+                    <h2>ยังไม่มีการเช่า</h2>
+                    <p>เมื่อมีลูกค้าเช่าพระเครื่องของคุณ จะแสดงที่นี่</p>
                 </div>
                 <?php endif; ?>
             </div>
@@ -432,7 +432,7 @@ try {
 <!-- Edit Order Modal -->
 <div id="editModal" onclick="handleModalOverlayClick(event)">
     <div class="edit-modal-box">
-        <h3><i class="fa-solid fa-pen-to-square" style="color:#6366f1;margin-right:8px"></i>แก้ไขข้อมูลคำสั่งเช่า <span id="editOrderNum" style="color:#6366f1"></span></h3>
+        <h3><i class="fa-solid fa-pen-to-square" style="color:#6366f1;margin-right:8px"></i>แก้ไขข้อมูลการเช่า <span id="editOrderNum" style="color:#6366f1"></span></h3>
         <form action="/views/seller/update_order.php" method="POST">
             <input type="hidden" name="order_id" id="editOrderId">
 
@@ -453,7 +453,7 @@ try {
                 <input type="text" name="tracking_number" id="editTracking" placeholder="กรอกเลขพัสดุ">
             </div>
             <div class="edit-field">
-                <label><i class="fa-solid fa-circle-dot" style="margin-right:4px"></i>สถานะคำสั่งเช่า</label>
+                <label><i class="fa-solid fa-circle-dot" style="margin-right:4px"></i>สถานะการเช่า</label>
                 <select name="order_status" id="editStatus">
                     <option value="pending">รอดำเนินการ</option>
                     <option value="confirmed">ยืนยันแล้ว</option>

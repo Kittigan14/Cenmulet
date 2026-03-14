@@ -113,7 +113,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>แดชบอร์ดผู้ขาย - Cenmulet</title>
+    <title>แดชบอร์ดร้านค้า - Cenmulet</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
 
@@ -423,7 +423,7 @@ try {
             <div class="sidebar-header">
                 <img src="/public/images/image.png" alt="" width="64px">
                 <h2>Cenmulet</h2>
-                <p>แดชบอร์ดผู้ขาย</p>
+                <p>แดชบอร์ดร้านค้า</p>
             </div>
 
             <div class="sidebar-user">
@@ -435,7 +435,7 @@ try {
                 <li><a href="/views/seller/dashboard.php" class="active"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
                 <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
                 <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
+                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> การเช่า</a></li>
                 <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
                 <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
                 <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>
@@ -467,7 +467,7 @@ try {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value"><?php echo number_format($total_orders); ?></div>
-                            <div class="stat-label">คำสั่งเช่าทั้งหมด</div>
+                            <div class="stat-label">การเช่าทั้งหมด</div>
                         </div>
                         <div class="stat-icon blue">
                             <i class="fa-solid fa-shopping-cart"></i>
@@ -516,7 +516,7 @@ try {
 
             <div class="content-section">
                 <div class="section-header">
-                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่าล่าสุด</h2>
+                    <h2><i class="fa-solid fa-shopping-cart"></i> การเช่าล่าสุด</h2>
                     <a href="/views/seller/orders.php" class="btn-primary">ดูทั้งหมด</a>
                 </div>
 
@@ -525,7 +525,7 @@ try {
                         <thead>
                             <tr>
                                 <th>รหัส</th>
-                                <th>ผู้สั่งเช่า</th>
+                                <th>ลูกค้า</th>
                                 <th>ยอดรวม</th>
                                 <th>สถานะชำระเงิน</th>
                                 <th>วันที่</th>
@@ -554,7 +554,7 @@ try {
                 <?php else: ?>
                     <div class="empty-state">
                         <i class="fa-solid fa-shopping-cart"></i>
-                        <p>ยังไม่มีคำสั่งเช่า</p>
+                        <p>ยังไม่มีการเช่า</p>
                     </div>
                 <?php endif; ?>
             </div>

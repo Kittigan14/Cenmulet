@@ -302,7 +302,7 @@ include __DIR__ . '/../../includes/navbar.php';
                 <tr>
                     <th style="width:4%">#</th>
                     <th style="width:10%">รหัสการเช่า</th>
-                    <th style="width:14%">วันที่สั่ง</th>
+                    <th style="width:14%">วันที่เช่า</th>
                     <th style="width:20%">ชื่อพระเครื่อง</th>
                     <th style="width:14%">ร้านค้า</th>
                     <th style="width:10%">ยอดชำระ</th>

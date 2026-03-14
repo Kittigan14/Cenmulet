@@ -161,7 +161,7 @@ try {
                         <div class="seller-icon"><i class="fa-solid fa-store"></i></div>
                         <div>
                             <div class="seller-name"><?php echo htmlspecialchars($product['store_name'] ?? 'ร้านค้า'); ?></div>
-                            <div class="seller-label">ผู้ขาย: <?php echo htmlspecialchars($product['seller_name'] ?? 'ไม่ระบุ'); ?></div>
+                            <div class="seller-label">ร้านค้า: <?php echo htmlspecialchars($product['seller_name'] ?? 'ไม่ระบุ'); ?></div>
                         </div>
                     </div>
 

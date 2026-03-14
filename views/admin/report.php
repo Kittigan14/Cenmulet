@@ -40,8 +40,8 @@ switch ($report_type) {
 
     // ── Orders ─────────────────────────────────────────
     case 'orders':
-        $title_th = 'รายงานคำสั่งเช่า';
-        $columns  = ['#','รหัส Order','ผู้เช่า','เบอร์โทร','ร้านค้า','ยอดรวม','สถานะชำระ','สถานะจัดส่ง','เลขพัสดุ','วันที่สั่ง'];
+        $title_th = 'รายงานการเช่า';
+        $columns  = ['#','รหัส Order','ผู้เช่า','เบอร์โทร','ร้านค้า','ยอดรวม','สถานะชำระ','สถานะจัดส่ง','เลขพัสดุ','วันที่เช่า'];
         $rows = $db->prepare("
             SELECT o.id,
                    u.fullname as buyer, u.tel,
@@ -70,7 +70,7 @@ switch ($report_type) {
         $completed_count = 0;
         foreach ($data as $_r) { if ($_r['order_status'] === 'completed') $completed_count++; }
         $summary = [
-            'คำสั่งเช่าทั้งหมด' => number_format($total_orders) . ' รายการ',
+            'การเช่าทั้งหมด' => number_format($total_orders) . ' รายการ',
             'รายได้รวม'          => '฿' . number_format($total_revenue, 2),
             'เสร็จสิ้นแล้ว'      => number_format($completed_count) . ' รายการ',
         ];
@@ -93,7 +93,7 @@ switch ($report_type) {
 
         $summary = [
             'ลูกค้าทั้งหมด' => number_format(count($data)) . ' คน',
-            'มีประวัติสั่งเช่า' => number_format(count(array_filter($data, function($r){ return $r['order_count'] > 0; }))) . ' คน',
+            'มีประวัติการเช่า' => number_format(count(array_filter($data, function($r){ return $r['order_count'] > 0; }))) . ' คน',
             'ยอดเช่ารวมทุกคน' => '฿' . number_format(array_sum(array_column($data, 'total_spent')), 2),
         ];
         break;
@@ -305,7 +305,7 @@ switch ($report_type) {
         <div class="report-tabs no-print">
             <?php
             $tabs = [
-                'orders'    => ['fa-cart-shopping',  'รายงาน คำสั่งเช่า'],
+                'orders'    => ['fa-cart-shopping',  'รายงาน การเช่า'],
                 'customers' => ['fa-users',           'ข้อมูลลูกค้า'],
                 'stores'    => ['fa-store',           'ข้อมูลร้านค้า'],
                 'products'  => ['fa-box',             'ข้อมูลพระเครื่อง'],

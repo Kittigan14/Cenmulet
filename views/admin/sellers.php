@@ -73,7 +73,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>จัดการผู้ขาย - Cenmulet Admin</title>
+    <title>จัดการร้านค้า - Cenmulet Admin</title>
     <style>
         #editSellerModal { display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;align-items:center;justify-content:center; }
         .edit-box { background:#fff;border-radius:16px;padding:28px;max-width:540px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2); }
@@ -96,7 +96,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
 
 <main class="main-content">
     <div class="top-bar">
-        <h1><i class="fa-solid fa-store"></i> จัดการผู้ขาย</h1>
+        <h1><i class="fa-solid fa-store"></i> จัดการร้านค้า</h1>
         <?php if ($pending_sellers > 0): ?>
         <a href="/views/admin/approve_sellers.php?filter=pending" class="btn btn-primary">
             <i class="fa-solid fa-clock"></i> รออนุมัติ <?php echo $pending_sellers; ?> ราย
@@ -105,7 +105,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
     </div>
 
     <?php if (isset($_GET['done']) && $_GET['done'] === 'updated'): ?>
-    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลผู้ขายเรียบร้อยแล้ว</span></div>
+    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลร้านค้าเรียบร้อยแล้ว</span></div>
     <?php endif; ?>
     <?php if (isset($_GET['error'])): ?>
     <div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i> <span>เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง</span></div>
@@ -158,7 +158,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
         <form method="GET" style="display:flex;gap:8px;flex:1;min-width:200px">
             <input type="hidden" name="filter" value="<?php echo $filter; ?>">
             <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
-                   placeholder="ค้นหาชื่อร้าน, ชื่อผู้ขาย..."
+                   placeholder="ค้นหาชื่อร้าน, ชื่อร้านค้า..."
                    style="flex:1;padding:9px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-search"></i></button>
         </form>
@@ -275,7 +275,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
                         </form>
                         <?php elseif ($s['status'] === 'approved'): ?>
                         <form method="POST" action="/views/admin/seller_action.php"
-                              onsubmit="return confirm('ถอนสิทธิ์ผู้ขายรายนี้?')">
+                              onsubmit="return confirm('ถอนสิทธิ์ร้านค้ารายนี้?')">
                             <input type="hidden" name="seller_id" value="<?php echo $s['id']; ?>">
                             <input type="hidden" name="action" value="revoke">
                             <input type="hidden" name="redirect_to" value="/views/admin/sellers.php">
@@ -308,7 +308,7 @@ $n_rejected = $db->query("SELECT COUNT(*) FROM sellers WHERE status='rejected'")
     <div class="edit-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
             <h3 style="font-size:17px;display:flex;align-items:center;gap:8px">
-                <i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขข้อมูลผู้ขาย
+                <i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขข้อมูลร้านค้า
             </h3>
             <button onclick="closeEdit()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer">×</button>
         </div>

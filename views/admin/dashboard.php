@@ -105,7 +105,7 @@ try {
         <?php if (isset($_GET["done"])): ?>
         <div class="alert alert-success">
             <i class="fa-solid fa-circle-check"></i>
-            <span><?php echo $_GET["done"] === "approved" ? "อนุมัติผู้ขายเรียบร้อยแล้ว! ผู้ขายสามารถเข้าสู่ระบบได้แล้ว" : "ดำเนินการเรียบร้อยแล้ว"; ?></span>
+            <span><?php echo $_GET["done"] === "approved" ? "อนุมัติร้านค้าเรียบร้อยแล้ว! ร้านค้าสามารถเข้าสู่ระบบได้แล้ว" : "ดำเนินการเรียบร้อยแล้ว"; ?></span>
         </div>
         <?php endif; ?>
         <?php if (isset($_GET["error"])): ?>
@@ -121,7 +121,7 @@ try {
             <i class="fa-solid fa-store"></i>
             <div style="flex:1">
                 <h3>มีผู้สมัครขาย <?php echo $pending_sellers; ?> ราย รอการอนุมัติ</h3>
-                <p>กรุณาตรวจสอบข้อมูลและอนุมัติผู้ขายใหม่</p>
+                <p>กรุณาตรวจสอบข้อมูลและอนุมัติร้านค้าใหม่</p>
             </div>
             <a href="/views/admin/approve_sellers.php" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-arrow-right"></i> ไปอนุมัติ
@@ -145,7 +145,7 @@ try {
                 <div class="stat-header-row">
                     <div>
                         <div class="stat-value"><?php echo number_format($total_sellers); ?></div>
-                        <div class="stat-label">ผู้ขาย (อนุมัติแล้ว)</div>
+                        <div class="stat-label">ร้านค้า (อนุมัติแล้ว)</div>
                     </div>
                     <div class="stat-icon green"><i class="fa-solid fa-store"></i></div>
                 </div>
@@ -157,7 +157,7 @@ try {
                         <div class="stat-value" style="color:<?php echo $pending_sellers > 0 ? '#f59e0b' : '#1a1a1a'; ?>">
                             <?php echo number_format($pending_sellers); ?>
                         </div>
-                        <div class="stat-label">รออนุมัติผู้ขาย</div>
+                        <div class="stat-label">รออนุมัติร้านค้า</div>
                     </div>
                     <div class="stat-icon yellow"><i class="fa-solid fa-clock"></i></div>
                 </div>
@@ -185,7 +185,7 @@ try {
                 <div class="stat-header-row">
                     <div>
                         <div class="stat-value"><?php echo number_format($total_orders); ?></div>
-                        <div class="stat-label">คำสั่งเช่าทั้งหมด</div>
+                        <div class="stat-label">การเช่าทั้งหมด</div>
                     </div>
                     <div class="stat-icon orange"><i class="fa-solid fa-shopping-cart"></i></div>
                 </div>
@@ -226,7 +226,7 @@ try {
         <?php if (count($pending_seller_list) > 0): ?>
         <div class="card" style="margin-bottom:24px">
             <div class="card-header">
-                <h2><i class="fa-solid fa-hourglass-half"></i> ผู้ขายรอการอนุมัติ</h2>
+                <h2><i class="fa-solid fa-hourglass-half"></i> ร้านค้ารอการอนุมัติ</h2>
                 <a href="/views/admin/approve_sellers.php" style="font-size:13px;color:var(--admin-primary);text-decoration:none;font-weight:600">
                     ดูทั้งหมด (<?php echo $pending_sellers; ?>) →
                 </a>
@@ -305,7 +305,7 @@ try {
             <!-- คำสั่งเช่าล่าสุด -->
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่าล่าสุด</h2>
+                    <h2><i class="fa-solid fa-shopping-cart"></i> การเช่าล่าสุด</h2>
                     <a href="/views/admin/orders.php" style="font-size:13px;color:var(--admin-primary);text-decoration:none;font-weight:600">
                         ดูทั้งหมด →
                     </a>
@@ -345,7 +345,7 @@ try {
                         </tbody>
                     </table>
                     <?php else: ?>
-                    <div class="empty-state"><i class="fa-solid fa-shopping-cart"></i><p>ยังไม่มีคำสั่งเช่า</p></div>
+                    <div class="empty-state"><i class="fa-solid fa-shopping-cart"></i><p>ยังไม่มีการเช่า</p></div>
                     <?php endif; ?>
                 </div>
             </div>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../public/css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>สมัครผู้ขาย - Cenmulet</title>
+    <title>สมัครร้านค้า - Cenmulet</title>
     <style>
         .address-section {
             display: grid;
@@ -44,7 +44,7 @@
     <div class="auth-box wide">
         <div class="auth-header">
             <div class="icon-wrap"><i class="fa-solid fa-store"></i></div>
-            <h1>สมัครผู้ขาย</h1>
+            <h1>สมัครร้านค้า</h1>
             <p>เริ่มต้นขายพระเครื่องกับ Cenmulet</p>
         </div>
         <div class="auth-body">
@@ -52,7 +52,7 @@
             <!-- Notice about approval -->
             <div class="info-message">
                 <i class="fa-solid fa-circle-info"></i>
-                <span>การสมัครผู้ขายต้องผ่านการตรวจสอบและอนุมัติจากผู้ดูแลระบบก่อน คุณจะได้รับแจ้งผลภายใน 1-3 วันทำการ</span>
+                <span>การสมัครร้านค้าต้องผ่านการตรวจสอบและอนุมัติจากผู้ดูแลระบบก่อน คุณจะได้รับแจ้งผลภายใน 1-3 วันทำการ</span>
             </div>
 
             <?php if (isset($_GET['error'])): ?>
@@ -220,7 +220,7 @@
                 </div>
 
                 <button type="submit" class="btn-submit">
-                    <i class="fa-solid fa-paper-plane"></i> ส่งคำขอสมัครผู้ขาย
+                    <i class="fa-solid fa-paper-plane"></i> ส่งคำขอสมัครร้านค้า
                 </button>
             </form>
 

@@ -186,7 +186,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
         <div class="sidebar-header">
             <img src="/public/images/image.png" alt="">
             <h2>Cenmulet</h2>
-            <p>แดชบอร์ดผู้ขาย</p>
+            <p>แดชบอร์ดร้านค้า</p>
         </div>
         <div class="sidebar-user">
             <h3><?php echo htmlspecialchars($seller['store_name']); ?></h3>
@@ -196,7 +196,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
             <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
             <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
             <li><a href="/views/seller/add_product.php"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า
+            <li><a href="/views/seller/orders.php" class="active"><i class="fa-solid fa-shopping-cart"></i> การเช่า
                 <?php if ($n_waiting > 0): ?>
                 <span style="background:#ef4444;color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;margin-left:auto"><?php echo $n_waiting; ?></span>
                 <?php endif; ?>
@@ -211,7 +211,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
     <main class="main-content">
         <div class="top-bar">
             <div>
-                <h1><i class="fa-solid fa-file-invoice"></i> รายละเอียดคำสั่งเช่า</h1>
+                <h1><i class="fa-solid fa-file-invoice"></i> รายละเอียดการเช่า</h1>
             </div>
             <a href="/views/seller/orders.php" class="btn btn-secondary btn-sm">
                 <i class="fa-solid fa-arrow-left"></i> กลับ
@@ -219,7 +219,7 @@ $seller_subtotal = array_sum(array_map(function($i) {
         </div>
 
         <a href="/views/seller/orders.php" class="back-btn">
-            <i class="fa-solid fa-arrow-left"></i> กลับไปหน้าคำสั่งเช่า
+            <i class="fa-solid fa-arrow-left"></i> กลับไปหน้าการเช่า
         </a>
 
         <!-- Order Header -->

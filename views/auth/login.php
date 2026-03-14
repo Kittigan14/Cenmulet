@@ -33,13 +33,13 @@
                 <?php if ($err === 'seller_pending'): ?>
                 <div class="info-message">
                     <i class="fa-solid fa-clock"></i>
-                    <span>บัญชีผู้ขายของคุณอยู่ระหว่างรอการอนุมัติจากผู้ดูแลระบบ กรุณารอการยืนยัน</span>
+                    <span>บัญชีร้านค้าของคุณอยู่ระหว่างรอการอนุมัติจากผู้ดูแลระบบ กรุณารอการยืนยัน</span>
                 </div>
                 <?php elseif ($err === 'seller_rejected'): ?>
                 <div class="error-message">
                     <i class="fa-solid fa-circle-exclamation"></i>
                     <div>
-                        <strong>คำขอสมัครผู้ขายถูกปฏิเสธ</strong><br>
+                        <strong>คำขอสมัครร้านค้าถูกปฏิเสธ</strong><br>
                         <?php if (!empty($_GET['reason'])): ?>
                         <span style="font-size:13px">เหตุผล: <?php echo htmlspecialchars(urldecode($_GET['reason'])); ?></span>
                         <?php endif; ?>
@@ -89,7 +89,7 @@
             <div class="auth-footer" style="margin-top:18px;">
                 ยังไม่มีบัญชี?
                 <a href="/views/auth/register_user.php">สมัครผู้ใช้</a> &nbsp;|&nbsp;
-                <a href="/views/auth/register_seller.php">สมัครผู้ขาย</a>
+                <a href="/views/auth/register_seller.php">สมัครร้านค้า</a>
             </div>
 
         </div>

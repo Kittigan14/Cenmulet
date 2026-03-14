@@ -103,7 +103,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/public/css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <title>จัดการคำสั่งเช่า - Cenmulet Admin</title>
+    <title>จัดการการเช่า - Cenmulet Admin</title>
     <style>
         .slip-thumb { width:48px;height:48px;border-radius:8px;object-fit:cover;cursor:zoom-in;border:2px solid #e5e7eb;transition:transform .2s; }
         .slip-thumb:hover { transform:scale(1.1); }
@@ -120,7 +120,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
 
 <main class="main-content">
     <div class="top-bar">
-        <h1><i class="fa-solid fa-cart-shopping"></i> จัดการคำสั่งเช่า</h1>
+        <h1><i class="fa-solid fa-cart-shopping"></i> จัดการการเช่า</h1>
         <div style="display:flex;align-items:center;gap:12px">
             <strong style="color:#10b981;font-size:16px">฿<?php echo number_format($total_rev, 2); ?></strong>
             <a href="/views/admin/report.php?type=orders" class="btn btn-primary btn-sm">
@@ -130,7 +130,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
     </div>
 
     <?php if (isset($_GET['success']) && $_GET['success'] === 'updated'): ?>
-    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลคำสั่งเช่าเรียบร้อยแล้ว</span></div>
+    <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>แก้ไขข้อมูลการเช่าเรียบร้อยแล้ว</span></div>
     <?php endif; ?>
 
     <!-- Stats -->
@@ -183,7 +183,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         <table>
             <thead>
                 <tr>
-                    <th>คำสั่งเช่า</th>
+                    <th>การเช่า</th>
                     <th>ผู้เช่า</th>
                     <th>ร้านค้า</th>
                     <th>ที่อยู่จัดส่ง</th>
@@ -282,7 +282,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         <?php else: ?>
         <div class="empty-state">
             <i class="fa-solid fa-cart-shopping"></i>
-            <h2>ไม่พบคำสั่งเช่า</h2>
+            <h2>ไม่พบการเช่า</h2>
         </div>
         <?php endif; ?>
         </div>
@@ -301,7 +301,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
             <h3 id="detailTitle" style="font-size:18px;display:flex;align-items:center;gap:8px">
                 <i class="fa-solid fa-receipt" style="color:#6366f1"></i>
-                รายละเอียดคำสั่งเช่า
+                รายละเอียดการเช่า
             </h3>
             <button onclick="closeDetail()" style="background:none;border:none;font-size:22px;color:#9ca3af;cursor:pointer">×</button>
         </div>
@@ -334,7 +334,7 @@ $pending_sellers = $db->query("SELECT COUNT(*) FROM sellers WHERE status='pendin
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
                     <div>
                         <label style="display:block;font-size:13px;color:#6b7280;font-weight:600;margin-bottom:4px">
-                            <i class="fa-solid fa-cart-shopping"></i> สถานะคำสั่งเช่า
+                            <i class="fa-solid fa-cart-shopping"></i> สถานะการเช่า
                         </label>
                         <select name="order_status" id="eo_ostatus"
                             style="width:100%;padding:10px 14px;border:2px solid #e5e7eb;border-radius:8px;font-family:inherit;font-size:14px;box-sizing:border-box">
@@ -444,7 +444,7 @@ function openDetail(id) {
     _currentOrder = o;
     document.getElementById('detailViewMode').style.display = 'block';
     document.getElementById('detailEditMode').style.display = 'none';
-    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-receipt" style="color:#6366f1"></i> รายละเอียดคำสั่งเช่า';
+    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-receipt" style="color:#6366f1"></i> รายละเอียดการเช่า';
 
     const payLabels = {
         waiting:  '<span class="badge badge-warning"><i class="fa-solid fa-clock"></i> รอยืนยัน</span>',
@@ -474,7 +474,7 @@ function openDetail(id) {
     document.getElementById('detailContent').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
             <div style="background:#f9fafb;padding:14px;border-radius:10px">
-                <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">คำสั่งเช่า</div>
+                <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">การเช่า</div>
                 <div style="font-weight:700;font-size:16px">#${String(o.id).padStart(6,'0')}</div>
                 <div style="font-size:12px;color:#6b7280;margin-top:2px">${o.date ? new Date(o.date).toLocaleString('th-TH', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',calendar:'buddhist'}) : '-'}</div>
             </div>
@@ -533,7 +533,7 @@ function openDetail(id) {
 
 function switchOrderEdit() {
     const o = _currentOrder;
-    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขคำสั่งเช่า';
+    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-pen-to-square" style="color:#6366f1"></i> แก้ไขการเช่า';
     document.getElementById('eo_id').value       = o.id;
     document.getElementById('eo_tracking').value = o.tracking || '';
     document.getElementById('eo_ostatus').value  = o.status  || 'pending';
@@ -544,7 +544,7 @@ function switchOrderEdit() {
 }
 
 function switchOrderView() {
-    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-receipt" style="color:#6366f1"></i> รายละเอียดคำสั่งเช่า';
+    document.getElementById('detailTitle').innerHTML = '<i class="fa-solid fa-receipt" style="color:#6366f1"></i> รายละเอียการเช่า';
     document.getElementById('detailViewMode').style.display = 'block';
     document.getElementById('detailEditMode').style.display = 'none';
 }

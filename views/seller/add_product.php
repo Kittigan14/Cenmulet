@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
 
 $seller_id = $_SESSION['user_id'];
 
-// ดึงข้อมูลผู้ขาย
+// ดึงข้อมูลร้านค้า
 try {
     $stmt = $db->prepare("SELECT * FROM sellers WHERE id = :id");
     $stmt->execute([':id' => $seller_id]);
@@ -388,7 +388,7 @@ try {
             <div class="sidebar-header">
                 <img src="/public/images/image.png" alt="" width="64px">
                 <h2>Cenmulet</h2>
-                <p>แดชบอร์ดผู้ขาย</p>
+                <p>แดชบอร์ดร้านค้า</p>
             </div>
 
             <div class="sidebar-user">
@@ -400,7 +400,7 @@ try {
                 <li><a href="/views/seller/dashboard.php"><i class="fa-solid fa-chart-line"></i> แดชบอร์ด</a></li>
                 <li><a href="/views/seller/products.php"><i class="fa-solid fa-box"></i> จัดการพระเครื่อง</a></li>
                 <li><a href="/views/seller/add_product.php" class="active"><i class="fa-solid fa-plus"></i> เพิ่มพระเครื่อง</a></li>
-                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> คำสั่งเช่า</a></li>
+                <li><a href="/views/seller/orders.php"><i class="fa-solid fa-shopping-cart"></i> เช่า</a></li>
                 <li><a href="/views/seller/seller_profile.php"><i class="fa-solid fa-user"></i> ข้อมูลร้าน</a></li>
                 <li><a href="/views/seller/report.php"><i class="fa-solid fa-chart-bar"></i> รายงานการขาย</a></li>
                 <li><a href="/auth/logout.php"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a></li>

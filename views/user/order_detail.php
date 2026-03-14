@@ -117,7 +117,7 @@ function dateTH(string $format, $timestamp = null): string {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/public/css/style.css">
     <link rel="stylesheet" href="/public/css/order_detail.css">
-    <title>คำสั่งเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?> - Cenmulet</title>
+    <title>การเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?> - Cenmulet</title>
     <style>
         /* ═══ PRINT BASE ═══ */
         @media print {
@@ -239,7 +239,7 @@ function dateTH(string $format, $timestamp = null): string {
         <nav class="breadcrumb">
             <a href="/views/user/home.php">หน้าแรก</a>
             <span class="separator"><i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
-            <a href="/views/user/orders.php">คำสั่งเช่าของฉัน</a>
+            <a href="/views/user/orders.php">รายการเช่าของฉัน</a>
             <span class="separator"><i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
             <span>#<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></span>
         </nav>
@@ -259,7 +259,7 @@ function dateTH(string $format, $timestamp = null): string {
                     if ($_GET['error'] === 'payment_not_confirmed') {
                         echo 'กรุณารอการยืนยันการชำระเงินก่อน';
                     } elseif ($_GET['error'] === 'already_confirmed') {
-                        echo 'คำสั่งเช่านี้ได้รับการยืนยันแล้ว';
+                        echo 'การเช่านี้ได้รับการยืนยันแล้ว';
                     } else {
                         echo 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
                     }
@@ -341,7 +341,7 @@ function dateTH(string $format, $timestamp = null): string {
                     <tr>
                         <th style="width:6%">ลำดับ</th>
                         <th style="width:10%">รหัส</th>
-                        <th style="width:14%">วันที่สั่ง</th>
+                        <th style="width:14%">วันที่เช่า</th>
                         <th style="flex:1">ชื่อพระเครื่อง</th>
                         <th style="width:10%">จำนวน</th>
                         <th style="width:12%">ราคา<br>(บาท)</th>
@@ -415,8 +415,8 @@ function dateTH(string $format, $timestamp = null): string {
                     <tr>
                         <th style="width:6%">ลำดับ</th>
                         <th style="width:10%">รหัส</th>
-                        <th style="width:14%">วันที่สั่ง</th>
-                        <th style="width:12%">เวลาที่สั่ง</th>
+                        <th style="width:14%">วันที่เช่า</th>
+                        <th style="width:12%">เวลาที่เช่า</th>
                         <th style="flex:1">ชื่อพระเครื่อง</th>
                         <th style="width:10%">จำนวน</th>
                         <th style="width:12%">ราคา<br>(บาท)</th>
@@ -457,7 +457,7 @@ function dateTH(string $format, $timestamp = null): string {
         <!-- Page Header -->
         <div class="order-detail-header">
             <div>
-                <h1>คำสั่งเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></h1>
+                <h1>การเช่า #<?php echo str_pad($order['id'], 6, '0', STR_PAD_LEFT); ?></h1>
                 <div class="order-datetime">
                     <i class="fa-regular fa-calendar"></i>
                     <?php echo dateTH('d/m/Y H:i น.', strtotime($order['created_at'])); ?>
@@ -543,13 +543,13 @@ function dateTH(string $format, $timestamp = null): string {
                 <!-- Timeline -->
                 <div class="detail-section">
                     <h2 class="section-title">
-                        <i class="fa-solid fa-list-check"></i> สถานะการสั่งเช่า
+                        <i class="fa-solid fa-list-check"></i> สถานะการเช่า
                     </h2>
                     <div class="status-timeline">
                         <div class="timeline-item">
                             <div class="timeline-dot active"></div>
                             <div class="timeline-content">
-                                <h4>สั่งเช่าสำเร็จ</h4>
+                                <h4>การเช่าสำเร็จ</h4>
                                 <p><?php echo dateTH('d/m/Y H:i น.', strtotime($order['created_at'])); ?></p>
                             </div>
                         </div>
@@ -576,7 +576,7 @@ function dateTH(string $format, $timestamp = null): string {
                 <!-- Order Summary -->
                 <div class="detail-section">
                     <h2 class="section-title">
-                        <i class="fa-solid fa-file-invoice"></i> สรุปคำสั่งเช่า
+                        <i class="fa-solid fa-file-invoice"></i> สรุปการเช่า
                     </h2>
                     <div class="summary-line">
                         <span>จำนวนสินค้า</span>
@@ -667,7 +667,7 @@ function dateTH(string $format, $timestamp = null): string {
 
                 <a href="/views/user/orders.php" class="btn-back-page">
                     <i class="fa-solid fa-arrow-left"></i>
-                    กลับไปหน้าคำสั่งเช่า
+                    กลับไปหน้ารายการเช่า
                 </a>
             </div>
 

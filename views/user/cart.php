@@ -55,7 +55,7 @@ $cart_count = count($cart_items);
     <div class="container">
         <div class="page-header">
             <h1><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i>ตะกร้าพระเครื่อง</h1>
-            <p>ตรวจสอบพระเครื่องก่อนดำเนินการสั่งเช่า</p>
+            <p>ตรวจสอบพระเครื่องก่อนดำเนินการเช่า</p>
         </div>
 
         <?php if (count($cart_items) > 0): ?>
@@ -137,7 +137,7 @@ $cart_count = count($cart_items);
                     <form action="/user/checkout.php" method="POST">
                         <button type="submit" class="btn-checkout">
                             <i class="fa-solid fa-credit-card"></i>
-                            ดำเนินการสั่งเช่า
+                            ดำเนินการเช่า
                         </button>
                     </form>
 
